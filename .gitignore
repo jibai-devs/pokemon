@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.ruff_cache/
+.pyright/
+*.egg-info/
+dist/
+build/
+data/*.parquet
+data/*.csv
+data/*.json
+!data/.gitkeep
+.env
+.DS_Store

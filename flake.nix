@@ -46,6 +46,14 @@
             duckdb
             sqlite
 
+            # SDL2 for pygame (kaggle-environments dependency)
+            SDL2
+            SDL2_image
+            SDL2_mixer
+            SDL2_ttf
+            pkg-config
+            freetype
+
             # CA certs for SSL
             cacert
           ];

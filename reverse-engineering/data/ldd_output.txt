@@ -1,0 +1,7 @@
+ldd: warning: you do not have execution permission for `/home/df/projects/pokemen/data/sample_submission/cg/libcg.so'
+	linux-vdso.so.1 (0x000071dcc0358000)
+	libstdc++.so.6 => /nix/store/chqq8mpmpyfi9kgsngya71akv5xicn03-gcc-15.2.0-lib/lib/libstdc++.so.6 (0x000071dcbfe00000)
+	libgcc_s.so.1 => /nix/store/chqq8mpmpyfi9kgsngya71akv5xicn03-gcc-15.2.0-lib/lib/libgcc_s.so.1 (0x000071dcc01e6000)
+	libc.so.6 => /nix/store/57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61/lib/libc.so.6 (0x000071dcbfa00000)
+	libm.so.6 => /nix/store/57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61/lib/libm.so.6 (0x000071dcc00ee000)
+	/nix/store/57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61/lib64/ld-linux-x86-64.so.2 (0x000071dcc035a000)

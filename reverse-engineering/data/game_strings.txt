@@ -1,0 +1,1598 @@
+Ability
+active
+(after applying Weakness and Resistance).
+(after applying Weakness and Resistance). The effect of Curly Wall doesn
+(after applying Weakness and Resistance). The effect of Tundra Wall doesn
+AllAttack
+and discard them.
+Ask your opponent if each player may take a Prize card. If yes, each player takes a Prize card. If no, you draw 4 cards.
+asleep
+Asleep
+As often as you like during your turn, if you have any {R} Mega Evolution Pok
+As often as you like during your turn, you may attach a Basic {L} Energy card from your hand to 1 of your Iono
+As often as you like during your turn, you may attach a Basic {R} Energy card from your hand to 1 of your Pok
+As often as you like during your turn, you may move 1 damage counter from 1 of your Team Rocket
+As often as you like during your turn, you may use this Ability. Move a Basic {G} Energy from 1 of your Pok
+As often as you like during your turn, you may use this Ability. Move an Energy from 1 of your other Pok
+As often as you like during your turn, you may use this Ability. Move a {W} Energy from 1 of your Benched Pok
+At any time during your turn, you may discard this card from play.
+Attach a Basic Energy card from your discard pile to 1 of your Benched N
+Attach a Basic Energy card from your discard pile to each of your Future Pok
+Attach a Basic Energy card from your hand to 1 of your Pok
+Attach a Basic Energy card from your hand to this Pok
+Attach a Basic {F} Energy card from your discard pile to this Pok
+Attach a Basic {G} Energy card from your hand to 1 of your Benched Pok
+Attach a Basic {P} Energy card from your discard pile to 1 of your Benched {P} Pok
+Attach up to 2 Basic Energy cards from your discard pile to 1 of your Stage 2 Pok
+Attach up to 2 Basic Energy cards from your discard pile to your Pok
+Attach up to 2 Basic {F} Energy cards from your discard pile to this Pok
+Attach up to 2 Basic {M} Energy cards from your discard pile to this Pok
+Attach up to 2 Basic {P} Energy cards from your hand to your Pok
+Attach up to 2 Basic {W} Energy cards from your discard pile to this Pok
+Attach up to 3 Basic {F} Energy cards from your discard pile to your Benched Pok
+attackEffectType not set
+attackId
+attackIdH
+attacks
+Attacks used by each Tera Pok
+Attacks used by Hop
+Attacks used by the Hop
+Attacks used by the Pikachu {ex} this card is attached to do 50 more damage to your opponent
+Attacks used by the Poisoned Pok
+Attacks used by the Pok
+Attacks used by this Pok
+Attacks used by your Cynthia
+Attacks used by your Evolution {R} Pok
+Attacks used by your {F} Pok
+Attacks used by your Future Pok
+Attacks used by your {G} Pok
+Attacks used by your Hop
+Attacks used by your Pok
+At the end of your turn (after your attack), if the Pok
+Basic {D} Energy
+Basic {F} Energy
+Basic {G} Energy
+Basic {L} Energy
+Basic {M} Energy
+Basic {P} Energy
+Basic {R} Energy
+Basic {W} Energy
+(before applying Weakness and Resistance).
+Before doing damage, discard all Pok
+Bench Manipulation
+benchMax
+benchMaxJ
+Boomerang Energy
+Boosted Evolution
+Both Active Pok
+Brighten and Burn
+burned
+Burned
+Burning Charge
+Burning Flare
+Burn It All Up
+Buzz Flip
+by attacks from the opponent
+cardIdActive
+cardIdBench
+Cellular Evolution
+Chandelure
+Choose 1 of your Benched N
+Choose Basic {L} Energy cards from your discard pile up to the amount of Energy attached to all of your opponent
+Choose up to 2 of your Benched {C} Pok
+Coated Attack
+CoinHead
+confused
+Confused
+confusedH
+Confused Pok
+Confuse Ray
+ Counterattack
+ Counterattacking Crest
+Count your Prize cards, shuffle them, and put them on the bottom of your deck. Then, take that many cards from the top of your deck and put them face down as your Prize cards.
+damage
+Damage
+Damage Beat
+DamageCounterAny
+Damage Rush
+deckCounL
+deckCount
+Devolve 1 of your evolved {P} Pok
+Devolve each of your opponent
+DisableAttack
+discard
+Discard
+Discard 2 Basic {G} Energy cards from your hand. If you can
+Discard 2 Energy from this Pok
+Discard 3 Energy from this Pok
+Discard 4 Basic {R} Energy cards from your hand. If you can
+Discard 6 Basic {G} Energy cards from your hand, and Knock Out your opponent
+Discard a Basic {G} Energy card from your hand. If you can
+Discard a card from your hand. If you do, your opponent discards a card from their hand.
+Discard a {G} Energy from this Pok
+Discard a {L} Energy from this Pok
+Discard all Energy from this Pok
+Discard all {L} Energy from this Pok
+Discard all {M} Energy from this Pok
+Discard all Pok
+Discard an Energy from this Pok
+Discard an Energy from your opponent
+Discard any amount of {R} Energy from among your Pok
+Discard a Pok
+Discard a random card from your opponent
+Discard a {R} Energy from your opponent
+Discard a Special Energy from 1 of your opponent
+Discard a Special Energy from your opponent
+Discard a Stadium in play.
+Discard a Team Rocket
+DiscardCardOrAttachedCard
+DiscardEnergy
+DiscardEnergyCard
+Discard random cards from your opponent
+Discard the top 2 cards of your deck.
+Discard the top 2 cards of your opponent
+Discard the top 3 cards of your deck.
+Discard the top 3 cards of your opponent
+Discard the top 6 cards of your deck, and this attack does 100 damage for each Basic {W} Energy card that you discarded in this way.
+Discard the top 7 cards of your deck, and this attack does 70 damage for each Misty
+Discard the top card of each player
+Discard the top card of your deck.
+Discard the top card of your deck, and if that card is a Pok
+Discard the top card of your deck, and if that card is a Supporter card, use the effect of that card as the effect of this attack.
+Discard the top card of your opponent
+Discard this Pok
+DiscardToolCard
+Discard up to 2 Energy cards from this Pok
+Discard up to 2 Energy cards from your hand, and this attack does 60 damage for each card you discarded in this way.
+Discard up to 2 {M} Energy from this Pok
+Discard up to 3 Energy cards from your hand. This attack does 60 damage to 1 of your opponent
+Discard up to 3 {G} Energy cards from your Pok
+Discard up to 5 {R} Energy from this Pok
+Discard your hand and draw 5 cards.
+Discard your hand and draw 6 cards.
+Discard your hand and search your deck for a Pok
+Double the number of damage counters on each of your opponent
+Draw 2 cards. If your opponent has 3 or fewer Prize cards remaining, draw 2 more cards.
+Draw 2 cards. Then, if you have 10 or more cards in your hand, draw 2 more cards.
+Draw 4 cards. At the end of this turn, if you have 5 or more cards in your hand, discard your hand.
+Draw cards until you have 5 cards in your hand. Before drawing cards, you may discard any number of cards from your hand. (If you can
+Draw cards until you have 5 cards in your hand. If all of your Pok
+Draw cards until you have 6 cards in your hand.
+Draw cards until you have 7 cards in your hand.
+__dso_handle
+During this turn, attacks used by your {F} Pok
+ During this turn, attacks used by your Pok
+During this turn, attacks used by your Pok
+Each Basic {G} Energy attached to all of your Pok
+Each of your evolved Pok
+Each player discards cards from their hand until they have 5 cards in their hand. Your opponent discards first. (If a player has 5 or fewer cards in their hand, they do not discard.)
+Each player shuffles their hand and puts it on the bottom of their deck. If either player put any cards on the bottom of their deck in this way, each player flips a coin. If heads, that player draws 6 cards. If tails, they draw 3 cards.
+Each player shuffles their hand into their deck and draws 4 cards.
+Each player shuffles their hand into their deck. Then, flip a coin. If heads, you draw 5 cards,
+Each player shuffles their hand into their deck. Then, you draw 5 cards, and your opponent draws 2 cards.
+Each player shuffles their hand into their deck. Then, you draw 5 cards, and your opponent draws 3 cards.
+Each Stage 2 Pok
+energyAtA
+energyAttached
+energyCaH
+energyCards
+Energy Coin
+Energy Crush
+Energy Feather
+Energy Gift
+energyIndex
+Energy Loop
+Energy Recycler
+Energy Retrieval
+Energy Search
+Energy Search Pro
+Energy Short
+Energy Straw
+Energy Swatter
+Energy Switch
+energyTyA
+energyType
+Enriching Energy
+evolutio
+ Evolutionary Guidance
+Evolution Jammer
+evolutionType
+Evolve
+evolvesFrom
+EvolvesFrom
+EvolvesTo
+(Existing effects are not removed. Damage is not an effect.)
+Flip 2 coins. For each heads, discard an Energy from your opponent
+Flip 2 coins. If both of them are heads, heal all damage from 1 of your Pok
+Flip 2 coins. If both of them are heads, search your deck for a Basic Energy card and attach it to 1 of your Pok
+Flip 2 coins. If both of them are heads, this attack does 100 more damage.
+Flip 2 coins. If both of them are tails, this Pok
+Flip 2 coins. This attack does 10 damage for each heads.
+Flip 2 coins. This attack does 20 damage for each heads.
+Flip 2 coins. This attack does 30 damage for each heads.
+Flip 2 coins. This attack does 30 more damage for each heads.
+Flip 2 coins. This attack does 40 damage for each heads.
+Flip 2 coins. This attack does 50 more damage for each heads.
+Flip 2 coins. This attack does 70 damage for each heads.
+Flip 2 coins. This attack does 80 damage for each heads.
+Flip 2 coins. This attack does 90 damage for each heads.
+Flip 2 coins. This attack does 90 damage for each heads. If both of them are tails, your opponent
+Flip 2 coins. This attack does 90 damage for each heads. If either of them is heads, your opponent
+Flip 3 coins. Attach an amount of Basic Energy up to the number of heads from your discard pile to your Benched Pok
+Flip 3 coins. For each heads, search your deck for up to 2 Basic Energy cards and attach them to your Pok
+Flip 3 coins. If all of them are heads, Knock Out 1 of your opponent
+Flip 3 coins. Put a number of cards up to the number of heads from your discard pile into your hand.
+Flip 3 coins. This attack does 10 damage for each heads.
+Flip 3 coins. This attack does 120 damage for each heads.
+Flip 3 coins. This attack does 20 damage for each heads.
+Flip 3 coins. This attack does 30 damage for each heads.
+Flip 4 coins. This attack does 100 damage for each heads.
+Flip 4 coins. This attack does 30 damage for each heads.
+Flip 4 coins. This attack does 60 damage for each heads. If at least 2 of them are heads, your opponent
+Flip 4 coins. This attack does 80 damage for each heads.
+Flip 5 coins. This attack does 30 damage for each heads.
+Flip a coin for each {D} Pok
+Flip a coin for each Energy attached to this Pok
+Flip a coin for each {W} Energy attached to this Pok
+Flip a coin. If heads, choose 1 of your opponent
+Flip a coin. If heads, choose a Special Condition. Your opponent
+Flip a coin. If heads, discard an Energy from 1 of your opponent
+Flip a coin. If heads, discard an Energy from your opponent
+Flip a coin. If heads, during your opponent
+Flip a coin. If heads, Knock Out your opponent
+Flip a coin. If heads, put 2 damage counters on 1 of your opponent
+Flip a coin. If heads, switch in 1 of your opponent
+Flip a coin. If heads, this attack does 10 more damage.
+Flip a coin. If heads, this attack does 20 more damage.
+Flip a coin. If heads, this attack does 30 more damage.
+Flip a coin. If heads, this attack does 30 more damage, and heal 30 damage from this Pok
+Flip a coin. If heads, this attack does 40 more damage.
+Flip a coin. If heads, this attack does 50 more damage.
+Flip a coin. If heads, this attack does 60 more damage.
+Flip a coin. If heads, this attack does 70 more damage.
+Flip a coin. If heads, this attack does 80 more damage.
+Flip a coin. If heads, your opponent
+Flip a coin. If tails, during your next turn, this Pok
+Flip a coin. If tails, this attack does nothing.
+Flip a coin. If tails, this attack does nothing. If heads, during your opponent
+Flip a coin until you get tails. For each heads, choose a random card from your opponent
+Flip a coin until you get tails. For each heads, discard an Energy from your opponent
+Flip a coin until you get tails. For each heads, discard the top card of your opponent
+Flip a coin until you get tails. Search your deck for an amount of Basic Energy up to the number of heads and attach it to this Pok
+Flip a coin until you get tails. Search your deck for a number of cards up to the number of heads and put them into your hand. Then, shuffle your deck.
+Flip a coin until you get tails. This attack does 100 more damage for each heads.
+Flip a coin until you get tails. This attack does 10 damage for each heads.
+Flip a coin until you get tails. This attack does 20 damage for each heads.
+Flip a coin until you get tails. This attack does 30 more damage for each heads.
+Flip a coin until you get tails. This attack does 40 damage for each heads.
+Flip a coin until you get tails. This attack does 50 damage for each heads.
+Flip a coin until you get tails. This attack does 50 more damage for each heads.
+Flip the Script
+Focus Energy
+For each of your Benched Pok
+Ground Burn
+Grow Grass Energy
+handCounL
+handCount
+Handheld Fan
+hand or deck from the discard pile.
+Hand Trim
+Hand Trimmer
+Heal 100 damage from each of your Basic Pok
+Heal 100 damage from each of your Benched Pok
+Heal 10 damage from each of your Pok
+Heal 10 damage from this Pok
+Heal 120 damage from 1 of your Benched {P} Pok
+Heal 150 damage from 1 of your Pok
+Heal 150 damage from 1 of your {P} Pok
+Heal 20 damage and remove a Special Condition from your Active Pok
+Heal 20 damage from this Pok
+Heal 30 damage from 1 of your Pok
+Heal 30 damage from each of your Pok
+Heal 30 damage from this Pok
+Heal 30 damage from your Active Pok
+Heal 40 damage from 1 of your Pok
+Heal 40 damage from each of your Pok
+Heal 40 damage from this Pok
+Heal 50 damage from each of your Pok
+Heal 50 damage from this Pok
+Heal 60 damage from 1 of your Pok
+Heal 60 damage from this Pok
+Heal 60 damage from your Active {N} Pok
+Heal 70 damage from your Active Pok
+Heal 80 damage from your Active Pok
+Heal all damage from 1 of your Benched Pok
+Heal all damage from 1 of your Mega Evolution Pok
+Heal all damage from 1 of your Pok
+Heat Burn
+Horn Attack
+If any of your Benched Pancham have any damage counters on them, this attack does 120 more damage.
+If a Stadium is in play, this attack also does 30 damage to each of your opponent
+If a Stadium is in play, this attack does 120 more damage. Then, discard that Stadium.
+If a Stadium is in play, this attack does 140 more damage. Then, discard that Stadium.
+If a Stadium is in play, this attack does 60 more damage.
+If a Stadium is in play, this attack does 60 more damage. Then, discard that Stadium.
+If a Stadium is in play, this attack does 70 more damage.
+If Beldum and Metang are on your Bench, this attack does 150 more damage.
+If Durant is on your Bench, this attack does 20 more damage.
+If Illumise is on your Bench, this attack does 60 more damage.
+If there are 3 or fewer cards in your deck, this attack also does 120 damage to 2 of your opponent
+If there is no Stadium in play, this attack does nothing.
+If this card is attached to an Evolution Pok
+If this card is attached to a Stage 2 Pok
+If this card is discarded by an effect of an attack used by the Pok
+If you attached Energy to a Pok
+If you go first, you can use this attack during your first turn. Discard your hand and draw 5 cards.
+If you go first, you can use this attack during your first turn. Search your deck for a card and put it into your hand. Then, shuffle your deck.
+If you go first, you can use this attack during your first turn. Search your deck for a card that evolves from this Pok
+If you go first, you can use this attack during your first turn. Search your deck for up to 2 Basic Pok
+If you have 10 or more Basic {R} Energy cards in your discard pile, this attack does 100 more damage.
+If you have 3 or more Energy in play, this attack does 70 more damage. This attack
+If you have 4 or fewer Benched Pok
+If you have any {D} Mega Evolution Pok
+If you have any Stage 2 {D} Pok
+If you have a Stadium in play, this attack does 50 more damage.
+If you have at least 4 {L} Energy in play, this attack does 90 more damage.
+If you have at least 4 {R} Energy in play, this attack does 90 more damage.
+If you have at least 4 {W} Energy in play, this attack does 90 more damage.
+If you have exactly 6 Prize cards remaining, this attack does 200 more damage.
+If you have more Prize cards remaining than your opponent, attacks used by the Pok
+If you have more Prize cards remaining than your opponent, this attack does 90 more damage.
+If you have the same number of cards in your hand as your opponent, this attack does 90 more damage.
+If you played a Supporter card that has 
+If you played Tarragon from your hand during this turn, discard the top 3 cards of your opponent
+If your Active {D} Pok
+If your Benched Pok
+If your opponent has 2 or fewer Prize cards remaining, this attack does 100 more damage.
+If your opponent has 3 or fewer cards in their hand, this attack does 120 more damage.
+If your opponent has 3 or fewer Prize cards remaining, this attack does 90 more damage.
+If your opponent has 3 or more Benched Pok
+If your opponent has any cards in their discard pile that have "Colress" in the name, this Pok
+If your opponent has a Stadium in play, discard it. If you do, your opponent can
+If your opponent has exactly 4 cards in their hand, ignore all {C} Energy in the costs of attacks used by this Pok
+If you use this attack when you have exactly 1 Prize card remaining, you win this game.
+Ignition Energy
+ in its name. Any attached cards, damage counters, Special Conditions, turns in play, and any other effects remain on the new Pok
+ in its name from your hand during this turn, this attack does 100 more damage.
+ in its name in your discard pile.
+ in its name, reveal it, and put it into your hand. Then, shuffle your deck.
+ in its name that has any damage counters on it.
+ in their name and put them onto your Bench. Then, shuffle your deck.
+ in their name from your hand, and this attack does 60 damage for each card you discarded in this way.
+Legacy Energy
+Lively Stadium
+Look at the bottom 7 cards of your deck. You may reveal a Pok
+Look at the top 10 cards of your deck. You may put any number of Pok
+Look at the top 20 cards of your deck and attach any number of Energy cards you find there to your Pok
+Look at the top 3 cards of your deck and put them back in any order, or shuffle them and put them on the bottom of your deck.
+Look at the top 4 cards of your deck. You may reveal any number of Supporter cards you find there and put them into your hand. Shuffle the other cards back into your deck.
+Look at the top 6 cards of your deck and attach a Basic Energy card you find there to 1 of your Pok
+Look at the top 6 cards of your deck and put 2 of them into your hand. Discard the other cards.
+Look at the top 7 cards of your deck and put a {D} Pok
+Look at the top 7 cards of your deck. You may reveal a Pok
+Look at the top 7 cards of your deck. You may reveal a Supporter card you find there and put it into your hand. Shuffle the other cards back into your deck.
+Look at the top 7 cards of your deck. You may reveal up to 2 in any combination of {G} Pok
+Look at the top 8 cards of your deck and put up to 3 of them into your hand. Shuffle the other cards back into your deck.
+Look at the top card of your deck. You may discard that card.
+lose any Ability that requires the Pok
+Mirror Attack
+Mist Energy
+mon (after applying Weakness and Resistance).
+mon (after applying Weakness and Resistance). The effect of Stone Palace doesn
+mon (after applying Weakness and Resistance). (This includes new Pok
+mon after attacking.
+mon already has any damage counters on it, this attack
+mon already has any damage counters on it, this attack does 100 more damage.
+mon already has any damage counters on it, this attack does 200 more damage.
+mon already has any damage counters on it, this attack does 60 more damage.
+mon already has any damage counters on it, this attack does 80 more damage.
+mon already has any damage counters on it, this attack does 90 more damage.
+mon also do 60 damage to itself and make your opponent
+mon also does 10 damage to itself.
+mon also does 10 damage to itself for each damage counter on it.
+mon also does 20 damage to itself.
+mon also does 30 damage to itself.
+mon also does 50 damage to itself.
+mon also does 60 damage to itself.
+mon also does 70 damage to itself.
+mon also does 70 damage to itself. Your opponent
+mon also does 80 damage to itself.
+mon also does 90 damage to itself.
+mon and all attached cards into their deck.
+mon and all attached cards into your deck.
+mon and all attached cards into your hand.
+mon and an Energy card, reveal them, and put them into your hand. Then, shuffle your deck.
+mon, and a Stage 2 Pok
+mon and a Trainer card you find there and put them into your hand. Shuffle the other cards back into your deck.
+mon and attach a Basic Energy card from your discard pile to each of them.
+mon and Basic Energy cards from your discard pile into your hand.
+mon and Basic {F} Energy cards from your discard pile into your hand.
+mon and Basic {G} Energy cards you find there and put them into your hand. Shuffle the other cards back into your deck.
+mon and Basic {R} Energy cards, reveal them, and put them into your hand. Then, shuffle your deck.
+mon, and discard a Stadium in play.
+mon, and discard that Stadium. (Don
+mon and have this attack do 130 more damage.
+mon, and if you have any Pecharunt {ex} in play, your opponent takes 1 fewer Prize card.
+mon and place 12 damage counters on 1 of your opponent
+mon and put 2 damage counters on each of them.
+mon and put it onto their Bench. Then, that player shuffles their deck. If a player searches their deck in this way, their turn ends.
+mon and put it onto your Bench. Then, shuffle your deck.
+mon and put it onto your Bench. Then, shuffle your deck. If you put any Pok
+mon and put them into your hand. Then, shuffle your deck.
+mon and put them onto your Bench. Then, shuffle your deck.
+mon and Stadium cards, reveal them, and put them into your hand. Then, shuffle your deck.
+mon, and take a Prize card.
+mon, and this attack also does 50 damage to 1 of your opponent
+mon, and this attack also does 90 damage to 1 of your opponent
+mon, and this attack does 120 damage for each card you discarded in this way.
+mon, and this attack does 120 damage to 1 of your opponent
+mon, and this attack does 210 damage to 1 of your opponent
+mon, and this attack does 280 damage to 1 of your opponent
+mon, and this attack does 60 damage to each of 2 of your opponent
+mon, and this attack does 90 damage for each card you discarded in this way.
+mon, and this attack does 90 damage to 1 of your opponent
+mon. Any attached cards, damage counters, Special Conditions, turns in play, and any other effects remain on the new Pok
+mon, a Stage 1 Pok
+mon, a Supporter card, and a Basic Energy card, reveal them, and put them into your hand. Then, shuffle your deck.
+mon (before applying Weakness and Resistance).
+mon (before applying Weakness and Resistance). The effect of Extra Helpings doesn
+mon. Before doing damage, you may attach any number of Basic {W} Energy cards from your hand to this Pok
+mon Burned.
+mon by attacks
+mon by attacks.
+mon by attacks from Basic non-{C} Pok
+mon by attacks from Basic Pok
+mon by attacks from your opponent
+mon by attacks if that damage is 40 or less.
+mon by attacks if that damage is 60 or less.
+mon by putting any number of Evolution cards on it into your hand. (That Pok
+mon by putting the highest Stage Evolution card on it into your opponent
+mon by shuffling the highest Stage Evolution card on it into your opponent
+mon can evolve during your first turn or the turn you play it.
+mon can evolve into any Pok
+mon can evolve into {G} Pok
+mon can use any attack from its previous Evolutions. (You still need the necessary Energy to use each attack.)
+mon can use attacks during your first turn.
+mon can use the Double-Edge attack for {P}.
+mon can use the Trifrost attack for {C}.
+mon Checkup, put 1 damage counter on each Pok
+mon Checkup, put 2 more damage counters on each Poisoned non-{D} Pok
+mon Checkup, put 3 more damage counters on your opponent
+mon Checkup, put 8 damage counters on that Pok
+mon Confused.
+mon cost {C} less for each Kofu card in your discard pile.
+mon cost {C} more, and its Retreat Cost is {C} more.
+mon costs {C} less for each Prize card your opponent has taken.
+mon. (Damage from attacks is still taken.)
+mon. (Damage is not an effect.)
+mon, discard it at the end of your turn.
+mon. Discard the top 2 cards of your opponent
+mon, discard this card.
+mon do 100 less damage (before applying Weakness and Resistance).
+mon do 10 more damage to your opponent
+mon do 120 more damage to your opponent
+mon, do 20 damage to it. This damage isn
+mon do 20 less damage (before applying Weakness and Resistance).
+mon do 20 more damage to your opponent
+mon do 30 less damage
+mon do 30 less damage (before applying Weakness and Resistance).
+mon do 30 more damage to your opponent
+mon do 40 more damage to your opponent
+mon do 50 more damage to your opponent
+mon does 100 damage to itself. Flip a coin. If heads, your opponent
+mon done to your Benched Pok
+mon, draw cards until you have 8 cards in your hand instead.
+mon during your turn, you may attach up to 2 Basic {M} Energy cards from your discard pile to your {M} Pok
+mon during your turn, you may attach up to 2 Spiky Energy cards from your discard pile to this Pok
+mon during your turn, you may have your opponent reveal their hand and you put any number of Basic Pok
+mon during your turn, you may heal all damage from your Active {G} Pok
+mon during your turn, you may put 2 damage counters on 1 of your opponent
+mon during your turn, you may search your deck for up to 5 Basic {D} Energy cards and attach them to your Marnie
+mon equal to the damage done to this Pok
+mon (even if your Active {D} Pok
+mon evolved from Gimmighoul during this turn, this attack does 90 more damage.
+mon evolved from Magneton during this turn, this attack does 120 more damage.
+mon evolved from Misty
+mon {ex} and Active Pok
+mon {ex} (before applying Weakness and Resistance).
+mon, except any Iron Crown {ex}, do 20 more damage to your opponent
+mon, except any Pecharunt {ex}, with your Active Pok
+mon {ex}. If you healed any damage in this way, put all Energy attached to that Pok
+mon {ex} in play, attacks used by this Pok
+mon {ex} in play, you may use this Ability. Attach a Basic {R} Energy card from your hand to 1 of your Benched {R} Pok
+mon {ex} in play, you may use this Ability. Heal 60 damage from 1 of your Pok
+mon {ex} in play, you may use this Ability. Switch this Pok
+mon {ex} in your discard pile that has 
+mon. (Existing effects are not removed. Damage is not an effect.)
+mon {ex} or Benched Pok
+mon {ex}, reveal it, and put it into your hand. Then, shuffle your deck.
+mon {ex}, reveal them, and put them into your hand. Then, shuffle your deck.
+mon {ex} that evolves from Eevee if you play it from your hand
+mon {ex}, that player takes 1 fewer Prize card. The effect of Shadowy Concealment doesn
+mon {ex}. This attack
+mon {ex}, this attack does 100 more damage.
+mon {ex}, this attack does 120 more damage.
+mon {ex}, this attack does 40 more damage.
+mon {ex}, this attack does 70 more damage.
+mon {ex}, this attack does 80 more damage.
+mon {ex}, this attack does 90 more damage.
+mon {ex}, this attack does nothing. This attack
+mon, flip a coin. If heads, this attack does 150 damage to that Pok
+mon for each Basic {G} Energy card in your discard pile. Then, shuffle those Energy cards into your deck.
+mon for each card in your hand.
+mon for each damage counter on that Pok
+mon for each Energy attached to this Pok
+mon for each Energy card you discarded in this way.
+mon for each {G} Energy attached to this Pok
+mon for each {M} Energy attached to this Pok
+mon for each Prize card your opponent has taken (before applying Weakness and Resistance).
+mon for each Prize card your opponent has taken. (Don
+mon for each tails. This attack
+mon from their Bench until they have 5, and the player who played this card discards first.
+mon from their Bench until they have 5. When this card leaves play, both players discard Pok
+mon from their hand to evolve 1 of their Pok
+mon from their hand to evolve their Pok
+mon from your discard pile into your deck.
+mon from your discard pile into your hand.
+mon from your hand onto your Bench during your turn, you may attach up to 2 Basic {F} Energy cards from your hand to this Pok
+mon from your hand onto your Bench during your turn, you may discard a Stadium in play.
+mon from your hand onto your Bench during your turn, you may discard the top card of your opponent
+mon from your hand onto your Bench during your turn, you may search your deck for a Pok
+mon from your hand onto your Bench during your turn, you may search your deck for up to 3 Basic {F} Energy cards and discard them. Then, shuffle your deck.
+mon from your hand onto your Bench during your turn, you may switch it with your Active Pok
+mon from your hand onto your Bench, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck. You can
+mon from your hand to evolve 1 of your Pok
+mon gets +40 HP for each {F} Energy attached to it.
+mon has 2 or more damage counters on it, attacks used by this Pok
+mon has 2 or more {G} Energy attached, this attack does 120 more damage.
+mon has any damage counters on it, this attack can be used for {D}.
+mon has any damage counters on it, this attack does 100 more damage.
+mon has any damage counters on it, this attack does 150 more damage.
+mon has any {D} Energy attached and is damaged by an attack, flip a coin. If heads, prevent that damage.
+mon has any {D} Energy attached, it gets +100 HP, and the attacks it uses do 100 more damage to your opponent
+mon has any {D} Energy attached, you may move up to 3 damage counters from 1 of your Pok
+mon has any Energy attached, you may use this Ability. Search your deck for an Evolution Pok
+mon has any {F} Energy attached, this attack does 20 more damage.
+mon has any {G} Energy attached, you may use this Ability. Heal 30 damage from 1 of your Pok
+mon has any {L} Energy attached, this attack does 80 more damage.
+mon has any Special Energy attached, it gets +150 HP.
+mon has any Special Energy attached, it is Knocked Out.
+mon has any Special Energy attached, this attack does 100 more damage.
+mon has at least 2 extra Energy attached (in addition to this attack
+mon has exactly 6 damage counters on it, that Pok
+mon has {F} Resistance, this attack does 50 more damage.
+mon has full HP and would be Knocked Out by damage from an attack, it is not Knocked Out, and its remaining HP becomes 10.
+mon has no damage counters on it before this attack does damage, this attack does nothing.
+mon has no damage counters on it, this attack does 120 more damage.
+mon has no Energy attached, it has no Retreat Cost.
+mon has no Weakness.
+mon has the Festival Lead Ability, you may search your deck for a card and put it into your hand. Then, shuffle your deck.
+mon have any damage counters on them, this attack does 60 more damage.
+mon have the same amount of Energy attached, this attack does 120 more damage.
+mon, heal 100 damage from it instead.
+mon, heal 90 damage from that Pok
+mon. If tails, put 2 damage counters on your Active Pok
+mon if that damage is 200 or more.
+mon. If you attached Energy to a Pok
+mon. If you discarded a Pok
+mon. If you do, discard your opponent
+mon. If you do, draw cards until you have 5 cards in your hand.
+mon. If you do, during this turn, attacks used by this Pok
+mon. If you do, heal all damage from that Pok
+mon. If you do, the new Active Pok
+mon. If you do, you may move any amount of Energy from the Pok
+mon. If you do, you may move any amount of Energy from your other Pok
+mon. If you healed any damage in this way, discard all Energy from that Pok
+mon. If you healed any damage in this way, discard all Energy from those Pok
+mon. If you healed any damage in this way, discard an Energy from that Pok
+mon. If you placed any damage counters in this way, discard this card.
+mon. If you use this Ability, this Pok
+mon in any way you like. If you use this Ability, this Pok
+mon in any way you like. Shuffle the other cards and put them on the bottom of your deck.
+mon in any way you like. Shuffle the other cards back into your deck.
+mon in any way you like. Then, shuffle your deck.
+mon in order to use this Ability. Once during your turn, you may draw cards until you have 6 cards in your hand.
+mon in play have no Retreat Cost.
+mon in play. If you have a Stage 2 card in your hand that evolves from that Pok
+mon in play is now {P}. (Apply Weakness as
+mon in play, reveal it, and put it into your hand. Then, shuffle your deck.
+mon in play that has the Round attack.
+mon in play, that player discards Pok
+mon in play, this attack does 120 more damage.
+mon in play, you may search your deck for up to 2 Trainer cards, reveal them, and put them into your hand. Then, shuffle your deck.
+mon in this way, heal 30 damage from that Pok
+mon in this way, it is now Poisoned.
+mon in this way, place 2 damage counters on that Pok
+mon in this way, put this card into your deck. Then, shuffle your deck.
+mon, into their deck.
+mon into their hand.
+mon into your deck and have this attack do 80 more damage.
+mon into your deck, and this attack does 220 damage to 1 of your opponent
+mon into your deck. If you do, this attack also does 120 damage to 1 of your opponent
+mon into your hand.
+mon into your hand. (Discard all cards attached to this Pok
+mon into your hand instead of the discard pile.
+mon into your hand to have this attack do 80 more damage.
+mon in your discard pile that has the United Wings attack.
+mon in your hand and put them into your deck. If you do, search your deck for up to that many Pok
+mon is affected by a Special Condition, ignore all Energy in this attack
+mon is affected by a Special Condition, place 6 damage counters on 1 of your opponent
+mon is affected by a Special Condition, this attack does 120 more damage.
+mon is an Evolution Pok
+mon is a Stage 2 Pok
+mon is Burned or Poisoned, this attack does 100 more damage.
+mon is Burned, this attack does 160 more damage.
+mon is Burned, this attack does 40 more damage.
+mon is damaged by an attack
+mon is damaged by an attack (even if this Pok
+mon is damaged by an attack from your opponent
+mon is in the Active Spot and is damaged by an attack from your opponent
+mon is in the Active Spot and is Knocked Out by damage from an attack from your opponent
+mon is in the Active Spot, attacks used by your opponent
+mon is in the Active Spot, it can evolve during your first turn or the turn you play it.
+mon is in the Active Spot, Pok
+mon is in the Active Spot, put 2 damage counters on each of your opponent
+mon is in the Active Spot, put 5 more damage counters on your opponent
+mon is in the Active Spot, whenever you attach an Energy card from your hand to 1 of your Pok
+mon is in the Active Spot, whenever your opponent
+mon is in the Active Spot, you may devolve 1 of your opponent
+mon is in the Active Spot, you may have your opponent shuffle their hand into their deck and draw 3 cards.
+mon is in the Active Spot, you may look at the top 6 cards of your deck, reveal a Supporter card you find there, and put it into your hand. Shuffle the other cards back into your deck.
+mon is in the Active Spot, you may make your opponent
+mon is in the Active Spot, you may put a Basic Pok
+mon is in the Active Spot, you may shuffle it and all attached cards into your deck.
+mon is in the Active Spot, you may use this Ability. Draw 2 cards. You can
+mon is in the Active Spot, you may use this Ability. Each player draws a card.
+mon is in the Active Spot, your opponent
+mon is in the Active Spot, your opponent can
+mon is in your hand and your opponent has any Stage 2 Pok
+mon is in your hand when you are setting up to play, you may put it face down in the Active Spot.
+mon is Knocked Out by damage from an attack from your opponent
+mon is Knocked Out by damage from an attack used by this Pok
+mon is Knocked Out by damage from an attack used by your N
+mon is Knocked Out by damage from an attack used by your Tera Pok
+mon is Knocked Out by damage from this attack, during your opponent
+mon is Knocked Out), discard an Energy from the Attacking Pok
+mon is Knocked Out, flip a coin. If heads, take 1 more Prize card. The effect of Wonder Kiss doesn
+mon is Knocked Out), move an Energy from the Attacking Pok
+mon is Knocked Out), place 1 damage counter on the Attacking Pok
+mon is Knocked Out), place 2 damage counters on the Attacking Pok
+mon is Knocked Out), place 4 damage counters on the Attacking Pok
+mon is Knocked Out), place 5 damage counters on the Attacking Pok
+mon is Knocked Out), put 12 damage counters on the Attacking Pok
+mon is Knocked Out), put 2 damage counters on the Attacking Pok
+mon is Knocked Out), put 3 damage counters on the Attacking Pok
+mon is Knocked Out), put 6 damage counters on the Attacking Pok
+mon is Knocked Out), put damage counters on the Attacking Pok
+mon is Knocked Out), search your deck for up to 2 Pok
+mon is Knocked Out), the Attacking Pok
+mon is now Asleep.
+mon is now Asleep and Poisoned.
+mon is now Asleep. Draw 2 cards.
+mon is now Asleep. Heal 30 damage from it.
+mon is now Burned.
+mon is now Burned and Confused.
+mon is now Burned and Poisoned. Switch this Pok
+mon is now Confused.
+mon is now Confused. During your opponent
+mon is now Confused. You may move any number of damage counters on your opponent
+mon is now Paralyzed.
+mon is now Paralyzed and Poisoned.
+mon is now Paralyzed and Poisoned. If tails, your opponent
+mon is now Poisoned.
+mon is now Poisoned. During Pok
+mon is now Poisoned. During your opponent
+mon is now Poisoned. You can
+mon is on your Bench, all of your Steven
+mon is on your Bench, and if you have any Mega Evolution Pok
+mon is on your Bench, Benched Stage 2 Pok
+mon is on your Bench, prevent all damage done to this Pok
+mon is on your Bench, prevent all damage from and effects of attacks from your opponent
+mon is on your Bench, you may discard the bottom card of your deck. If you do, discard all cards from this Pok
+mon is on your Bench, you may switch it with your Active Pok
+mon is on your Bench, you may use this Ability. Attach an Energy card from your hand to your Active Larry
+mon is Poisoned, this attack does 130 more damage.
+mon is Poisoned, this attack does 60 more damage.
+mon is Poisoned, this attack does 90 more damage.
+mon, it is not Knocked Out, and its remaining HP becomes 10. Then, discard this card.
+mon, it is now Paralyzed.
+mon, it provides 2 in any combination of {P} Energy and {D} Energy.
+mon, it provides {C}{C}{C} Energy instead.
+mon, it provides {C} Energy.
+mon, it provides every type of Energy but provides only 1 Energy at a time.
+mon, it provides {F} Energy.
+mon, it provides {G} Energy.
+mon, it provides {P} Energy.
+mon, it takes 60 less damage (after applying Weakness and Resistance), and discard this card.
+mon may use an attack it has twice. If the first attack Knocks Out your opponent
+mon may use an attack it has twice in succession. If the first attack Knocks Out your opponent
+mon moved from your Bench to the Active Spot this turn, this attack does 120 more damage.
+mon moved from your Bench to the Active Spot this turn, this attack does 170 more damage.
+mon moved from your Bench to the Active Spot this turn, this attack does 90 more damage.
+mon moves from the Active Spot to the Bench, you may search your deck for a Palafin {ex} and switch it with this Pok
+mon moves from the Active Spot to your Bench, you may use this Ability. Attach up to 2 Basic {W} Energy cards from your hand to this Pok
+mon moves from your Bench to the Active Spot, you may search your deck for up to 3 Basic {G} Energy cards and attach them to this Pok
+mon moves to the Bench during their turn, place 2 damage counters on that Pok
+mon moves to the Bench during their turn, their new Active Pok
+mon, move up to 3 Basic Energy cards from that Pok
+mon on their Bench.
+mon on top of your deck.
+mon onto their Bench during their turn, place 2 damage counters on that Pok
+mon onto their Bench. Your opponent shuffles the other cards back into their deck.
+mon onto your Bench.
+mon onto your Bench in this way, move an Energy from this Pok
+mon on your Bench.
+mon on your Bench, this attack does 100 more damage.
+mon on your Bench, this attack does 70 more damage.
+mon or 1 Evolution Pok
+mon or a Basic Energy card from your discard pile into your hand.
+mon, or discard a Stadium in play.
+mon Paralyzed.
+mon, place 8 damage counters on that Pok
+mon provides {G}{G} Energy. The effect of Wild Growth doesn
+mon, put 4 damage counters on that Pok
+mon, put 6 damage counters on the Attacking Pok
+mon, put it into your hand instead of the discard pile. (Discard all attached cards.)
+mon, reveal it, and put it into their hand. Then, that player shuffles their deck.
+mon, reveal it, and put it into your hand. Then, shuffle your deck.
+mon, reveal them, and put them into your hand. Then, shuffle your deck.
+mon, search your deck for a Basic {D} Energy card and attach it to that Pok
+mon, search your deck for a Basic {P} Energy card and attach it to that Pok
+mon, search your deck for a card and put it into your hand. Then, shuffle your deck.
+mon, search your deck for a card that evolves from that Pok
+mon, search your deck for up to 2 Basic {P} Pok
+mon, search your deck for up to 3 cards and put them into your hand. Then, shuffle your deck.
+mon. Shuffle the other cards back into your deck.
+mon, take 1 more Prize card.
+mon take 30 less damage from attacks from your opponent
+mon, take 3 more Prize cards.
+mon take 60 less damage from attacks from your opponent
+mon takes 100 more damage from attacks (after applying Weakness and Resistance).
+mon takes 10 less damage from attacks (after applying Weakness and Resistance).
+mon takes 20 less damage from attacks (after applying Weakness and Resistance).
+mon takes 30 less damage from attacks (after applying Weakness and Resistance).
+mon takes 30 less damage from attacks from your opponent
+mon takes 40 less damage from attacks (after applying Weakness and Resistance).
+mon takes 50 less damage from attacks (after applying Weakness and Resistance).
+mon takes 50 more damage from attacks (after applying Weakness and Resistance).
+mon takes 60 less damage from attacks
+mon that evolves from 1 of their Basic Pok
+mon that evolves from that Pok
+mon that has 3 or more Energy attached.
+mon that has an Ability (before applying Weakness and Resistance).
+mon that has an Ability (both yours and your opponent
+mon that has an Ability from their hand, except for Team Rocket
+mon that has any damage counters on it (both yours and your opponent
+mon that has any damage counters on it. (Don
+mon that has any Energy attached (both yours and your opponent
+mon that has exactly 6 damage counters on it.
+mon that has "Nidoking" in its name is on your Bench, this attack does 120 more damage.
+mon that have 2 or less Energy attached can
+mon that have an Ability.
+mon that have an Ability (after applying Weakness and Resistance).
+mon that have any {M} Energy attached take 20 less damage from attacks from your opponent
+mon that have any Special Energy attached.
+mon that have any {W} Energy attached take 50 less damage from attacks from your opponent
+mon that have {M} Energy attached have no Retreat Cost.
+mon, that player takes 1 fewer Prize card.
+mon, that player takes 1 fewer Prize card. This effect of your Legacy Energy only works once per game.
+mon that you discarded in this way.
+mon. Then, shuffle your deck.
+mon. Then, shuffle your deck. If you attached Energy to a Pok
+mon. Then, shuffle your deck. If you attached Energy to your Active Pok
+mon the same amount of damage you did to your opponent
+mon. This attack
+mon. This attack also does 120 damage to 1 of your opponent
+mon, this attack does 100 more damage.
+mon. This attack does 110 damage to 3 of your opponent
+mon. This attack does 120 damage for each card you discarded in this way.
+mon. This attack does 120 damage to 2 of your opponent
+mon, this attack does 140 more damage.
+mon, this attack does 140 more damage, and discard all Energy from this Pok
+mon. This attack does 20 damage for each damage counter you placed in this way.
+mon, this attack does 230 more damage.
+mon, this attack does 30 more damage.
+mon. This attack does 50 damage for each card you discarded in this way.
+mon, this attack does 50 more damage.
+mon. This attack does 60 more damage for each card you discarded in this way.
+mon. This attack does 70 damage for each card you discarded in this way.
+mon. This attack does 70 damage for each heads.
+mon. This attack does 80 damage for each heads.
+mon. This attack does 80 damage to your opponent
+mon, this attack does 80 more damage.
+mon. This attack does 90 damage for each heads.
+mon. This attack does 90 more damage for each card you discarded in this way.
+mon, this attack does nothing.
+mon this card is attached to, attach this card from your discard pile to that Pok
+mon this card is attached to cost {C} less and do 30 more damage to your opponent
+mon this card is attached to do 40 more damage to your opponent
+mon this card is attached to do 50 more damage to your opponent
+mon this card is attached to has a Retreat Cost of exactly 4, is in the Active Spot, and is Knocked Out by damage from an attack from your opponent
+mon this card is attached to has full HP and would be Knocked Out by damage from an attack from your opponent
+mon this card is attached to is damaged by an attack from your opponent
+mon this card is attached to is in the Active Spot and is damaged by an attack from your opponent
+mon this card is attached to is in the Active Spot, the Retreat Cost of both Active Pok
+mon this card is attached to is in the Active Spot, you may attach a Basic Energy card from your discard pile to it.
+mon this card is attached to is Knocked Out by damage from an attack from your opponent
+mon this card is attached to takes 30 less damage from attacks from your opponent
+mon this card is attached to takes 50 less damage from attacks from your opponent
+mon this card is attached to uses an attack, that attack costs 1 Energy less.
+mon, this card provides every type of Energy but provides only 1 Energy at a time.
+mon, this card provides every type of Energy but provides only 2 Energy at a time.
+mon to 1 of their Benched Pok
+mon to 1 of your Benched Pok
+mon to evolve it. If that Pok
+mon to evolve it, skipping the Stage 1. You can
+mon to evolve it. Then, shuffle your deck.
+mon to evolve it. Then, shuffle your deck. You can use this card on a Pok
+mon to evolve it. Then, that player shuffles their deck. (Players can
+mon Tool and a Special Energy from 1 of your opponent
+mon Tool attached, this attack does 40 more damage.
+mon Tool attached, this attack does 70 more damage.
+mon Tool card, a Supporter card, and a Stadium card, reveal them, and put them into your hand. Then, shuffle your deck.
+mon Tool card, reveal it, and put it into your hand. Then, shuffle your deck.
+mon Tool cards attached. If this Ability goes away, discard Pok
+mon Tool cards from their hand.
+mon Tool cards, reveal them, and put them into your hand. Then, shuffle your deck.
+mon Tool or Special Energy card from 1 of your opponent
+mon Tools and Special Energy from all of your opponent
+mon Tools and Special Energy from your opponent
+mon to the Active Spot.
+mon to the Active Spot. If you do, switch your Active Pok
+mon to the Active Spot. If you do, the new Active Pok
+mon to the Active Spot. This attack does 20 damage to the new Active Pok
+mon to the Active Spot. This attack does 30 damage to the new Active Pok
+mon to the Bench.
+mon to the Bench. (Your opponent chooses the new Active Pok
+mon to the new Benched Pok
+mon to your Active Pok
+mon to your Benched Pok
+mon tries to use an attack, your opponent flips a coin. If tails, that attack doesn
+mon used an attack during your last turn, this attack does 150 more damage.
+mon used Angelite during your last turn, this attack can
+mon used Spiky Rolling during your last turn, this attack does 80 more damage.
+mon {V} (before applying Weakness and Resistance).
+mon {V}. This attack
+mon {V}, this attack does 110 more damage.
+mon was damaged by an attack during your opponent
+mon was evolved in this way, that player may search their deck for a Stage 2 Pok
+mon was healed during this turn, this attack does 100 more damage.
+mon was healed during this turn, this attack does 120 more damage.
+mon were Knocked Out by damage from an attack during your opponent
+mon with 100 HP or less, reveal them, and put them into your hand. Then, shuffle your deck. You can
+mon with 1 of their Benched {W} Pok
+mon with 1 of your Benched Pok
+mon with 1 of your Benched Team Rocket
+mon with 70 HP or less and put them onto your Bench. Then, shuffle your deck.
+mon with 70 HP or less from your discard pile onto your Bench.
+mon with {F} Resistance, reveal them, and put them into your hand. Then, shuffle your deck.
+mon with your Active Pok
+mon would be Knocked Out by damage from an attack, flip a coin. If heads, this Pok
+mon you find there and put it into your hand. Shuffle the other cards back into your deck.
+mon you find there and use it as this attack. Shuffle the revealed cards into your opponent
+mon you find there onto their Bench.
+mon you find there onto your Bench. Shuffle the other cards and put them on the bottom of your deck. You can
+mon you find there onto your Bench. Shuffle the other cards back into your deck.
+mon you have in play. This attack does 60 damage for each heads.
+mon, you may attack again after your opponent chooses a new Active Pok
+mon, you may put all Basic {W} Energy attached to that Pok
+mon, you may use an attack again after your opponent chooses a new Active Pok
+mon, you may use this Ability. Draw 2 cards.
+mon, you may use this Ability. Draw 3 cards.
+mon, you may use this Ability. Flip a coin. If heads, discard an Energy from your opponent
+mon, you may use this Ability. Heal all damage from each of your Evolution Pok
+mon, you may use this Ability. Look at the top 4 cards of your deck and attach any number of Basic Energy cards you find there to your Pok
+mon, you may use this Ability. Make your opponent
+mon, you may use this Ability. Search your deck for a Shedinja and put it onto your Bench. Then, shuffle your deck.
+mon, you may use this Ability. Search your deck for a Silcoon or a Cascoon and put it onto your Bench. Then, shuffle your deck.
+mon, you may use this Ability. Switch in 1 of your opponent
+mon, you may use this Ability. You may also use this Ability if this Pok
+mon you moved to your Bench to the new Active Pok
+MoreDevolve
+Move 3 Energy from this Pok
+Move a Basic Energy from 1 of your Pok
+Move a Basic Energy from this Pok
+Move all damage counters from 1 of your Benched Pok
+Move all damage counters from 1 of your Benched Team Rocket
+Move an Energy from 1 of your opponent
+Move an Energy from this Pok
+Move a {W} Energy from this Pok
+Move up to 2 Energy from your Benched Pok
+Neo Upper Energy
+Once during your first turn, you may search your deck for up to 3 {C} Pok
+Once during your turn, if you have any {G} Mega Evolution Pok
+Once during your turn, if you have Solrock in play, you may discard a Basic {F} Energy card from your hand in order to use this Ability. Draw 3 cards. You can
+Once during your turn, if you played Canari from your hand this turn, you may use this Ability. Search your deck for up to 2 Basic {L} Energy cards and attach them to this Pok
+Once during your turn, if your Active Pok
+Once during your turn, when your Mega Latias {ex} moves from your Bench to the Active Spot, you may use this Ability. Move any amount of Energy from your Benched Pok
+Once during your turn, you may attach a Basic Energy card from your discard pile to 1 of your Pok
+Once during your turn, you may attach a Basic Energy card from your discard pile to this Pok
+Once during your turn, you may attach a Basic {G} Energy card from your hand to 1 of your Pok
+Once during your turn, you may attach a Basic {G} Energy card from your hand to this Pok
+Once during your turn, you may attach a Basic {L} Energy card from your discard pile to 1 of your Benched Pok
+Once during your turn, you may attach up to 2 Basic {R} Energy cards from your hand to 1 of your Benched Ethan
+Once during your turn, you may attach up to 3 Basic Energy cards from your discard pile to your {L} Pok
+Once during your turn, you may flip a coin. If heads, choose Burned, Confused, or Poisoned. Your opponent
+Once during your turn, you may heal 20 damage from your Active Pok
+Once during your turn, you may look at the top 2 cards of your deck and put 1 of them into your hand. Put the other card on the bottom of your deck.
+Once during your turn, you may look at the top 4 cards of your deck and attach any number of Basic {M} Energy cards you find there to your Pok
+Once during your turn, you may look at the top card of your deck. You may discard that card.
+Once during your turn, you may move a Basic Energy from 1 of your Pok
+Once during your turn, you may put 13 damage counters on 1 of your opponent
+Once during your turn, you may put 5 damage counters on 1 of your opponent
+Once during your turn, you may put 5 damage counters on this Pok
+Once during your turn, you may search your deck for a Basic {P} Energy card, a Basic {M} Energy card, or 1 of each and attach them to your {P} Pok
+Once during your turn, you may search your deck for a Cynthia
+Once during your turn, you may search your deck for an Ethan
+Once during your turn, you may search your deck for a Pok
+Once during your turn, you may search your deck for a Stadium card, reveal it, and put it into your hand. Then, shuffle your deck.
+Once during your turn, you may search your deck for up to 2 Evolution {M} Pok
+Once during your turn, you may switch 1 of your Benched {D} Pok
+Once during your turn, you may switch your Active Pok
+Once during your turn, you may use this Ability. Attach a Basic {F} Energy card from your hand to 1 of your {F} Pok
+Once during your turn, you may use this Ability. Flip a coin. If heads, discard a random card from your opponent
+Once during your turn, you may use this Ability. Flip a coin. If heads, put an Energy attached to your opponent
+Once during your turn, you may use this Ability. Heal 30 damage from each of your Pok
+Once during your turn, you may use this Ability. Search your deck for a Basic {D} Energy card and attach it to 1 of your Benched {D} Pok
+Once during your turn, you may use this Ability. Search your deck for an Erika
+Once during your turn, you may use this Ability. Search your deck for up to 2 Basic {P} Energy cards, reveal them, and put them into your hand. Then, shuffle your deck.
+Once during your turn, you may use this Ability. Switch a card from your hand with the top card of your deck.
+Once during your turn, you may use this Ability. Switch your Active Pok
+Once during your turn, you may use this Ability. Your opponent reveals their hand, and you put a Basic Pok
+Once during your turn, you may use this Ability. Your opponent shuffles their hand and puts it on the bottom of their deck. If they put any cards on the bottom of their deck in this way, they draw 4 cards.
+paralyzed
+Paralyzed
+paralyzeL
+Place 1 damage counter on 1 of your opponent
+Place 2 damage counters on your opponent
+Place 3 damage counters on your opponent
+Place damage counters on your opponent
+Poison Chain
+poisoned
+Poisoned
+poisonedH
+Poison Jab
+Poisonous Musculature
+ Poison Point
+Poison Powder
+Poison Ring
+Poison Spray
+Powerful Hand
+Precocious Evolution
+preEvolution
+Prevent all damage counters from being placed on Benched Pok
+Prevent all damage done to Pok
+Prevent all damage done to this Pok
+Prevent all damage done to your Benched Pok
+Prevent all damage from and effects of attacks done to this Pok
+Prevent all damage from and effects of attacks from your opponent
+Prevent all damage from attacks done to this Pok
+Prevent all effects of attacks used by your opponent
+Prism Energy
+Prize Count
+Put 1 of your Benched Pok
+Put 2 cards from your hand on the bottom of your deck in any order. If you put 2 cards on the bottom of your deck in this way, draw 4 cards.
+Put 2 damage counters on 1 of your opponent
+Put 2 damage counters on each of your opponent
+Put 2 damage counters on your opponent
+Put 2 {R} Energy attached to this Pok
+Put 4 damage counters on your opponent
+Put 6 damage counters on each Pok
+Put 6 damage counters on your opponent
+Put an Energy attached to 1 of your opponent
+Put an Energy attached to this Pok
+Put a Trainer card from your discard pile into your hand.
+putDamageCounter
+Put damage counters on each of your opponent
+Put up to 2 Basic Energy cards from your discard pile into your hand.
+Put up to 2 Supporter cards from your discard pile into your hand.
+Put up to 3 Duskull from your discard pile onto your Bench.
+Put up to 9 damage counters on this Pok
+Quick Attack
+remainDamageCounremainEnergyCost
+remainDamageCounter
+remainEnergyCost
+RemoveDamageCounter
+RemoveDamageCounterCount
+resistanA
+resistance
+Retreat
+retreatCost
+retreated
+retreateL
+Reveal any number of Honedge, Doublade, and Aegislash from your hand, and this attack does 60 damage for each card you revealed in this way.
+Roasting Burn
+Rock Fighting Energy
+Ruffians Attack
+s Active Basic Pok
+s Active Evolution Pok
+s Active Pok
+s Active Tera Pok
+s Adventure card in your discard pile.
+s Adventure card, reveal it, and put it into your hand. Then, shuffle your deck.
+Sand Attack
+s attacks and use it as this attack.
+s attacks. During your opponent
+s base damage is 240.
+s base damage is 30.
+s Bench.
+s Benched Basic Pok
+s Benched Pok
+s Burned Pok
+s) by effects of attacks and Abilities from the opponent
+s cost), this attack does 100 more damage.
+s cost), this attack does 140 more damage.
+s cost), this attack does 80 more damage.
+s damage isn
+s deck.
+s deck and put them back in any order.
+s deck. If 1 of your Pok
+s deck. If you played an Ancient Supporter card from your hand during this turn, discard 3 more cards in this way.
+s deck. This attack does 140 more damage for each Energy card discarded in this way.
+s deck. You may choose an attack from a Pok
+s deck. You may choose any number of Basic Pok
+s discard pile.
+s) do 30 more damage to the opponent
+Search your deck for 2 cards, shuffle your deck, then put those cards on top of it in any order.
+Search your deck for a Basic Energy card, reveal it, and put it into your hand. Then, shuffle your deck.
+Search your deck for a Basic {F} Energy card and attach it to 1 of your Pok
+Search your deck for a Basic {F} Energy card or a Basic {F} Pok
+Search your deck for a Basic {G} Energy card and attach it to 1 of your Pok
+Search your deck for a Basic {G} Energy card and attach it to this Pok
+Search your deck for a Basic {L} Energy card and attach it to this Pok
+Search your deck for a Basic {M} Energy card and attach it to this Pok
+Search your deck for a Basic Pok
+Search your deck for a Basic {R} Energy card and attach it to 1 of your Pok
+Search your deck for a Basic {W} Energy card and attach it to 1 of your Pok
+Search your deck for a card that evolves from 1 of your Pok
+Search your deck for a card that evolves from this Pok
+Search your deck for a card that has no Abilities and evolves from 1 of your Pok
+Search your deck for a Mega Evolution Pok
+Search your deck for an Energy card and attach it to 1 of your Benched {G} Pok
+Search your deck for an Evolution Pok
+Search your deck for an Item card, a Pok
+Search your deck for an Item card, reveal it, and put it into your hand. Then, shuffle your deck.
+Search your deck for a number of cards up to the number of your Benched Pok
+Search your deck for any number of Basic Energy cards of different types, reveal them, and put them into your hand. Then, shuffle your deck.
+Search your deck for any number of Basic Pok
+Search your deck for a Pok
+Search your deck for a Stadium card and an Energy card, reveal them, and put them into your hand. Then, shuffle your deck.
+Search your deck for a Stadium card, reveal it, and put it into your hand. Then, shuffle your deck.
+Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck.
+Search your deck for a Supporter card that has 
+Search your deck for a Tera Pok
+Search your deck for a Trainer card, reveal it, and put it into your hand. Then, shuffle your deck.
+Search your deck for up to 2 Basic {D} Energy cards and attach them to this Pok
+Search your deck for up to 2 Basic Energy cards and attach them to 1 of your Pok
+Search your deck for up to 2 Basic Energy cards and attach them to your Future Pok
+Search your deck for up to 2 Basic Energy cards and attach them to your Pok
+Search your deck for up to 2 Basic Energy cards of different types, reveal them, and put 1 of them into your hand. Attach the other to 1 of your Pok
+Search your deck for up to 2 Basic Energy cards, reveal them, and put them into your hand. Then, shuffle your deck.
+Search your deck for up to 2 Basic {G} Energy cards and up to 2 Basic {L} Energy cards and attach them to your Pok
+Search your deck for up to 2 Basic Hop
+Search your deck for up to 2 Basic {P} Energy cards and attach them to 1 of your Benched Pok
+Search your deck for up to 2 Basic {P} Energy cards and attach them to this Pok
+Search your deck for up to 2 Basic Pok
+Search your deck for up to 2 Basic Steven
+Search your deck for up to 2 cards and put them into your hand. Then, shuffle your deck.
+Search your deck for up to 2 Froakie and put them onto your Bench. Then, shuffle your deck.
+Search your deck for up to 2 Item cards, reveal them, and put them into your hand. Then, shuffle your deck. Your turn ends.
+Search your deck for up to 2 {L} Pok
+Search your deck for up to 2 Pok
+Search your deck for up to 3 Basic Energy cards and attach them to your Benched Pok
+Search your deck for up to 3 Basic Energy cards and attach them to your Pok
+Search your deck for up to 3 Basic Energy cards of different types and attach them to your Tera Pok
+Search your deck for up to 3 Basic Energy cards of different types, reveal them, and put them into your hand. Then, shuffle your deck.
+Search your deck for up to 3 Basic {P} Pok
+Search your deck for up to 3 Basic Team Rocket
+Search your deck for up to 3 {D} Pok
+Search your deck for up to 3 in any combination of Ethan
+Search your deck for up to 3 in any combination of {G} Pok
+Search your deck for up to 3 in any combination of {R} Pok
+Search your deck for up to 3 Misty
+Search your deck for up to 3 Pok
+Search your deck for up to 3 Stage 1 Pok
+Search your deck for up to 4 {L} Pok
+Search your deck for up to 5 cards and discard them. Then, shuffle your deck.
+Search your deck for up to 5 Pok
+Search your deck for up to 7 Basic {R} Energy cards, reveal them, and put them into your hand. Then, shuffle your deck.
+s Echoed Voice attack does 80 more damage (before applying Weakness and Resistance).
+s Encouragement is in your discard pile, this attack does 150 more damage.
+s Energy attached, this attack does 60 more damage.
+s Energy from this Pok
+serialActive
+serialBench
+SetupActivePokemon
+SetupBenchPokemon
+s evolved Pok
+s face-down Prize cards.
+s face-down Prize cards face up and choose a random card from your opponent
+s hand.
+s hand, and your opponent reveals that card and shuffles it into their deck.
+s hand. Discard the top card of your opponent
+s hand until they have 5 cards in their hand.
+s hand. Your opponent reveals that card and shuffles it into their deck.
+s hand. Your opponent reveals that card. You may have your opponent switch those cards. (That Prize card remains face up for the rest of the game.)
+s hand. Your opponent reveals those cards and shuffles them into their deck.
+s) have no Retreat Cost.
+Shield Attack
+Shuffle all Energy attached to this Pok
+Shuffle up to 5 Basic Energy cards from your discard pile into your deck.
+Shuffle your hand into your deck. Then, draw 4 cards. If your opponent has 3 or fewer Prize cards remaining, draw 8 cards instead.
+Shuffle your hand into your deck. Then, draw 6 cards.
+Shuffle your hand into your deck. Then, draw 6 cards. If you have exactly 6 Prize cards remaining, draw 8 cards instead.
+s Hyper Fang attack
+s last turn, this attack does 100 more damage.
+s last turn, this attack does 120 more damage.
+s last turn, this attack does 160 more damage.
+s last turn, this attack does 60 more damage.
+s last turn, this attack does 80 more damage.
+s last turn, this attack does that much more damage.
+Sleep Pulse
+s Mochi Rush attack does 50 more damage
+s next turn, attacks used by the Defending Pok
+s next turn, discard the Defending Pok
+s next turn, prevent all damage done to this Pok
+s next turn, prevent all damage from and effects of attacks done to that Pok
+s next turn, prevent all damage from and effects of attacks done to this Pok
+s next turn, put 9 damage counters on the Defending Pok
+s next turn, whenever they attach an Energy card from their hand to the Defending Pok
+Speed Attack
+Spiky Energy
+Spinning Attack
+Spit Poison
+s Poisoned Pok
+s remaining HP is 30 or less, it has no Retreat Cost.
+s remaining HP is 50 or less, this attack does 170 more damage.
+s Retreat Cost.
+s Sandwich cards from your discard pile into your hand.
+s Staryu during this turn, this attack does 80 more damage.
+stadium
+stadiumP
+stadiumPlayed
+stage1
+stage2
+s) take 30 less damage from attacks from the opponent
+ Stimulated Evolution
+Strike the Sleeper
+s turn, if they played a Supporter card from their hand this turn, they may heal 10 damage from each of their Pok
+s turn, if they played a Supporter card that has "Team Rocket" in its name from their hand this turn, they may draw 2 cards.
+s turn, that player may discard an Energy card from their hand in order to draw cards until they have as many cards in their hand as they have {P} Pok
+s turn, that player may put a card from their hand on top of their deck.
+s turn, that player may put up to 2 Basic {L} Energy cards from their discard pile into their hand.
+s turn, that player may search their deck for a Basic Pok
+s turn, that player may search their deck for a Marnie
+s turn, that player may search their deck for a Stage 1 Pok
+s turn, that player may switch their Active {W} Pok
+Super Poison Breath
+supporterPlayed
+Surprise Attack
+SwitchEnergy
+SwitchEnergyCard
+ Switch your Active Pok
+Switch your Active Pok
+Switch your Active Team Rocket
+s Zero to Hero Ability.
+t affected by Resistance.
+t affected by Weakness.
+t affected by Weakness or Resistance.
+t affected by Weakness or Resistance, or by any effects on those Pok
+t affected by Weakness or Resistance, or by any effects on your opponent
+t apply Weakness and Resistance for Benched Pok
+t attack.
+t attack unless you have 4 or more Team Rocket
+t be Asleep.
+t be put into your hand or deck from the discard pile.
+t Burned, this attack does nothing.
+t discard 2 cards in this way, this attack does nothing.
+t discard 4 cards in this way, this attack does nothing.
+t discard 6 cards in this way, this attack does nothing.
+Team Rocket's Energy
+Telepath Psychic Energy
+Teleportation Attack
+t evolve a Basic Pok
+t evolve during your first turn or the turn you play it.)
+t evolve this turn.)
+t have 10 or more Basic {F} Energy cards in your discard pile, this attack does nothing.
+t have a Rule Box and Basic Energy cards from your discard pile into your hand. (Pok
+t have a Rule Box by attacks from your opponent
+t have a Rule Box, choose 1 of its attacks and use it as this attack.
+t have a Rule Box, reveal it, and put it into your hand. Then, shuffle your deck. (Pok
+t have a Rule Box, the attacks it uses do 30 more damage to your opponent
+t have exactly 3 or 4 Prize cards remaining, this attack does nothing.
+t have exactly 7 cards in your hand, this attack does nothing.
+t have Lunatone on your Bench, this attack does nothing. This attack
+t have the same number of cards in your hand as your opponent, this attack does nothing.
+t have Uxie and Azelf on your Bench, this attack does nothing.
+(The Energy can be of any type.)
+The Mega Zygarde {ex} this card is attached to can use the attack on this card. (You still need the necessary Energy to use this attack.)
+The Retreat Cost of the Pok
+The Weakness of each of your opponent
+This attack
+This attack also does 10 damage to 1 of your Benched Pok
+This attack also does 10 damage to each of your Benched Pok
+This attack also does 10 damage to each of your opponent
+This attack also does 130 damage to 2 of your opponent
+This attack also does 20 damage to 1 of your opponent
+This attack also does 20 damage to each Benched Pok
+This attack also does 20 damage to each of your Benched Pok
+This attack also does 30 damage to 1 of your opponent
+This attack also does 30 damage to 2 of your opponent
+This attack also does 30 damage to each of your Benched Pok
+This attack also does 40 damage to 1 of your Benched Pok
+This attack also does 40 damage to each Benched Pok
+This attack also does 50 damage to 1 of your opponent
+This attack also does 60 damage to 1 of your opponent
+This attack does 100 damage for each Special Condition affecting your opponent
+This attack does 100 damage to 1 of your opponent
+This attack does 100 damage to each of your opponent
+This attack does 10 damage for each damage counter on all of your Benched Cynthia
+This attack does 10 damage for each damage counter on this Pok
+This attack does 10 more damage for each Ancient card in your discard pile.
+This attack does 10 more damage for each damage counter on all of your opponent
+This attack does 10 more damage for each damage counter on this Pok
+This attack does 10 more damage for each damage counter on your opponent
+This attack does 140 damage to 1 of your opponent
+This attack does 180 damage to 1 of your opponent
+This attack does 20 damage for each Basic {W} Energy card in your discard pile. Then, shuffle those cards into your deck.
+This attack does 20 damage for each damage counter on all of your Benched {F} Pok
+This attack does 20 damage for each damage counter on this Pok
+This attack does 20 damage for each damage counter on your opponent
+This attack does 20 damage for each Energy attached to your opponent
+This attack does 20 damage for each of your Basic Pok
+This attack does 20 damage for each of your Benched Pok
+This attack does 20 damage for each of your Pok
+This attack does 20 damage for each Pok
+This attack does 20 damage for each Supporter card that has 
+This attack does 20 damage to 1 of your opponent
+This attack does 20 damage to each of your opponent
+This attack does 20 more damage for each Benched Pok
+This attack does 20 more damage for each Energy card in your discard pile.
+This attack does 20 more damage for each {L} Energy attached to all of your Iono
+This attack does 20 more damage for each of your Benched Pok
+This attack does 20 more damage for each of your opponent
+This attack does 20 more damage for each {R} Energy attached to this Pok
+This attack does 20 more damage for each {W} Energy attached to this Pok
+This attack does 30 damage for each Basic Energy card in your opponent
+This attack does 30 damage for each card in your opponent
+This attack does 30 damage for each Energy attached to this Pok
+This attack does 30 damage for each Item card in your opponent
+This attack does 30 damage for each of your Ancient Pok
+This attack does 30 damage for each of your opponent
+This attack does 30 damage for each of your Team Rocket
+This attack does 30 damage for each Pok
+This attack does 30 damage for each {W} Energy attached to this Pok
+This attack does 30 damage to 1 of your opponent
+This attack does 30 damage to each of your opponent
+This attack does 30 less damage for each {C} in your opponent
+This attack does 30 more damage for each damage counter on your opponent
+This attack does 30 more damage for each Energy attached to both Active Pok
+This attack does 30 more damage for each Energy attached to your opponent
+This attack does 30 more damage for each {G} Energy attached to all of your Pok
+This attack does 30 more damage for each {G} Energy attached to this Pok
+This attack does 30 more damage for each of your opponent
+This attack does 30 more damage for each Prize card your opponent has taken.
+This attack does 40 damage for each damage counter on all of your Benched Rattata.
+This attack does 40 damage for each Energy attached to all of your opponent
+This attack does 40 damage for each Energy attached to this Pok
+This attack does 40 damage for each of your Erika
+This attack does 40 damage for each of your Pok
+This attack does 40 damage for each Pok
+This attack does 40 damage to 1 of your opponent
+This attack does 40 more damage for each damage counter on your opponent
+This attack does 40 more damage for each {D} Energy attached to this Pok
+This attack does 40 more damage for each Energy attached to your opponent
+This attack does 40 more damage for each of your Evolution Pok
+This attack does 40 more damage for each {P} Energy attached to this Pok
+This attack does 40 more damage for each {R} Energy attached to this Pok
+This attack does 40 more damage for each Stage 2 Pok
+This attack does 50 damage for each card in your opponent
+This attack does 50 damage for each {P} Energy attached to all of your Pok
+This attack does 50 damage to 1 of your opponent
+This attack does 50 damage to 2 of your opponent
+This attack does 50 damage to each of your opponent
+This attack does 50 more damage for each damage counter on your opponent
+This attack does 50 more damage for each Energy attached to this Pok
+This attack does 50 more damage for each Energy attached to your opponent
+This attack does 50 more damage for each {G} Energy attached to this Pok
+This attack does 50 more damage for each Prize card your opponent has taken. Discard an Energy from this Pok
+This attack does 50 more damage for each Prize card your opponent has taken. This Pok
+This attack does 50 more damage for each {W} Energy attached to this Pok
+This attack does 60 damage for each Energy attached to all of your opponent
+This attack does 60 damage for each of your opponent
+This attack does 60 damage for each Prize card your opponent has taken.
+This attack does 60 damage to 1 of your opponent
+This attack does 60 damage to each of 2 of your opponent
+This attack does 60 damage to each of your opponent
+This attack does 60 less damage for each Energy attached to your opponent
+This attack does 60 more damage for each Ethan
+This attack does 60 more damage for each Prize card your opponent took during their last turn.
+This attack does 70 damage for each damage counter on your opponent
+This attack does 70 damage for each of your Pok
+This attack does 70 damage for each Prize card you have taken.
+This attack does 70 damage to 1 of your opponent
+This attack does 70 more damage for each damage counter on this Pok
+This attack does 80 damage for each Prize card you have taken.
+This attack does 80 more damage for each Energy attached to your opponent
+ToActive
+ToBench
+ToDeck
+ToDeckBottom
+ToDeckEnergy
+ToHand
+ToHandEnergy
+ToPrize
+t play any {ACE SPEC} cards from their hand.
+t play any Item cards from their hand.
+t play any Stadium cards from their hand during their next turn.
+t play any Supporter cards from their hand during their next turn.
+t put 2 cards from your hand on the bottom of your deck, you can
+t recover from that Special Condition when they evolve or devolve.
+t retreat.
+t retreat. During your next turn, the Defending Pok
+t take any Prize cards for it.
+t, this attack does nothing.
+Tumbling Attack
+t use attacks.
+t use attacks. (This includes new Pok
+t use Blaze Blitz again until it leaves the Active Spot.
+t use more than 1 Ability that has 
+t use more than 1 Fan Call Ability during your turn.
+t use more than 1 Flip the Script Ability each turn.
+t use more than 1 Lunar Cycle Ability each turn.
+t use more than 1 Run Errand Ability each turn.
+t use more than 1 Subjugating Chains Ability each turn.
+t use that attack.
+t use this attack during your first turn. This attack does 30 damage for each of your Benched Pok
+Twilight Poison
+weakness
+weaknessH
+Whenever your opponent plays an Item or Supporter card from their hand, prevent all effects of that card done to this Pok
+Whenever your opponent plays a Supporter card from their hand, prevent all effects of that card done to this Pok
+When you attach this card from your hand to a Pok
+When you attach this card from your hand to a {P} Pok
+Wing Attack
+You can use this attack only if you go second, and only during your first turn. Your opponent can
+You can use this card only if you discard 2 other cards from your hand.
+You can use this card only if you discard 3 other cards from your hand.
+You can use this card only if you discard a Basic {R} Energy card from your hand.
+You can use this card only if you discard another card from your hand.
+You can use this card only if you have more Prize cards remaining than your opponent.
+You can use this card only if your opponent has 2 or fewer Prize cards remaining.
+You can use this card only if your opponent has exactly 2 Prize cards remaining.
+You can use this card only when it is the last card in your hand.
+You may attach any number of Basic Energy cards from your hand to your Pok
+You may discard 2 {L} Energy from this Pok
+You may discard all Energy from this Pok
+You may discard any amount of Basic Energy from your Pok
+You may discard any number of Supporter cards that have 
+You may discard a Stadium in play. If you do, this attack does 140 more damage.
+You may discard up to 2 Basic Energy from your Benched Pok
+You may discard up to 2 Energy from your Benched Pok
+You may discard up to 4 Energy cards from your hand, and this attack does 40 more damage for each card you discarded in this way.
+You may do 120 more damage. If you do, this Pok
+You may do 30 more damage. If you do, this Pok
+You may draw cards until you have 6 cards in your hand.
+You may move an Energy from your opponent
+You may move any amount of {M} Energy from your Pok
+You may put all Energy attached to this Pok
+You may search your deck for a card and put it into your hand. Then, shuffle your deck.
+You may search your deck for any number of Basic Lillie
+You may search your deck for any number of Fennel cards, reveal them, and put them into your hand. Then, shuffle your deck.
+You may search your deck for any number of Pok
+You may shuffle 3 Energy attached to this Pok
+You may shuffle all Energy attached to this Pok
+You must discard 2 cards from your hand in order to use this Ability. Once during your turn, you may draw a card.
+You must discard a Basic {L} Energy from this Pok
+You must discard a Basic {R} Energy card from your hand in order to use this Ability. Once during your turn, you may make your opponent
+You must discard a card from your hand in order to use this Ability. Once during your turn, you may draw 2 cards.
+You must discard a Chill Teaser Toy card from your hand in order to use this Ability. Once during your turn, you may switch in 1 of your opponent
+You must put a card from your hand on the bottom of your deck in order to use this Ability. Once during your turn, you may draw cards until you have 5 cards in your hand.
+Your opponent chooses 3 cards from their hand and shuffles those cards into their deck.
+(Your opponent chooses the new Active Pok
+Your opponent counts the cards in their hand, shuffles those cards, and puts them on the bottom of their deck. If they do, they draw that many cards.
+Your opponent discards 2 cards from their hand.
+Your opponent discards a card from their hand.
+Your opponent discards cards from their hand until they have 3 cards in their hand.
+Your opponent flips a coin for each of their Benched Pok
+Your opponent reveals their hand.
+Your opponent reveals their hand, and this attack does 80 damage for each Energy card you find there.
+Your opponent reveals their hand, and you choose a card you find there and put it on the bottom of their deck.
+Your opponent reveals their hand, and you choose an Energy card you find there and put it on the bottom of their deck.
+Your opponent reveals their hand, and you discard a card you find there.
+Your opponent reveals their hand, and you discard up to 2 Item cards you find there.
+Your opponent reveals their hand. Discard all Item cards and Pok
+Your opponent reveals their hand. This attack does 50 damage for each Trainer card you find there.
+_Z10CalcDamageRK5Statei7CardRefRK4CardS2_S5_bPK6Attack.isra.0
+_Z10CalcDamageRK5Statei7CardRefRK4CardS2_S5_bPK6Attack.isra.0.cold
+_Z10EffectBurnR5Statei
+_Z10EvolveProcR5State8AreaTypeiS1_ii
+_Z11AfterAttackR5State
+_Z11AfterDamageR5State7CardRefR4CardS1_RKS2_.isra.0
+_Z11AfterDamageR5State7CardRefR4CardS1_RKS2_.isra.0.cold
+_Z11ConfuseProcR5State
+_Z11DeckToPrizeR5Stateii.constprop.0
+_Z11DeckToPrizeR5Stateii.constprop.0.cold
+_Z11DevolveProcR5State7CardRefR4Card8AreaType
+_Z11EffectSleepR5Statei
+_Z11LogConfusedR5Stateib7CardRef
+_Z11LogPoisonedR5Stateib7CardRef
+_Z11SelectPrizeR5Stateiii
+_Z11ShuffleDeckR5Stateib
+_Z12AfterAbilityR5State
+_Z12AfterAttack2R5State
+_Z12AfterAttack3R5State
+_Z12AfterAttack4R5State
+_Z12AfterRetreatR5State
+_Z12ApiAllAttackR11JsonBuilder
+_Z12AttackDamageR5State
+_Z12AttackEffectR5State
+_Z12EffectPoisonR5Stateii
+_Z12LogParalyzedR5Stateib7CardRef
+_Z12ParalyzeProcR5State
+_Z12SelectedBurnR5State
+_Z13AfterBurnProcR5Statei
+_Z13AttackEffectsR5Stateb
+_Z13SelectedPrizeR5State
+_Z14AfterSleepProcR5Statei
+_Z14AttackCoinProcR5Statei
+_Z14CoinLuckyBonusR5Statei
+_Z15ActivateAbilityR5State
+_Z15AttackCoinProc2R5State
+_Z15SetAttackEnergyRK5StateRK4CardRKSt6vectorI10EnergyTypeSaIS6_EEbb
+_Z15StartSetupBenchR5State
+_Z16ActivateAbility2R5State
+_Z16AttackDamageCoinR5Statei
+_Z16SelectCoinSingleR5Statei
+_Z16SelectedAttackIdR5Statei
+_Z16SelectedRetreat2R5State
+_Z16SwitchEnergyProcR5State7CardRefS1_
+_Z17SelectDamageMultiR5State
+_Z17SetupBenchPokemonR5Statei
+_Z17SpecialAttackProcR5State
+_Z18AfterAttackTriggerR5State
+_Z18AfterEnergyDiscardR5State7CardRefRK4Cardi
+_Z18AttackNoDamageCoinR5Statei
+_Z18EffectAttackDamageR5Stateii
+_Z18SelectedCoinSingleR5Statei
+_Z18SetupActivePokemonR5Statei
+_Z19AfterSkipIfCoinTailR5State
+_Z19AfterTriggerAbilityR5Statei
+_Z19SelectActivePokemonR5Statei
+_Z19SelectBenchMaxTrashR5Statei
+_Z19SelectCoinUntilTailR5Statei
+_Z19SelectedDamageMultiR5State
+_Z19SelectedMoreDevolveR5State
+_Z19SelectedPrizeTargetR5State
+_Z19SelectPokemonEnergyR5StateiRK13FixedListBaseIi12AttachedCardLi60EEi13SelectContext
+_Z20AfterBreakIfCoinHeadR5State
+_Z20AfterBreakIfCoinTailR5State
+_Z20ResetupActivePokemonR5Statei
+_Z20SelectedEnergyTargetR5State
+_Z20SelectedEvolveTargetR5State
+_Z20SelectedSecondAttackR5State
+_Z21AfterAttackDamageCoinR5Statei
+_Z21PreSetupActivePokemonR5Statei
+_Z21SelectedBenchMaxTrashR5State
+_Z21SelectedCoinUntilTailR5Statei
+_Z21SelectedDisableAttackR5Statei
+_Z21SelectedPokemonEnergyR5State
+_Z22BothSetupActivePokemonR5State
+_Z22DamageCounterSwitchAnyR5Statei
+_Z22SelectDamageCounterAnyR5State
+_Z22SelectedDamageMultiAllR5State
+_Z23AfterSetupActivePokemonR5State
+_Z23InsufficientEnergyCountRK5StateRK13FixedListBaseIa10EnergyTypeLa7EERKSt6vectorIS3_SaIS3_EERK4CardRK6Attackb
+_Z23InsufficientEnergyCountRK5StateRK13FixedListBaseIa10EnergyTypeLa7EERKSt6vectorIS3_SaIS3_EERK4CardRK6Attackb.constprop.0
+_Z23InsufficientEnergyCountRK5StateRK13FixedListBaseIa10EnergyTypeLa7EERKSt6vectorIS3_SaIS3_EERK4CardRK6Attackb.constprop.0.cold
+_Z23SelectedActivateAbilityR5State
+_Z23SelectPokemonEnergyLoopR5Statei
+_Z24EffectAttackNoDamageCoinR5Stateii
+_Z24SelectedDamageCounterAnyR5State
+_Z25AfterBreakIfCoinTailMultiR5Statei
+_Z25AfterResetupActivePokemonR5Statei
+_Z25ClearSleepParalyzeConfuseR5Statei
+_Z25SelectedPokemonEnergyLoopR5Statei
+_Z25SelectedSetupBenchPokemonR5Statei
+_Z26SelectedSetupActivePokemonR5Statei
+_Z27AfterAttackDamageChangeCoinR5State
+_Z27SelectedRemoveDamageCounterR5State
+_Z29AfterDeckToTrashCoinUntilTailR5State
+_Z30SelectTrashSinglePokemonEnergyR5Statei7CardRefi
+_Z33SelectedAddDamageCounterSwitchAnyR5Statei
+_Z36AfterAttackDamageChangeCoinUntilTailR5State
+_Z36SelectedRemoveDamageCounterSwitchAnyR5Statei
+_Z42SelectedAttackDamageChangePutDamageCounterR5State
+_Z43AfterAttackDamageChangeTargetCountEnemyCoinR5State
+_Z8BurnProcR5Statei
+_Z9AddDamageR5State7CardRefR4CardibS1_bPK6Attack
+_Z9CoinPrizeR5Stateii
+_Z9LogAsleepR5Stateib7CardRef
+_Z9LogBurnedR5Stateib7CardRef
+_Z9SleepProcR5Statei
+_ZGV11AttackTable
+_ZL11EnergyTypes
+_ZL13AllAttackJson
+_ZN5Chain11abilityPlayEiPKDuS1_
+_ZN5Chain12existDamagedE12TargetPlayer.constprop.0
+_ZN5Chain13abilityEvolveEiPKDuS1_
+_ZN5Chain13costHandTrashEi
+_ZN5Chain17effectTrashEnergyEi12TargetPlayer
+_ZN5Chain17effectTrashToHandEi
+_ZN5Chain18effectTrashStadiumEv
+_ZN5Chain18targetEnergyCardMeEv
+_ZN5Chain19effectEvolvesToEachEv
+_ZN5Chain19effectLookEnemyhandEv
+_ZN5Chain20costHandTrashLimitedEi
+_ZN5Chain21postEffectActiveEnemyE10EffectType.constprop.0.isra.0
+_ZN5Chain21postEffectDamageBenchEii
+_ZN5Chain21postEffectDeckToTrashEi
+_ZN5Chain23canHandToDeckAndShuffleE12TargetPlayer
+_ZN5Chain23conditionAttachEnergyMeE10EnergyType
+_ZN5Chain23effectBasicEnergySwitchE12TargetPlayer
+_ZN5Chain23postEffectDamagePokemonEii
+_ZN5Chain23postEffectDamagePokemonEii.constprop.0
+_ZN5Chain23postEffectTrashEnergyMeEi
+_ZN5Chain23postEffectTrashEnergyMeEi.constprop.0
+_ZN5Chain23postEffectTrashEnergyMeEi.constprop.1.isra.0
+_ZN5Chain24effectHandAttachEnergyMeEi
+_ZN5Chain25effectDeckToHandNoShuffleEi.constprop.0
+_ZN5Chain25effectTrashAttachEnergyMeEi
+_ZN5Chain26conditionPrizeCountGreaterEv
+_ZN5Chain26effectDeckToHandAndShuffleEi
+_ZN5Chain26effectDeckToHandAndShuffleEi.constprop.0
+_ZN5Chain26postEffectTrashEnergyMeAllEv
+_ZN5Chain27effectDeckToBenchAndShuffleEi
+_ZN5Chain27effectDeckToTrashAndShuffleEi
+_ZN5Chain27effectTrashToDeckAndShuffleEi
+_ZN5Chain27preEffectFailAttackCoinTailEv.isra.0
+_ZN5Chain28effectSelectAttachEnergyHandEi
+_ZN5Chain28postEffectParalyzeIfCoinHeadEv
+_ZN5Chain32effectDeckAttachEnergyAndShuffleEi
+_ZN5Chain33effectDeckToHandReverseAndShuffleEi
+_ZN5Chain33effectSelectAttachBasicEnergyDeckEi
+_ZN5Chain33effectSelectAttachBasicEnergyHandEi
+_ZN5Chain34effectDeckAttachEnergyMeAndShuffleEi
+_ZN5Chain34effectSelectAttachBasicEnergyTrashEi
+_ZN5Chain37effectLookAndToHandRestDeckAndShuffleEii
+_ZN5Chain37postEffectNoDamageAndEffectIfCoinHeadEv
+_ZN5Chain38effectDeckSelectBasicEnergyNotSameTypeEi13SelectContext
+_ZN5Chain38effectLookAndToBenchRestDeckAndShuffleEi12TargetPlayer
+_ZN5Chain42postEffectActiveEnemyEnergyTrashIfCoinHeadEv
+_ZN5Chain6attackEiPKDuS1_PKcSt16initializer_listI10EnergyTypeE
+_ZN5Chain7abilityEiPKDuS1_8AreaTypeS2_.constprop.0.isra.0
+_ZN5Chain7abilityEiPKDuS1_8AreaTypeS2_.constprop.1
+_ZN5Chain7abilityEiPKDuS1_8AreaTypeS2_.constprop.2
+_ZN5Chain7abilityEiPKDuS1_8AreaTypeS2_.constprop.3.isra.0
+_ZN5Chain7abilityEiPKDuS1_8AreaTypeS2_.constprop.4.isra.0
+_ZN5State21targetListEnergyCountEv
+_ZN5State22isPreventDamageCounterERK4Card
+_ZN5State25targetListTypeEnergyCountE10EnergyType
+_ZN6AttackD1Ev
+_ZN6AttackD2Ev
+_ZNK4Card13getEnergyTypeEv
+_ZNK5State11getEnergiesEi7CardRefRSt6vectorI10EnergyTypeSaIS2_EE
+_ZNK5State11retreatCostERK4Card.isra.0
+_ZNK5State13getEnergyInfoERK4Card7CardRef
+_ZNK5State14getEnergyCardsE7CardRefRSt6vectorIS0_SaIS0_EE
+_ZNK5State15canEvolveEffectERKS_RK4CardRK10CardMaster7CardRef
+_ZNK5State15typeEnergyCountEi7CardRef10EnergyType
+_ZNK5State21isPreventEffectActiveEi
+_ZNK5State22satisfyAttackConditionERK4CardRK6Attacki
+_ZNK5State9isEvolvedE7CardRef
+_ZNSt10_HashtableIiSt4pairIKi6AttackESaIS3_ENSt8__detail10_Select1stESt8equal_toIiESt4hashIiENS5_18_Mod_range_hashingENS5_20_Default_ranged_hashENS5_20_Prime_rehash_policyENS5_17_Hashtable_traitsILb0ELb0ELb1EEEE9_M_rehashEmRKm
+_ZNSt13unordered_mapIi6AttackSt4hashIiESt8equal_toIiESaISt4pairIKiS0_EEED1Ev
+_ZNSt13unordered_mapIi6AttackSt4hashIiESt8equal_toIiESaISt4pairIKiS0_EEED2Ev
+_ZNSt6vectorI10EnergyTypeSaIS0_EE17_M_realloc_insertIJRKS0_EEEvN9__gnu_cxx17__normal_iteratorIPS0_S2_EEDpOT_
+_ZNSt6vectorI10EvolveInfoSaIS0_EE17_M_default_appendEm
+_ZNSt6vectorI10EvolveInfoSaIS0_EE17_M_realloc_insertIJRKS0_EEEvN9__gnu_cxx17__normal_iteratorIPS0_S2_EEDpOT_
+_ZNSt6vectorI12AttackEnergySaIS0_EE17_M_realloc_insertIJS0_EEEvN9__gnu_cxx17__normal_iteratorIPS0_S2_EEDpOT_
+_ZNSt6vectorI16TriggeredAbilitySaIS0_EE17_M_default_appendEm
+_ZNSt6vectorI16TriggeredAbilitySaIS0_EE17_M_realloc_insertIJEEEvN9__gnu_cxx17__normal_iteratorIPS0_S2_EEDpOT_
+_ZNSt6vectorI16TriggeredAbilitySaIS0_EE17_M_realloc_insertIJRKS0_EEEvN9__gnu_cxx17__normal_iteratorIPS0_S2_EEDpOT_
+_ZNSt6vectorI16TriggeredAbilitySaIS0_EE9push_backERKS0_
+_ZNSt6vectorI16TriggeredAbilitySaIS0_EEaSERKS2_.isra.0
+_ZNSt6vectorIP6AttackSaIS1_EE17_M_realloc_insertIJRKS1_EEEvN9__gnu_cxx17__normal_iteratorIPS1_S3_EEDpOT_
+_ZNSt6vectorIPK6AttackSaIS2_EE17_M_realloc_insertIJS2_EEEvN9__gnu_cxx17__normal_iteratorIPS2_S4_EEDpOT_
+_ZNSt8__detail9_Map_baseIiSt4pairIKi6AttackESaIS4_ENS_10_Select1stESt8equal_toIiESt4hashIiENS_18_Mod_range_hashingENS_20_Default_ranged_hashENS_20_Prime_rehash_policyENS_17_Hashtable_traitsILb0ELb0ELb1EEELb1EE2atERS2_.constprop.0
+_ZSt16__introsort_loopIN9__gnu_cxx17__normal_iteratorIPPK6AttackSt6vectorIS4_SaIS4_EEEElNS0_5__ops15_Iter_comp_iterIZ12ApiAllAttackR11JsonBuilderEUlS4_S4_E_EEEvT_SG_T0_T1_

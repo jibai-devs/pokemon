@@ -1,0 +1,452 @@
+ActivateAbility2(State&)
+ActivateAbility(State&)
+ActivateEffect2(State&)
+ActivateEffectEachSelected(State&, int)
+ActivateEffectForEach(State&, int)
+ActivateEffectMultiple(State&, int)
+ActivateEffect(State&, Effect const&, int)
+ActivateSkillEffect(State&)
+AddDamage(State&, CardRef, Card&, int, bool, CardRef, bool, Attack const*)
+AddIfTarget(State const&, CardRef, Target const&, std::vector<AreaRef, std::allocator<AreaRef> >&, AreaRef const&)
+AfterAbility(State&)
+AfterAttack2(State&)
+AfterAttack3(State&)
+AfterAttack4(State&)
+AfterAttackDamageChangeCoin(State&)
+AfterAttackDamageChangeCoinUntilTail(State&)
+AfterAttackDamageChangeTargetCountEnemyCoin(State&)
+AfterAttackDamageCoin(State&, int)
+AfterAttack(State&)
+AfterAttackTrigger(State&)
+AfterBreakIfCoinHead(State&)
+AfterBreakIfCoinTailMulti(State&, int)
+AfterBreakIfCoinTail(State&)
+AfterBurnProc(State&, int)
+AfterDamage(State&, CardRef, Card&, CardRef, Card const&) [clone .isra.0]
+AfterDamage(State&, CardRef, Card&, CardRef, Card const&) [clone .isra.0] [clone .cold]
+AfterDeckToTrashCoinUntilTail(State&)
+AfterEffect(State&)
+AfterEnergyDiscard(State&, CardRef, Card const&, int)
+AfterMoveTriggerStack(State&, int)
+AfterPlay(State&)
+AfterRefresh(State&)
+AfterResetupActivePokemon(State&, int)
+AfterRetreat(State&)
+AfterSetupActivePokemon(State&)
+AfterSkipIfCoinTail(State&)
+AfterSleepProc(State&, int)
+AfterTriggerAbility(State&, int)
+AllAttackJson
+AllCardJson
+ApiAgentStart()
+ApiAllAttack(JsonBuilder&)
+ApiAllCard(JsonBuilder&)
+ApiBattleStart(int*)
+ApiData::~ApiData()
+ApiGetBattleData(ApiData*)
+AreaRef& std::vector<AreaRef, std::allocator<AreaRef> >::emplace_back<AreaRef>(AreaRef&&) [clone .isra.0]
+AttachProc(State&, AreaType, int, int, CardRef, bool)
+Attack::~Attack()
+AttackCoinProc2(State&)
+AttackCoinProc(State&, int)
+AttackDamageCoin(State&, int)
+AttackDamage(State&)
+AttackEffects(State&, bool)
+AttackEffect(State&)
+AttackNoDamageCoin(State&, int)
+base64String
+BinaryReader::fromBase64()
+BinaryWriter::addA()
+BinaryWriter::set(void const*, unsigned long) [clone .part.0]
+BothSetupActivePokemon(State&)
+BurnProc(State&, int)
+CalcDamage(State const&, int, CardRef, Card const&, CardRef, Card const&, bool, Attack const*) [clone .isra.0]
+CalcDamage(State const&, int, CardRef, Card const&, CardRef, Card const&, bool, Attack const*) [clone .isra.0] [clone .cold]
+Card::getEnergyType() const
+CardImpl()
+CardJson(State const&, JsonBuilder&, CardRef, bool, bool)
+CardMaster::~CardMaster()
+Chain::abilityEvolve(int, char8_t const*, char8_t const*)
+Chain::ability(int, char8_t const*, char8_t const*, AreaType, AreaType) [clone .constprop.0] [clone .isra.0]
+Chain::ability(int, char8_t const*, char8_t const*, AreaType, AreaType) [clone .constprop.1]
+Chain::ability(int, char8_t const*, char8_t const*, AreaType, AreaType) [clone .constprop.2]
+Chain::ability(int, char8_t const*, char8_t const*, AreaType, AreaType) [clone .constprop.3] [clone .isra.0]
+Chain::ability(int, char8_t const*, char8_t const*, AreaType, AreaType) [clone .constprop.4] [clone .isra.0]
+Chain::abilityPlay(int, char8_t const*, char8_t const*)
+Chain::attack(int, char8_t const*, char8_t const*, char const*, std::initializer_list<EnergyType>)
+Chain::canHandToDeckAndShuffle(TargetPlayer)
+Chain::conditionAttachEnergyMe(EnergyType)
+Chain::condition(ConditionType, int, ComparatorType)
+Chain::condition(ConditionType, int, ComparatorType) [clone .constprop.0]
+Chain::condition(ConditionType, int, ComparatorType) [clone .constprop.0] [clone .cold]
+Chain::condition(ConditionType, int, ComparatorType) [clone .constprop.1]
+Chain::condition(ConditionType, int, ComparatorType) [clone .constprop.1] [clone .cold]
+Chain::conditionPrizeCountGreater()
+Chain::costHandTrash(int)
+Chain::costHandTrashLimited(int)
+Chain::currentEffects()
+Chain::effectBasicEnergySwitch(TargetPlayer)
+Chain::effectDeckAttachEnergyAndShuffle(int)
+Chain::effectDeckAttachEnergyMeAndShuffle(int)
+Chain::effectDeckSelectBasicEnergyNotSameType(int, SelectContext)
+Chain::effectDeckToBenchAndShuffle(int)
+Chain::effectDeckToHandAndShuffle(int)
+Chain::effectDeckToHandAndShuffle(int) [clone .constprop.0]
+Chain::effectDeckToHandNoShuffle(int) [clone .constprop.0]
+Chain::effectDeckToHandReverseAndShuffle(int)
+Chain::effectDeckToTrashAndShuffle(int)
+Chain::effectDraw(int)
+Chain::effectDraw(int) [clone .constprop.0]
+Chain::effectDraw(int) [clone .constprop.1]
+Chain::effectDraw(int) [clone .constprop.2]
+Chain::effectDraw(int) [clone .constprop.3]
+Chain::effectDrawUntil(int, TargetPlayer)
+Chain::effectEvolvesToEach()
+Chain::effectFestivalLead()
+Chain::effectHandAttachEnergyMe(int)
+Chain::effectHealSingle(int)
+Chain::effectInit(EffectType, TargetPlayer)
+Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.0]
+Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.0] [clone .cold]
+Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.1]
+Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.1] [clone .cold]
+Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.2]
+Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.2] [clone .cold]
+Chain::effectLookAndToBenchRestDeckAndShuffle(int, TargetPlayer)
+Chain::effectLookAndToHandRestDeckAndShuffle(int, int)
+Chain::effectLookEnemyhand()
+Chain::effectMe(EffectType)
+Chain::effectSelectAttachBasicEnergyDeck(int)
+Chain::effectSelectAttachBasicEnergyHand(int)
+Chain::effectSelectAttachBasicEnergyTrash(int)
+Chain::effectSelectAttachEnergyHand(int)
+Chain::effectSwitch(TargetPlayer) [clone .constprop.0]
+Chain::effectSwitch(TargetPlayer) [clone .constprop.1]
+Chain::effectTrashAttachEnergyMe(int)
+Chain::effectTrashEnergy(int, TargetPlayer)
+Chain::effectTrashStadium()
+Chain::effectTrashToDeckAndShuffle(int)
+Chain::effectTrashToHand(int)
+Chain::exist(AreaType, TargetPlayer) [clone .constprop.0]
+Chain::exist(AreaType, TargetPlayer) [clone .constprop.1]
+Chain::exist(AreaType, TargetPlayer) [clone .constprop.2]
+Chain::existDamaged(TargetPlayer) [clone .constprop.0]
+Chain::existPokemon(TargetPlayer)
+Chain::existPokemon(TargetPlayer) [clone .constprop.0]
+Chain::fossil()
+Chain::initSkill(int, char8_t const*, char8_t const*)
+Chain::notOpen4Card(char8_t const*)
+Chain::postEffectActiveEnemy(EffectType) [clone .constprop.0] [clone .isra.0]
+Chain::postEffectActiveEnemyEnergyTrashIfCoinHead()
+Chain::postEffectDamageBench(int, int)
+Chain::postEffectDamagePokemon(int, int)
+Chain::postEffectDamagePokemon(int, int) [clone .constprop.0]
+Chain::postEffectDeckToTrash(int)
+Chain::postEffectMe(EffectType)
+Chain::postEffectNoDamageAndEffectIfCoinHead()
+Chain::postEffectParalyzeIfCoinHead()
+Chain::postEffectTrashEnergyMeAll()
+Chain::postEffectTrashEnergyMe(int)
+Chain::postEffectTrashEnergyMe(int) [clone .constprop.0]
+Chain::postEffectTrashEnergyMe(int) [clone .constprop.1] [clone .isra.0]
+Chain::preEffectFailAttackCoinTail() [clone .isra.0]
+Chain::preEffectRound(int)
+Chain::separator()
+Chain::setEffect(int)
+Chain::target(AreaType)
+Chain::targetCondition2(TargetType, int, int, ComparatorType)
+Chain::targetCondition(TargetType, int, ComparatorType)
+Chain::targetCondition(TargetType, int, ComparatorType) [clone .constprop.0]
+Chain::targetCondition(TargetType, int, ComparatorType) [clone .constprop.0] [clone .cold]
+Chain::targetCondition(TargetType, int, ComparatorType) [clone .constprop.1]
+Chain::targetCondition(TargetType, int, ComparatorType) [clone .constprop.1] [clone .cold]
+Chain::targetEnergyCardMe()
+Chain::targetNameCondition(TargetType, char8_t const*, ComparatorType) [clone .constprop.0]
+Chain::targetNameCondition(TargetType, char8_t const*, ComparatorType) [clone .constprop.1]
+Chain::targetPokemon() [clone .isra.0]
+Chain::textEn(char8_t const*, char8_t const*)
+Chain::triggerAttachedCard(TriggerType)
+Chain::triggerMe(TriggerType)
+Chain::trigger(TriggerType)
+ClearSleepParalyzeConfuse(State&, int)
+ClearSpecialCondition(State&, int)
+CoinLuckyBonus(State&, int)
+CoinPrize(State&, int, int)
+Compare(int, int, ComparatorType)
+ConfuseProc(State&)
+CopyIdPtr(int*, std::vector<int, std::allocator<int> >&, int, int&) [clone .part.0]
+CreateCard(int, char8_t const*, CardType, int)
+CreateCard(int, char8_t const*, CardType, int) [clone .constprop.0]
+CreateCard(int, char8_t const*, CardType, int) [clone .constprop.1]
+CreateCard(int, char8_t const*, CardType, int) [clone .constprop.2]
+Current(State const&, JsonBuilder&, int, bool)
+DamageCounterSwitchAny(State&, int)
+DeckToPrize(State&, int, int) [clone .constprop.0]
+DeckToPrize(State&, int, int) [clone .constprop.0] [clone .cold]
+DevolveProc(State&, CardRef, Card&, AreaType)
+Draw(State&, int, int)
+EffectAttackDamage(State&, int, int)
+EffectAttackNoDamageCoin(State&, int, int)
+EffectBurn(State&, int)
+EffectContinual(State&, Effect const&, std::vector<AreaRef, std::allocator<AreaRef> > const&, int, CardRef)
+EffectInstatnt(State&)
+EffectPoison(State&, int, int)
+EffectSleep(State&, int)
+EnemySelectedWhichEffect(State&)
+EnergyTypes
+EvolveProc(State&, AreaType, int, AreaType, int, int)
+Exception(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+FixedListBase<int, CardRef, 61>::checkFull() const [clone .isra.0]
+FixedListBase<int, CardRef, 61>::checkFull() const [clone .isra.0] [clone .cold]
+FixedListBase<int, CardRef, 61>::checkIndex(int) const
+FixedListBase<int, int, 7>::checkFull() const [clone .isra.0]
+FixedListBase<int, int, 7>::checkFull() const [clone .isra.0] [clone .cold]
+FixedListBase<int, int, 7>::checkIndex(int) const
+FixedListBase<signed char, AreaType, (signed char)4>::checkIndex(int) const
+FixedListBase<signed char, CardRef, (signed char)1>::checkIndex(int) const
+FixedListBase<signed char, CardRef, (signed char)1>::checkIndex(int) const [clone .constprop.0]
+FixedListBase<signed char, CardRef, (signed char)1>::checkIndex(int) const [clone .constprop.0] [clone .cold]
+FixedListBase<signed char, CardRef, (signed char)2>::checkIndex(int) const
+FixedListBase<signed char, CardRef, (signed char)8>::checkIndex(int) const
+guard variable for AttackTable
+guard variable for CardTable
+guard variable for ChainInstance
+guard variable for DummyCardMaster
+guard variable for FunctionIndexTable
+guard variable for FunctionTable
+guard variable for NameTable[abi:cxx11]
+guard variable for SkillTable
+Heal(State&, CardRef, int, bool)
+InitializeBattleFunction()
+InsufficientEnergyCount(State const&, FixedListBase<signed char, EnergyType, (signed char)7> const&, std::vector<EnergyType, std::allocator<EnergyType> > const&, Card const&, Attack const&, bool)
+InsufficientEnergyCount(State const&, FixedListBase<signed char, EnergyType, (signed char)7> const&, std::vector<EnergyType, std::allocator<EnergyType> > const&, Card const&, Attack const&, bool) [clone .constprop.0]
+InsufficientEnergyCount(State const&, FixedListBase<signed char, EnergyType, (signed char)7> const&, std::vector<EnergyType, std::allocator<EnergyType> > const&, Card const&, Attack const&, bool) [clone .constprop.0] [clone .cold]
+IsTargetSingle(State const&, CardRef, Card const&, CardMaster const&, TargetCondition const&, AreaRef const&)
+JsonBuilder::append(bool)
+JsonBuilder::appendDoubleQuote(char const*)
+JsonBuilder::append(int)
+JsonBuilder::~JsonBuilder()
+KOProc2(State&)
+KOProc3(State&)
+KOProc(State&)
+LogAsleep(State&, int, bool, CardRef)
+LogBurned(State&, int, bool, CardRef)
+LogConfused(State&, int, bool, CardRef)
+LogJson(JsonBuilder&, Log const&, int, bool)
+LogMoveCard(State&, int, CardRef, AreaType, AreaType, int)
+LogParalyzed(State&, int, bool, CardRef)
+LogPoisoned(State&, int, bool, CardRef)
+Log& std::vector<Log, std::allocator<Log> >::emplace_back<LogType&>(LogType&)
+MainSelect(State&)
+MoveCard(State&, int, AreaType, int, AreaType, int, bool, bool, bool, bool)
+MoveRefCard(State&, CardRef, Card const&, AreaType, int, bool, bool)
+MoveRefCard(State&, CardRef, Card const&, AreaType, int, bool, bool) [clone .constprop.0]
+NameTable[abi:cxx11]
+operator delete(void*, unsigned long)
+operator delete(void*, unsigned long)@CXXABI_1.3.9
+operator new(unsigned long)
+operator new(unsigned long)@GLIBCXX_3.4
+ParalyzeProc(State&)
+PlayerJson(State const&, JsonBuilder&, int, int)
+PlayerState::getInPlayPokemon() const
+PokemonCheckupEnd(State&)
+PokemonCheckup(State&)
+PokemonJson(State const&, JsonBuilder&, CardRef, bool)
+PreSetupActivePokemon(State&, int)
+PullTrigger(State&, TriggerType, CardRef, CardRef, int) [clone .constprop.0]
+PullTrigger(State&, TriggerType, CardRef, CardRef, int) [clone .constprop.1]
+RefreshEffect(State&, int)
+Refresh(State&)
+ReservedFunction()
+ReservedFunction2()
+ReservedFunction3()
+ResetupActivePokemon(State&, int)
+ResolveTriggerStack(State&, int)
+SatisfyCondition(State const&, std::vector<Effect, std::allocator<Effect> > const&, int, CardRef, int)
+SatisfyFirstSkillCondition(State&)
+SatisfySkillCondition(State const&, Skill const&, CardRef, int, int)
+Search::alloc(State const&)
+SearchStartConfig::~SearchStartConfig()
+Search::start(SearchStartConfig const&, State const&)
+Search::start(SearchStartConfig const&, State const&)::{lambda()#2}::operator()() const
+Search::start(SearchStartConfig const&, State const&)::{lambda(std::vector<int, std::allocator<int> > const&, FixedListBase<int, CardRef, 61>&, int, AreaType)#1}::operator()(std::vector<int, std::allocator<int> > const&, FixedListBase<int, CardRef, 61>&, int, AreaType) const
+SelectActivePokemon(State&, int)
+SelectBenchMaxTrash(State&, int)
+SelectCard(State&)
+SelectCoinSingle(State&, int)
+SelectCoinUntilTail(State&, int)
+SelectContextStr
+SelectDamageCounterAny(State&)
+SelectDamageMulti(State&)
+SelectedActivateAbility(State&)
+SelectedActivate(State&)
+SelectedAddDamageCounterSwitchAny(State&, int)
+SelectedAttackDamageChangePutDamageCounter(State&)
+SelectedAttackId(State&, int)
+SelectedBenchMaxTrash(State&)
+SelectedBurn(State&)
+SelectedCardOrAttachedCard(State&)
+SelectedCoinSingle(State&, int)
+SelectedCoinUntilTail(State&, int)
+SelectedDamageCounterAny(State&)
+SelectedDamageMultiAll(State&)
+SelectedDamageMulti(State&)
+SelectedDisableAttack(State&, int)
+SelectedDrawCount(State&, int)
+SelectedEffectTarget(State&)
+SelectedEnergyTarget(State&)
+SelectedEvolveTarget(State&)
+SelectedFirstEffect(State&)
+SelectedIsFirst(State&)
+SelectedLuckyBonus(State&, int)
+SelectedMain(State&)
+SelectedMoreDevolve(State&)
+SelectedMulligan(State&, int)
+SelectedPokemonEnergyLoop(State&, int)
+SelectedPokemonEnergy(State&)
+SelectedPrize(State&)
+SelectedPrizeTarget(State&)
+SelectedRecoverSpecialCondition(State&, int)
+SelectedRemoveDamageCounter(State&)
+SelectedRemoveDamageCounterSwitchAny(State&, int)
+SelectedRetreat2(State&)
+SelectedSecondAttack(State&)
+SelectedSetupActivePokemon(State&, int)
+SelectedSetupBenchPokemon(State&, int)
+SelectedSkillOrder(State&, int)
+SelectedSpecialCondition(State&)
+SelectedSwitchPokemon(State&)
+SelectedToolMaxTrash(State&)
+SelectedToolTarget(State&)
+SelectedWhichEffect(State&)
+SelectJson(State const&, JsonBuilder&, bool)
+SelectLuckyBonus(State&, int)
+SelectOptionJson(JsonBuilder&, SelectOption const&, bool)
+SelectOption& std::vector<SelectOption, std::allocator<SelectOption> >::emplace_back<>()
+SelectPokemonEnergyLoop(State&, int)
+SelectPokemonEnergy(State&, int, FixedListBase<int, AttachedCard, 60> const&, int, SelectContext)
+SelectPrize(State&, int, int, int)
+SelectSwitchPokemon(State&, int, int)
+SelectToolMaxTrash(State&, int, int)
+SelectTrashSinglePokemonEnergy(State&, int, CardRef, int)
+SelectTypeStr
+SeparatorProc(State&)
+SetAttackEnergy(State const&, Card const&, std::vector<EnergyType, std::allocator<EnergyType> > const&, bool, bool)
+SetupActivePokemon(State&, int)
+SetupBenchPokemon(State&, int)
+SetupGame(State&)
+ShuffleDeck(State&, int, bool)
+Skill::~Skill()
+SleepProc(State&, int)
+SpecialAttackProc(State&)
+StartSetupBench(State&)
+State::addOption(SelectOptionType)
+State::attachedCardPosition(Card const&) const [clone .isra.0]
+State::attachedCardPosition(Card const&) const [clone .isra.0] [clone .cold]
+State::callFunction()
+State::canEvolveEffect(State const&, Card const&, CardMaster const&, CardRef) const
+State::cardMoved(CardRef, AreaType, bool)
+State::checkGetCard(AreaRef) [clone .isra.0]
+State::checkGetCardNotPreventEffect(AreaRef) [clone .isra.0]
+State::checkPlayerSelect() const
+State::currentAreaIndex(int, AreaType, CardRef) const
+State::currentCardPosition(AreaRef) const
+State::currentCardPosition(CardRef) const
+State::deserialize(BinaryReader&)
+State::effectTargetPlayerContinual(Effect const&, int) [clone .isra.0]
+State::finishCheck()
+State::getAttachedList(PlayerState const&, FixedListBase<int, CardRef, 61> const&)
+State::getAttachedToolRef(Card const&) const
+State::getCardRef(AreaType, int, int) const
+State::getEffect() const
+State::getEffectValue() const
+State::getEnergies(int, CardRef, std::vector<EnergyType, std::allocator<EnergyType> >&) const
+State::getEnergyCards(CardRef, std::vector<CardRef, std::allocator<CardRef> >&) const
+State::getEnergyInfo(Card const&, CardRef) const
+State::getSecondEffectValue() const
+State::getValuesByEffect(Effect const&) const [clone .isra.0]
+State::isEvolved(CardRef) const
+State::isPreventDamageCounter(Card const&)
+State::isPreventEffectActive(int) const
+State::isPreventEffect(Card const&) const
+State::operator=(State const&) [clone .isra.0]
+State::pushCardRef(AreaType, int, CardRef)
+State::pushFunction(void (*)(State&))
+State::pushFunction(void (*)(State&, int), int)
+State::pushFunction(void (*)(State&, int, int), int, int)
+State::removeCardRef(AreaType, int, int)
+State::retreatCost(Card const&) const [clone .isra.0]
+State::satisfyAttackCondition(Card const&, Attack const&, int) const
+State::selectedOption(int) const [clone .constprop.0]
+State::selectedOption(int) const [clone .constprop.0] [clone .cold]
+State::setSelectedCardTarget()
+State::setSelect(SelectType, SelectContext, int, int, int)
+State::~State()
+State::step()
+State::targetListEnergyCount()
+State::targetListTypeEnergyCount(EnergyType)
+State::typeEnergyCount(int, CardRef, EnergyType) const
+StaticEffect(State&, CardRef)
+SwitchEnergyProc(State&, CardRef, CardRef)
+SwitchPokemon(State&, int, int)
+TargetList(State const&, Target const&, std::vector<AreaRef, std::allocator<AreaRef> >&, AreaRef, int)
+ToJsonApi(State const&, JsonBuilder&, int)
+ToMain(State&)
+ToolCountProc(State&)
+TransformProc(State&, bool)
+TriggerList(State&, TriggerType, CardRef, CardRef, CardRef, int)
+TurnEnd2(State&)
+TurnEnd(State&)
+TurnStart(State&)
+typeinfo for std::runtime_error
+typeinfo for std::runtime_error@GLIBCXX_3.4
+unsigned long std::uniform_int_distribution<unsigned long>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_int_distribution<unsigned long>::param_type const&) [clone .constprop.0] [clone .isra.0]
+unsigned long std::uniform_int_distribution<unsigned long>::operator()<std::random_device>(std::random_device&, std::uniform_int_distribution<unsigned long>::param_type const&) [clone .isra.0]
+void CardListJson<FixedListBase<int, CardRef, 61> >(State const&, JsonBuilder&, FixedListBase<int, CardRef, 61> const&, bool, bool)
+void JsonBuilder::appendCommaKeyValue<10>(char const (&) [10], bool)
+void JsonBuilder::appendCommaKeyValue<12>(char const (&) [12], int)
+void JsonBuilder::appendCommaKeyValue<13>(char const (&) [13], int)
+void JsonBuilder::appendCommaKeyValue<5>(char const (&) [5], int)
+void JsonBuilder::appendCommaKeyValue<6>(char const (&) [6], int)
+void JsonBuilder::appendCommaKeyValue<7>(char const (&) [7], int)
+void JsonBuilder::appendCommaKeyValue<9>(char const (&) [9], int)
+void JsonBuilder::appendKey<5>(char const (&) [5])
+void JsonBuilder::appendKey<7>(char const (&) [7])
+void JsonBuilder::appendKey<8>(char const (&) [8])
+void std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::_M_construct<char8_t*>(char8_t*, char8_t*, std::forward_iterator_tag) [clone .isra.0]
+void std::_Destroy_aux<false>::__destroy<TargetCondition*>(TargetCondition*, TargetCondition*)
+void std::__introsort_loop<__gnu_cxx::__normal_iterator<Attack const**, std::vector<Attack const*, std::allocator<Attack const*> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<ApiAllAttack(JsonBuilder&)::{lambda(Attack const*, Attack const*)#1}> >(__gnu_cxx::__normal_iterator<Attack const**, std::vector<Attack const*, std::allocator<Attack const*> > >, __gnu_cxx::__normal_iterator<Attack const**, std::vector<Attack const*, std::allocator<Attack const*> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<ApiAllAttack(JsonBuilder&)::{lambda(Attack const*, Attack const*)#1}>)
+void std::__introsort_loop<__gnu_cxx::__normal_iterator<CardEffect*, std::vector<CardEffect, std::allocator<CardEffect> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<RefreshEffect(State&, int)::{lambda(CardEffect const&, CardEffect const&)#2}> >(__gnu_cxx::__normal_iterator<CardEffect*, std::vector<CardEffect, std::allocator<CardEffect> > >, __gnu_cxx::__normal_iterator<CardEffect*, std::vector<CardEffect, std::allocator<CardEffect> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<RefreshEffect(State&, int)::{lambda(CardEffect const&, CardEffect const&)#2}>)
+void std::__introsort_loop<__gnu_cxx::__normal_iterator<CardMaster const**, std::vector<CardMaster const*, std::allocator<CardMaster const*> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<ApiAllCard(JsonBuilder&)::{lambda(CardMaster const*, CardMaster const*)#1}> >(__gnu_cxx::__normal_iterator<CardMaster const**, std::vector<CardMaster const*, std::allocator<CardMaster const*> > >, __gnu_cxx::__normal_iterator<CardMaster const**, std::vector<CardMaster const*, std::allocator<CardMaster const*> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<ApiAllCard(JsonBuilder&)::{lambda(CardMaster const*, CardMaster const*)#1}>)
+void std::__introsort_loop<int*, long, __gnu_cxx::__ops::_Iter_less_iter>(int*, int*, long, __gnu_cxx::__ops::_Iter_less_iter) [clone .isra.0]
+void std::shuffle<CardRef*, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&>(CardRef*, CardRef*, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+void std::shuffle<CardRef*, std::random_device>(CardRef*, CardRef*, std::random_device&&)
+void std::shuffle<__gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&>(__gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, __gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+void std::shuffle<__gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, std::random_device>(__gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, __gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, std::random_device&&)
+void std::vector<AreaRef, std::allocator<AreaRef> >::_M_realloc_insert<AreaRef>(__gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, AreaRef&&)
+void std::vector<Attack const*, std::allocator<Attack const*> >::_M_realloc_insert<Attack const*>(__gnu_cxx::__normal_iterator<Attack const**, std::vector<Attack const*, std::allocator<Attack const*> > >, Attack const*&&)
+void std::vector<AttackEnergy, std::allocator<AttackEnergy> >::_M_realloc_insert<AttackEnergy>(__gnu_cxx::__normal_iterator<AttackEnergy*, std::vector<AttackEnergy, std::allocator<AttackEnergy> > >, AttackEnergy&&)
+void std::vector<Attack*, std::allocator<Attack*> >::_M_realloc_insert<Attack* const&>(__gnu_cxx::__normal_iterator<Attack**, std::vector<Attack*, std::allocator<Attack*> > >, Attack* const&)
+void std::vector<CardEffect, std::allocator<CardEffect> >::_M_realloc_insert<CardEffect>(__gnu_cxx::__normal_iterator<CardEffect*, std::vector<CardEffect, std::allocator<CardEffect> > >, CardEffect&&)
+void std::vector<CardMaster const*, std::allocator<CardMaster const*> >::_M_realloc_insert<CardMaster const*>(__gnu_cxx::__normal_iterator<CardMaster const**, std::vector<CardMaster const*, std::allocator<CardMaster const*> > >, CardMaster const*&&)
+void std::vector<CardRef, std::allocator<CardRef> >::_M_realloc_insert<CardRef const&>(__gnu_cxx::__normal_iterator<CardRef*, std::vector<CardRef, std::allocator<CardRef> > >, CardRef const&)
+void std::vector<char, std::allocator<char> >::_M_realloc_insert<char const&>(__gnu_cxx::__normal_iterator<char*, std::vector<char, std::allocator<char> > >, char const&)
+void std::vector<char, std::allocator<char> >::_M_realloc_insert<char>(__gnu_cxx::__normal_iterator<char*, std::vector<char, std::allocator<char> > >, char&&)
+void std::vector<Effect, std::allocator<Effect> >::_M_realloc_insert<>(__gnu_cxx::__normal_iterator<Effect*, std::vector<Effect, std::allocator<Effect> > >)
+void std::vector<EnergyType, std::allocator<EnergyType> >::_M_realloc_insert<EnergyType const&>(__gnu_cxx::__normal_iterator<EnergyType*, std::vector<EnergyType, std::allocator<EnergyType> > >, EnergyType const&)
+void std::vector<EvolveInfo, std::allocator<EvolveInfo> >::_M_realloc_insert<EvolveInfo const&>(__gnu_cxx::__normal_iterator<EvolveInfo*, std::vector<EvolveInfo, std::allocator<EvolveInfo> > >, EvolveInfo const&)
+void std::vector<GameFunction, std::allocator<GameFunction> >::_M_realloc_insert<GameFunction const&>(__gnu_cxx::__normal_iterator<GameFunction*, std::vector<GameFunction, std::allocator<GameFunction> > >, GameFunction const&)
+void std::vector<int, std::allocator<int> >::_M_realloc_insert<int const&>(__gnu_cxx::__normal_iterator<int*, std::vector<int, std::allocator<int> > >, int const&)
+void std::vector<Log, std::allocator<Log> >::_M_realloc_insert<LogType&>(__gnu_cxx::__normal_iterator<Log*, std::vector<Log, std::allocator<Log> > >, LogType&)
+void std::vector<SearchState, std::allocator<SearchState> >::_M_realloc_insert<>(__gnu_cxx::__normal_iterator<SearchState*, std::vector<SearchState, std::allocator<SearchState> > >)
+void std::vector<SelectOption, std::allocator<SelectOption> >::_M_realloc_insert<>(__gnu_cxx::__normal_iterator<SelectOption*, std::vector<SelectOption, std::allocator<SelectOption> > >)
+void std::vector<State*, std::allocator<State*> >::_M_realloc_insert<State* const&>(__gnu_cxx::__normal_iterator<State**, std::vector<State*, std::allocator<State*> > >, State* const&)
+void std::vector<State*, std::allocator<State*> >::_M_realloc_insert<State*>(__gnu_cxx::__normal_iterator<State**, std::vector<State*, std::allocator<State*> > >, State*&&)
+void std::vector<std::array<State, 128ul>*, std::allocator<std::array<State, 128ul>*> >::_M_realloc_insert<std::array<State, 128ul>* const&>(__gnu_cxx::__normal_iterator<std::array<State, 128ul>**, std::vector<std::array<State, 128ul>*, std::allocator<std::array<State, 128ul>*> > >, std::array<State, 128ul>* const&)
+void std::vector<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, std::allocator<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > > >::_M_realloc_insert<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const&>(__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >*, std::vector<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, std::allocator<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > > > >, std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const&)
+void std::vector<TargetCondition, std::allocator<TargetCondition> >::_M_realloc_insert<TargetCondition const&>(__gnu_cxx::__normal_iterator<TargetCondition*, std::vector<TargetCondition, std::allocator<TargetCondition> > >, TargetCondition const&)
+void std::vector<TriggeredAbility, std::allocator<TriggeredAbility> >::_M_realloc_insert<>(__gnu_cxx::__normal_iterator<TriggeredAbility*, std::vector<TriggeredAbility, std::allocator<TriggeredAbility> > >)
+void std::vector<TriggeredAbility, std::allocator<TriggeredAbility> >::_M_realloc_insert<TriggeredAbility const&>(__gnu_cxx::__normal_iterator<TriggeredAbility*, std::vector<TriggeredAbility, std::allocator<TriggeredAbility> > >, TriggeredAbility const&)
+void std::vector<Trigger, std::allocator<Trigger> >::_M_realloc_insert<>(__gnu_cxx::__normal_iterator<Trigger*, std::vector<Trigger, std::allocator<Trigger> > >)
+void*& std::vector<void*, std::allocator<void*> >::emplace_back<void*>(void*&&) [clone .constprop.0] [clone .isra.0]
+void std::vector<void*, std::allocator<void*> >::_M_realloc_insert<void*>(__gnu_cxx::__normal_iterator<void**, std::vector<void*, std::allocator<void*> > >, void*&&)

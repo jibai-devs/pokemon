@@ -1,0 +1,614 @@
+00000000000076c0 T AgentStart
+00000000000097d0 T AllAttack
+0000000000009790 T AllCard
+000000000013c520 b AttackTable
+00000000000076d0 T BattleFinish
+000000000000ec50 T BattleStart
+000000000013c5a0 b CardTable
+000000000013c320 b ChainInstance
+000000000013c240 b completed.0
+                 U __cxa_allocate_exception@CXXABI_1.3
+                 U __cxa_atexit@GLIBC_2.2.5
+                 U __cxa_begin_catch@CXXABI_1.3
+                 U __cxa_end_catch@CXXABI_1.3
+                 w __cxa_finalize@GLIBC_2.2.5
+                 U __cxa_free_exception@CXXABI_1.3
+                 U __cxa_rethrow@CXXABI_1.3
+                 U __cxa_throw@CXXABI_1.3
+0000000000005540 t deregister_tm_clones
+00000000000055b0 t __do_global_dtors_aux
+000000000013bb98 d __do_global_dtors_aux_fini_array_entry
+000000000013c228 d __dso_handle
+000000000013c360 b DummyCardMaster
+000000000013c230 d DW.ref.__gxx_personality_v0
+000000000013bda0 d _DYNAMIC
+                 U __errno_location@GLIBC_2.2.5
+00000000000cf9cc t _fini
+00000000000055f0 t frame_dummy
+000000000013bb88 d __frame_dummy_init_array_entry
+0000000000137e10 r __FRAME_END__
+000000000013c480 b FunctionIndexTable
+000000000013c4c0 b FunctionTable
+000000000000f200 T GameInitialize
+000000000000506b t GameInitialize.cold
+000000000000b7e0 T GetBattleData
+000000000013c000 d _GLOBAL_OFFSET_TABLE_
+0000000000005080 t _GLOBAL__sub_I_Export.cpp
+                 w __gmon_start__
+00000000001277f0 r __GNU_EH_FRAME_HDR
+                 U __gxx_personality_v0@CXXABI_1.3
+0000000000004000 t _init
+                 w _ITM_deregisterTMCloneTable
+                 w _ITM_registerTMCloneTable
+                 U memchr@GLIBC_2.2.5
+                 U memcmp@GLIBC_2.2.5
+                 U memcpy@GLIBC_2.14
+                 U memmove@GLIBC_2.2.5
+                 U memset@GLIBC_2.2.5
+                 U __popcountdi2@GCC_3.4
+0000000000005570 t register_tm_clones
+000000000000d310 T SearchBegin
+0000000000004f03 t SearchBegin.cold
+0000000000007700 T SearchEnd
+00000000000080e0 T SearchRelease
+000000000000c400 T SearchStep
+0000000000004ee1 t SearchStep.cold
+000000000000a6f0 T Select
+0000000000004bdb t Select.cold
+000000000013c560 b SkillTable
+                 U __stack_chk_fail@GLIBC_2.4
+                 U strlen@GLIBC_2.2.5
+                 U strtol@GLIBC_2.2.5
+000000000013c238 d __TMC_END__
+                 U _Unwind_Resume@GCC_3.0
+00000000000087c0 T VisualizeData
+0000000000031260 t ApiAllCard(JsonBuilder&)
+0000000000069950 t AttachProc(State&, AreaType, int, int, CardRef, bool)
+0000000000009900 t CalcDamage(State const&, int, CardRef, Card const&, CardRef, Card const&, bool, Attack const*) [clone .isra.0]
+0000000000004ad3 t CalcDamage(State const&, int, CardRef, Card const&, CardRef, Card const&, bool, Attack const*) [clone .isra.0] [clone .cold]
+000000000005c200 t CreateCard(int, char8_t const*, CardType, int)
+000000000005d9e0 t CreateCard(int, char8_t const*, CardType, int) [clone .constprop.0]
+000000000005e180 t CreateCard(int, char8_t const*, CardType, int) [clone .constprop.1]
+000000000005e920 t CreateCard(int, char8_t const*, CardType, int) [clone .constprop.2]
+000000000003bc10 t EffectBurn(State&, int)
+000000000006e770 t EvolveProc(State&, AreaType, int, AreaType, int, int)
+00000000000618b0 t MainSelect(State&)
+00000000000490f0 t PlayerJson(State const&, JsonBuilder&, int, int)
+000000000003cd10 t SelectCard(State&)
+0000000000047d20 t SelectJson(State const&, JsonBuilder&, bool)
+00000000000410a0 t TargetList(State const&, Target const&, std::vector<AreaRef, std::allocator<AreaRef> >&, AreaRef, int)
+0000000000040f50 t AddIfTarget(State const&, CardRef, Target const&, std::vector<AreaRef, std::allocator<AreaRef> >&, AreaRef const&)
+0000000000079370 t AfterAttack(State&)
+000000000000ec60 t AfterDamage(State&, CardRef, Card&, CardRef, Card const&) [clone .isra.0]
+0000000000004f72 t AfterDamage(State&, CardRef, Card&, CardRef, Card const&) [clone .isra.0] [clone .cold]
+000000000000f710 t AfterEffect(State&)
+000000000007cad0 t ConfuseProc(State&)
+000000000000b0a0 t DeckToPrize(State&, int, int) [clone .constprop.0]
+0000000000004ca1 t DeckToPrize(State&, int, int) [clone .constprop.0] [clone .cold]
+0000000000064a90 t DevolveProc(State&, CardRef, Card&, AreaType)
+000000000003bf50 t EffectSleep(State&, int)
+000000000002aa40 t LogConfused(State&, int, bool, CardRef)
+0000000000023d20 t LogMoveCard(State&, int, CardRef, AreaType, AreaType, int)
+000000000002a300 t LogPoisoned(State&, int, bool, CardRef)
+0000000000066980 t MoveRefCard(State&, CardRef, Card const&, AreaType, int, bool, bool)
+000000000006ace0 t MoveRefCard(State&, CardRef, Card const&, AreaType, int, bool, bool) [clone .constprop.0]
+000000000002fd50 t PokemonJson(State const&, JsonBuilder&, CardRef, bool)
+000000000000e410 t PullTrigger(State&, TriggerType, CardRef, CardRef, int) [clone .constprop.0]
+000000000000e630 t PullTrigger(State&, TriggerType, CardRef, CardRef, int) [clone .constprop.1]
+0000000000017080 t SelectPrize(State&, int, int, int)
+0000000000023890 t ShuffleDeck(State&, int, bool)
+00000000000525a0 t TriggerList(State&, TriggerType, CardRef, CardRef, CardRef, int)
+000000000000f670 t AfterAbility(State&)
+00000000000653c0 t AfterAttack2(State&)
+000000000007b4d0 t AfterAttack3(State&)
+0000000000062fd0 t AfterAttack4(State&)
+000000000007c4d0 t AfterRefresh(State&)
+000000000000f740 t AfterRetreat(State&)
+0000000000034eb0 t ApiAllAttack(JsonBuilder&)
+0000000000079000 t AttackDamage(State&)
+0000000000078eb0 t AttackEffect(State&)
+00000000000466a0 t void CardListJson<FixedListBase<int, CardRef, 61> >(State const&, JsonBuilder&, FixedListBase<int, CardRef, 61> const&, bool, bool)
+000000000003bd30 t EffectPoison(State&, int, int)
+000000000002a4d0 t LogParalyzed(State&, int, bool, CardRef)
+0000000000037b50 t ParalyzeProc(State&)
+000000000003c0e0 t SelectedBurn(State&)
+000000000007a4b0 t SelectedMain(State&)
+000000000005f600 t StaticEffect(State&, CardRef)
+0000000000037e10 t AfterBurnProc(State&, int)
+0000000000013900 t ApiAgentStart()
+0000000000016a20 t AttackEffects(State&, bool)
+000000000005fbf0 t RefreshEffect(State&, int)
+0000000000067610 t SelectedPrize(State&)
+0000000000016c80 t SeparatorProc(State&)
+000000000006e0b0 t SwitchPokemon(State&, int, int)
+0000000000068aa0 t ToolCountProc(State&)
+00000000000374f0 t TransformProc(State&, bool)
+0000000000076e90 t ActivateEffect(State&, Effect const&, int)
+0000000000037cc0 t AfterSleepProc(State&, int)
+000000000005c9b0 t ApiBattleStart(int*)
+000000000007afd0 t AttackCoinProc(State&, int)
+0000000000016f30 t CoinLuckyBonus(State&, int)
+000000000006eda0 t EffectInstatnt(State&)
+000000000003e830 t IsTargetSingle(State const&, CardRef, Card const&, CardMaster const&, TargetCondition const&, AreaRef const&)
+0000000000063330 t PokemonCheckup(State&)
+00000000000539c0 t ActivateAbility(State&)
+0000000000074b80 t ActivateEffect2(State&)
+000000000007c860 t AttackCoinProc2(State&)
+0000000000038640 t EffectContinual(State&, Effect const&, std::vector<AreaRef, std::allocator<AreaRef> > const&, int, CardRef)
+0000000000045d70 t SelectedIsFirst(State&)
+00000000000439f0 t SetAttackEnergy(State const&, Card const&, std::vector<EnergyType, std::allocator<EnergyType> > const&, bool, bool)
+0000000000017f00 t StartSetupBench(State&)
+000000000002e550 t ActivateAbility2(State&)
+000000000004cbd0 t ApiGetBattleData(ApiData*)
+0000000000017370 t AttackDamageCoin(State&, int)
+000000000000f770 t ReservedFunction()
+0000000000051130 t SatisfyCondition(State const&, std::vector<Effect, std::allocator<Effect> > const&, int, CardRef, int)
+00000000000235b0 t SelectCoinSingle(State&, int)
+0000000000010e00 t SelectedActivate(State&)
+000000000007a0f0 t SelectedAttackId(State&, int)
+0000000000023eb0 t SelectedMulligan(State&, int)
+0000000000050e70 t SelectedRetreat2(State&)
+0000000000066660 t SelectLuckyBonus(State&, int)
+000000000001de70 t SelectOptionJson(JsonBuilder&, SelectOption const&, bool)
+000000000003cab0 t SwitchEnergyProc(State&, CardRef, CardRef)
+000000000007b910 t PokemonCheckupEnd(State&)
+000000000000f780 t ReservedFunction2()
+000000000000f790 t ReservedFunction3()
+000000000002c7c0 t SelectDamageMulti(State&)
+000000000002b5d0 t SelectedDrawCount(State&, int)
+000000000003aa90 t SetupBenchPokemon(State&, int)
+00000000000795c0 t SpecialAttackProc(State&)
+000000000006e510 t AfterAttackTrigger(State&)
+00000000000250b0 t AfterEnergyDiscard(State&, CardRef, Card const&, int)
+000000000006c3d0 t AttackNoDamageCoin(State&, int)
+000000000006cc20 t EffectAttackDamage(State&, int, int)
+0000000000024070 t SelectedCoinSingle(State&, int)
+0000000000067ca0 t SelectedLuckyBonus(State&, int)
+0000000000055900 t SelectedSkillOrder(State&, int)
+00000000000750f0 t SelectedToolTarget(State&)
+000000000003a770 t SelectToolMaxTrash(State&, int, int)
+0000000000042cd0 t SetupActivePokemon(State&, int)
+00000000000788a0 t ActivateSkillEffect(State&)
+0000000000011e70 t AfterSkipIfCoinTail(State&)
+000000000006e6a0 t AfterTriggerAbility(State&, int)
+00000000000542b0 t ResolveTriggerStack(State&, int)
+0000000000017a80 t SelectActivePokemon(State&, int)
+0000000000017810 t SelectBenchMaxTrash(State&, int)
+0000000000027480 t SelectCoinUntilTail(State&, int)
+0000000000011050 t SelectedDamageMulti(State&)
+0000000000011ec0 t SelectedFirstEffect(State&)
+0000000000065240 t SelectedMoreDevolve(State&)
+00000000000669f0 t SelectedPrizeTarget(State&)
+000000000002eae0 t SelectedWhichEffect(State&)
+0000000000050530 t SelectPokemonEnergy(State&, int, FixedListBase<int, AttachedCard, 60> const&, int, SelectContext)
+0000000000017cc0 t SelectSwitchPokemon(State&, int, int)
+000000000000f610 t AfterBreakIfCoinHead(State&)
+000000000000f630 t AfterBreakIfCoinTail(State&)
+0000000000045050 t ResetupActivePokemon(State&, int)
+0000000000075e50 t SelectedEffectTarget(State&)
+00000000000757a0 t SelectedEnergyTarget(State&)
+000000000006ece0 t SelectedEvolveTarget(State&)
+000000000007b130 t SelectedSecondAttack(State&)
+000000000006d5d0 t SelectedToolMaxTrash(State&)
+0000000000078b90 t ActivateEffectForEach(State&, int)
+000000000006ad40 t AfterAttackDamageCoin(State&, int)
+0000000000053cf0 t AfterMoveTriggerStack(State&, int)
+00000000000381c0 t ClearSpecialCondition(State&, int)
+0000000000024230 t PreSetupActivePokemon(State&, int)
+0000000000053670 t SatisfySkillCondition(State const&, Skill const&, CardRef, int, int)
+000000000006b070 t SelectedBenchMaxTrash(State&)
+0000000000024510 t SelectedCoinUntilTail(State&, int)
+0000000000010f10 t SelectedDisableAttack(State&, int)
+000000000000f5d0 t SelectedPokemonEnergy(State&)
+000000000007c100 t SelectedSwitchPokemon(State&)
+00000000000789f0 t ActivateEffectMultiple(State&, int)
+0000000000024760 t BothSetupActivePokemon(State&)
+0000000000041eb0 t DamageCounterSwitchAny(State&, int)
+000000000002ca90 t SelectDamageCounterAny(State&)
+000000000002dfc0 t SelectedDamageMultiAll(State&)
+000000000004f180 t AfterSetupActivePokemon(State&)
+0000000000012740 t InsufficientEnergyCount(State const&, FixedListBase<signed char, EnergyType, (signed char)7> const&, std::vector<EnergyType, std::allocator<EnergyType> > const&, Card const&, Attack const&, bool)
+0000000000006fa0 t InsufficientEnergyCount(State const&, FixedListBase<signed char, EnergyType, (signed char)7> const&, std::vector<EnergyType, std::allocator<EnergyType> > const&, Card const&, Attack const&, bool) [clone .constprop.0]
+0000000000004880 t InsufficientEnergyCount(State const&, FixedListBase<signed char, EnergyType, (signed char)7> const&, std::vector<EnergyType, std::allocator<EnergyType> > const&, Card const&, Attack const&, bool) [clone .constprop.0] [clone .cold]
+000000000002e800 t SelectedActivateAbility(State&)
+000000000004fa80 t SelectPokemonEnergyLoop(State&, int)
+000000000006bbc0 t EffectAttackNoDamageCoin(State&, int, int)
+000000000002e930 t EnemySelectedWhichEffect(State&)
+0000000000059850 t InitializeBattleFunction()
+000000000003d220 t SelectedDamageCounterAny(State&)
+000000000003c510 t SelectedSpecialCondition(State&)
+000000000000f650 t AfterBreakIfCoinTailMulti(State&, int)
+0000000000044560 t AfterResetupActivePokemon(State&, int)
+0000000000036ef0 t ClearSleepParalyzeConfuse(State&, int)
+00000000000693d0 t SelectedPokemonEnergyLoop(State&, int)
+0000000000063e20 t SelectedSetupBenchPokemon(State&, int)
+0000000000078d20 t ActivateEffectEachSelected(State&, int)
+00000000000537f0 t SatisfyFirstSkillCondition(State&)
+00000000000764e0 t SelectedCardOrAttachedCard(State&)
+000000000002b6e0 t SelectedSetupActivePokemon(State&, int)
+00000000000105f0 t AfterAttackDamageChangeCoin(State&)
+000000000003b920 t SelectedRemoveDamageCounter(State&)
+0000000000068040 t AfterDeckToTrashCoinUntilTail(State&)
+0000000000050920 t SelectTrashSinglePokemonEnergy(State&, int, CardRef, int)
+0000000000037230 t SelectedRecoverSpecialCondition(State&, int)
+00000000000424f0 t SelectedAddDamageCounterSwitchAny(State&, int)
+0000000000010770 t AfterAttackDamageChangeCoinUntilTail(State&)
+000000000003e4a0 t SelectedRemoveDamageCounterSwitchAny(State&, int)
+00000000000532e0 t SelectedAttackDamageChangePutDamageCounter(State&)
+00000000000108f0 t AfterAttackDamageChangeTargetCountEnemyCoin(State&)
+000000000002af40 t Draw(State&, int, int)
+0000000000024d70 t Heal(State&, CardRef, int, bool)
+00000000000551a0 t KOProc(State&)
+000000000007bd60 t ToMain(State&)
+0000000000011180 t Compare(int, int, ComparatorType)
+000000000004a9d0 t Current(State const&, JsonBuilder&, int, bool)
+00000000000546e0 t KOProc2(State&)
+0000000000069fa0 t KOProc3(State&)
+000000000002ee90 t LogJson(JsonBuilder&, Log const&, int, bool)
+00000000000610e0 t Refresh(State&)
+0000000000061430 t TurnEnd(State&)
+0000000000053580 t BurnProc(State&, int)
+000000000007d620 t CardImpl()
+000000000001e8e0 t CardJson(State const&, JsonBuilder&, CardRef, bool, bool)
+0000000000065650 t MoveCard(State&, int, AreaType, int, AreaType, int, bool, bool, bool, bool)
+0000000000068380 t TurnEnd2(State&)
+0000000000052e10 t AddDamage(State&, CardRef, Card&, int, bool, CardRef, bool, Attack const*)
+0000000000067f60 t AfterPlay(State&)
+00000000000175a0 t CoinPrize(State&, int, int)
+0000000000010d40 t Exception(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+000000000002a870 t LogAsleep(State&, int, bool, CardRef)
+000000000002a6a0 t LogBurned(State&, int, bool, CardRef)
+000000000013c4e0 b NameTable[abi:cxx11]
+0000000000023a80 t SetupGame(State&)
+0000000000016d80 t SleepProc(State&, int)
+000000000004c1e0 t ToJsonApi(State const&, JsonBuilder&, int)
+0000000000063670 t TurnStart(State&)
+                 U operator delete(void*, unsigned long)@CXXABI_1.3.9
+000000000013c2f8 b guard variable for SkillTable
+000000000013c2f0 b guard variable for AttackTable
+000000000013c2c8 b guard variable for ChainInstance
+000000000013c2e0 b guard variable for FunctionTable
+000000000013c2d0 b guard variable for DummyCardMaster
+000000000013c2d8 b guard variable for FunctionIndexTable
+000000000013c300 b guard variable for CardTable
+000000000013c2e8 b guard variable for NameTable[abi:cxx11]
+000000000013c280 b AllCardJson
+00000000000d07e0 r EnergyTypes
+000000000013c2a0 b base64String
+000000000013c260 b AllAttackJson
+000000000013bd40 d SelectTypeStr
+000000000013bba0 d SelectContextStr
+0000000000008160 t CopyIdPtr(int*, std::vector<int, std::allocator<int> >&, int, int&) [clone .part.0]
+000000000000f8d0 t CardMaster::~CardMaster()
+000000000000f8d0 t CardMaster::~CardMaster()
+000000000001b110 t JsonBuilder::appendDoubleQuote(char const*)
+000000000001b970 t void JsonBuilder::appendCommaKeyValue<10>(char const (&) [10], bool)
+000000000001bce0 t void JsonBuilder::appendCommaKeyValue<12>(char const (&) [12], int)
+000000000001c820 t void JsonBuilder::appendCommaKeyValue<13>(char const (&) [13], int)
+000000000001cdb0 t void JsonBuilder::appendCommaKeyValue<5>(char const (&) [5], int)
+000000000001d8e0 t void JsonBuilder::appendCommaKeyValue<6>(char const (&) [6], int)
+000000000001d350 t void JsonBuilder::appendCommaKeyValue<7>(char const (&) [7], int)
+000000000001c280 t void JsonBuilder::appendCommaKeyValue<9>(char const (&) [9], int)
+000000000001b860 t JsonBuilder::append(bool)
+000000000001add0 t JsonBuilder::append(int)
+000000000001b4b0 t void JsonBuilder::appendKey<5>(char const (&) [5])
+000000000001b2e0 t void JsonBuilder::appendKey<7>(char const (&) [7])
+000000000001b680 t void JsonBuilder::appendKey<8>(char const (&) [8])
+000000000000f9b0 t JsonBuilder::~JsonBuilder()
+000000000000f9b0 t JsonBuilder::~JsonBuilder()
+000000000001f0e0 t BinaryReader::fromBase64()
+0000000000014750 t BinaryWriter::set(void const*, unsigned long) [clone .part.0]
+000000000001f850 t BinaryWriter::addA()
+0000000000013d20 t SearchStartConfig::~SearchStartConfig()
+0000000000013d20 t SearchStartConfig::~SearchStartConfig()
+0000000000028b50 t Chain::effectDraw(int)
+0000000000028e60 t Chain::effectDraw(int) [clone .constprop.0]
+0000000000028fe0 t Chain::effectDraw(int) [clone .constprop.1]
+00000000000292d0 t Chain::effectDraw(int) [clone .constprop.2]
+0000000000028ce0 t Chain::effectDraw(int) [clone .constprop.3]
+00000000000258c0 t Chain::effectInit(EffectType, TargetPlayer)
+0000000000008c20 t Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.0]
+00000000000049c0 t Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.0] [clone .cold]
+0000000000008ff0 t Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.1]
+00000000000049e6 t Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.1] [clone .cold]
+00000000000093c0 t Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.2]
+0000000000004a0c t Chain::effectInit(EffectType, TargetPlayer) [clone .constprop.2] [clone .cold]
+000000000005b5c0 t Chain::abilityPlay(int, char8_t const*, char8_t const*)
+00000000000262b0 t Chain::effectSwitch(TargetPlayer) [clone .constprop.0]
+0000000000026100 t Chain::effectSwitch(TargetPlayer) [clone .constprop.1]
+0000000000058f90 t Chain::existDamaged(TargetPlayer) [clone .constprop.0]
+00000000000289e0 t Chain::existPokemon(TargetPlayer)
+0000000000029160 t Chain::existPokemon(TargetPlayer) [clone .constprop.0]
+0000000000059140 t Chain::notOpen4Card(char8_t const*)
+0000000000027ee0 t Chain::postEffectMe(EffectType)
+000000000005b810 t Chain::abilityEvolve(int, char8_t const*, char8_t const*)
+00000000000295e0 t Chain::costHandTrash(int)
+0000000000027da0 t Chain::targetPokemon() [clone .isra.0]
+0000000000013140 t Chain::currentEffects()
+0000000000058de0 t Chain::preEffectRound(int)
+000000000002a130 t Chain::effectDrawUntil(int, TargetPlayer)
+0000000000058800 t Chain::targetCondition(TargetType, int, ComparatorType)
+000000000000ea40 t Chain::targetCondition(TargetType, int, ComparatorType) [clone .constprop.0]
+0000000000004f52 t Chain::targetCondition(TargetType, int, ComparatorType) [clone .constprop.0] [clone .cold]
+000000000000e820 t Chain::targetCondition(TargetType, int, ComparatorType) [clone .constprop.1]
+0000000000004f32 t Chain::targetCondition(TargetType, int, ComparatorType) [clone .constprop.1] [clone .cold]
+0000000000056530 t Chain::effectHealSingle(int)
+0000000000058a30 t Chain::targetCondition2(TargetType, int, int, ComparatorType)
+0000000000025f40 t Chain::effectTrashEnergy(int, TargetPlayer)
+0000000000026810 t Chain::effectTrashToHand(int)
+0000000000059310 t Chain::effectFestivalLead()
+0000000000029760 t Chain::effectTrashStadium()
+0000000000056e30 t Chain::targetEnergyCardMe()
+00000000000594d0 t Chain::effectEvolvesToEach()
+0000000000029c00 t Chain::effectLookEnemyhand()
+00000000000563c0 t Chain::targetNameCondition(TargetType, char8_t const*, ComparatorType) [clone .constprop.0]
+0000000000058c70 t Chain::targetNameCondition(TargetType, char8_t const*, ComparatorType) [clone .constprop.1]
+00000000000253a0 t Chain::triggerAttachedCard(TriggerType)
+0000000000025d80 t Chain::costHandTrashLimited(int)
+0000000000028890 t Chain::postEffectActiveEnemy(EffectType) [clone .constprop.0] [clone .isra.0]
+0000000000026460 t Chain::postEffectDamageBench(int, int)
+0000000000029450 t Chain::postEffectDeckToTrash(int)
+00000000000298e0 t Chain::canHandToDeckAndShuffle(TargetPlayer)
+0000000000056cb0 t Chain::conditionAttachEnergyMe(EnergyType)
+00000000000583f0 t Chain::effectBasicEnergySwitch(TargetPlayer)
+0000000000029db0 t Chain::postEffectDamagePokemon(int, int)
+0000000000029f80 t Chain::postEffectDamagePokemon(int, int) [clone .constprop.0]
+0000000000056700 t Chain::postEffectTrashEnergyMe(int)
+0000000000056870 t Chain::postEffectTrashEnergyMe(int) [clone .constprop.0]
+00000000000586a0 t Chain::postEffectTrashEnergyMe(int) [clone .constprop.1] [clone .isra.0]
+0000000000057e00 t Chain::effectHandAttachEnergyMe(int)
+0000000000029a60 t Chain::effectDeckToHandNoShuffle(int) [clone .constprop.0]
+0000000000057ff0 t Chain::effectTrashAttachEnergyMe(int)
+0000000000028720 t Chain::conditionPrizeCountGreater()
+00000000000269f0 t Chain::effectDeckToHandAndShuffle(int)
+0000000000026c00 t Chain::effectDeckToHandAndShuffle(int) [clone .constprop.0]
+00000000000569d0 t Chain::postEffectTrashEnergyMeAll()
+0000000000057230 t Chain::effectDeckToBenchAndShuffle(int)
+0000000000026e00 t Chain::effectDeckToTrashAndShuffle(int)
+0000000000026630 t Chain::effectTrashToDeckAndShuffle(int)
+0000000000025d20 t Chain::preEffectFailAttackCoinTail() [clone .isra.0]
+0000000000057800 t Chain::effectSelectAttachEnergyHand(int)
+0000000000025d50 t Chain::postEffectParalyzeIfCoinHead()
+0000000000057ba0 t Chain::effectDeckAttachEnergyAndShuffle(int)
+0000000000027010 t Chain::effectDeckToHandReverseAndShuffle(int)
+0000000000057670 t Chain::effectSelectAttachBasicEnergyDeck(int)
+00000000000579d0 t Chain::effectSelectAttachBasicEnergyHand(int)
+00000000000581e0 t Chain::effectDeckAttachEnergyMeAndShuffle(int)
+0000000000057470 t Chain::effectSelectAttachBasicEnergyTrash(int)
+0000000000027240 t Chain::effectLookAndToHandRestDeckAndShuffle(int, int)
+0000000000028450 t Chain::postEffectNoDamageAndEffectIfCoinHead()
+0000000000058510 t Chain::effectDeckSelectBasicEnergyNotSameType(int, SelectContext)
+0000000000056f70 t Chain::effectLookAndToBenchRestDeckAndShuffle(int, TargetPlayer)
+0000000000056b30 t Chain::postEffectActiveEnemyEnergyTrashIfCoinHead()
+0000000000028170 t Chain::exist(AreaType, TargetPlayer) [clone .constprop.0]
+00000000000282e0 t Chain::exist(AreaType, TargetPlayer) [clone .constprop.1]
+00000000000285b0 t Chain::exist(AreaType, TargetPlayer) [clone .constprop.2]
+000000000007d050 t Chain::attack(int, char8_t const*, char8_t const*, char const*, std::initializer_list<EnergyType>)
+0000000000025cc0 t Chain::fossil()
+0000000000025780 t Chain::target(AreaType)
+000000000001ad50 t Chain::textEn(char8_t const*, char8_t const*)
+000000000005b4e0 t Chain::ability(int, char8_t const*, char8_t const*, AreaType, AreaType) [clone .constprop.0] [clone .isra.0]
+000000000005b0e0 t Chain::ability(int, char8_t const*, char8_t const*, AreaType, AreaType) [clone .constprop.1]
+000000000005b230 t Chain::ability(int, char8_t const*, char8_t const*, AreaType, AreaType) [clone .constprop.2]
+000000000005b400 t Chain::ability(int, char8_t const*, char8_t const*, AreaType, AreaType) [clone .constprop.3] [clone .isra.0]
+000000000005b320 t Chain::ability(int, char8_t const*, char8_t const*, AreaType, AreaType) [clone .constprop.4] [clone .isra.0]
+000000000001a0a0 t Chain::trigger(TriggerType)
+0000000000028030 t Chain::effectMe(EffectType)
+0000000000019b40 t Chain::condition(ConditionType, int, ComparatorType)
+0000000000007b80 t Chain::condition(ConditionType, int, ComparatorType) [clone .constprop.0]
+00000000000048f0 t Chain::condition(ConditionType, int, ComparatorType) [clone .constprop.0] [clone .cold]
+0000000000007e30 t Chain::condition(ConditionType, int, ComparatorType) [clone .constprop.1]
+0000000000004916 t Chain::condition(ConditionType, int, ComparatorType) [clone .constprop.1] [clone .cold]
+000000000005a4b0 t Chain::initSkill(int, char8_t const*, char8_t const*)
+0000000000012f30 t Chain::separator()
+0000000000013030 t Chain::setEffect(int)
+0000000000025590 t Chain::triggerMe(TriggerType)
+0000000000012d20 t Skill::~Skill()
+0000000000012d20 t Skill::~Skill()
+0000000000020500 t State::deserialize(BinaryReader&)
+0000000000011200 t State::finishCheck()
+0000000000027860 t State::pushCardRef(AreaType, int, CardRef)
+00000000000122f0 t State::callFunction()
+0000000000005840 t State::checkGetCard(AreaRef) [clone .isra.0]
+0000000000016910 t State::pushFunction(void (*)(State&))
+0000000000016b50 t State::pushFunction(void (*)(State&, int), int)
+0000000000016e00 t State::pushFunction(void (*)(State&, int, int), int, int)
+000000000002da60 t State::removeCardRef(AreaType, int, int)
+000000000003a180 t State::getAttachedList(PlayerState const&, FixedListBase<int, CardRef, 61> const&)
+0000000000043370 t State::setSelectedCardTarget()
+00000000000152f0 t State::targetListEnergyCount()
+0000000000011cb0 t State::isPreventDamageCounter(Card const&)
+0000000000015730 t State::targetListTypeEnergyCount(EnergyType)
+0000000000008ac0 t State::effectTargetPlayerContinual(Effect const&, int) [clone .isra.0]
+000000000003bbb0 t State::checkGetCardNotPreventEffect(AreaRef) [clone .isra.0]
+00000000000124e0 t State::step()
+0000000000014da0 t State::addOption(SelectOptionType)
+0000000000011420 t State::cardMoved(CardRef, AreaType, bool)
+0000000000011340 t State::setSelect(SelectType, SelectContext, int, int, int)
+0000000000005e80 t State::operator=(State const&) [clone .isra.0]
+0000000000013200 t State::~State()
+0000000000013200 t State::~State()
+000000000007ce20 t Attack::~Attack()
+000000000007ce20 t Attack::~Attack()
+0000000000022010 t Search::alloc(State const&)
+000000000004e5a0 t Search::start(SearchStartConfig const&, State const&)
+0000000000013390 t ApiData::~ApiData()
+0000000000013390 t ApiData::~ApiData()
+000000000003e0f0 t PlayerState::getInPlayPokemon() const
+000000000002bd20 t FixedListBase<signed char, CardRef, (signed char)1>::checkIndex(int) const
+0000000000009810 t FixedListBase<signed char, CardRef, (signed char)1>::checkIndex(int) const [clone .constprop.0]
+0000000000004a32 t FixedListBase<signed char, CardRef, (signed char)1>::checkIndex(int) const [clone .constprop.0] [clone .cold]
+000000000002d520 t FixedListBase<signed char, CardRef, (signed char)2>::checkIndex(int) const
+000000000002bb20 t FixedListBase<signed char, CardRef, (signed char)8>::checkIndex(int) const
+000000000002e350 t FixedListBase<signed char, AreaType, (signed char)4>::checkIndex(int) const
+000000000002ad40 t FixedListBase<int, CardRef, 61>::checkIndex(int) const
+0000000000008b20 t FixedListBase<int, CardRef, 61>::checkFull() const [clone .isra.0]
+000000000000493c t FixedListBase<int, CardRef, 61>::checkFull() const [clone .isra.0] [clone .cold]
+000000000002ec90 t FixedListBase<int, int, 7>::checkIndex(int) const
+0000000000008ba0 t FixedListBase<int, int, 7>::checkFull() const [clone .isra.0]
+000000000000497e t FixedListBase<int, int, 7>::checkFull() const [clone .isra.0] [clone .cold]
+0000000000024f30 t Card::getEnergyType() const
+000000000002d720 t State::getCardRef(AreaType, int, int) const
+0000000000015030 t State::getEnergies(int, CardRef, std::vector<EnergyType, std::allocator<EnergyType> >&) const
+0000000000007550 t State::retreatCost(Card const&) const [clone .isra.0]
+00000000000118c0 t State::getEnergyInfo(Card const&, CardRef) const
+0000000000012010 t State::getEffectValue() const
+00000000000165e0 t State::getEnergyCards(CardRef, std::vector<CardRef, std::allocator<CardRef> >&) const
+00000000000075f0 t State::selectedOption(int) const [clone .constprop.0]
+00000000000048a6 t State::selectedOption(int) const [clone .constprop.0] [clone .cold]
+0000000000011b40 t State::canEvolveEffect(State const&, Card const&, CardMaster const&, CardRef) const
+000000000003b4f0 t State::isPreventEffect(Card const&) const
+0000000000015e40 t State::typeEnergyCount(int, CardRef, EnergyType) const
+000000000002bf20 t State::currentAreaIndex(int, AreaType, CardRef) const
+000000000003af90 t State::checkPlayerSelect() const
+000000000000f870 t State::getValuesByEffect(Effect const&) const [clone .isra.0]
+0000000000023440 t State::getAttachedToolRef(Card const&) const
+000000000002c710 t State::currentCardPosition(AreaRef) const
+000000000002c690 t State::currentCardPosition(CardRef) const
+000000000000aca0 t State::attachedCardPosition(Card const&) const [clone .isra.0]
+0000000000004c00 t State::attachedCardPosition(Card const&) const [clone .isra.0] [clone .cold]
+0000000000012180 t State::getSecondEffectValue() const
+000000000003b880 t State::isPreventEffectActive(int) const
+0000000000011a10 t State::satisfyAttackCondition(Card const&, Attack const&, int) const
+0000000000011d30 t State::getEffect() const
+00000000000117f0 t State::isEvolved(CardRef) const
+                 U std::ctype<char>::_M_widen_init() const@GLIBCXX_3.4.11
+000000000000f7a0 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::find(char8_t const*, unsigned long, unsigned long) const [clone .isra.0]
+0000000000005780 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::compare(char8_t const*) const [clone .isra.0]
+00000000000057f0 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::compare(std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const&) const [clone .isra.0]
+                 U std::__detail::_Prime_rehash_policy::_M_need_rehash(unsigned long, unsigned long, unsigned long) const@GLIBCXX_3.4.18
+                 U std::ostream::put(char)@GLIBCXX_3.4
+                 U std::ostream::flush()@GLIBCXX_3.4
+000000000005f4c0 W std::_Hashtable<int, int, std::allocator<int>, std::__detail::_Identity, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, true, true> >::_M_rehash(unsigned long, unsigned long const&)
+000000000005bb10 t std::_Hashtable<int, std::pair<int const, CardMaster>, std::allocator<std::pair<int const, CardMaster> >, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true> >::_M_rehash(unsigned long, unsigned long const&)
+000000000005a370 t std::_Hashtable<int, std::pair<int const, Skill>, std::allocator<std::pair<int const, Skill> >, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true> >::_M_rehash(unsigned long, unsigned long const&)
+000000000005b9d0 t std::_Hashtable<int, std::pair<int const, Attack>, std::allocator<std::pair<int const, Attack> >, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true> >::_M_rehash(unsigned long, unsigned long const&)
+000000000005be30 W std::_Hashtable<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, int>, std::allocator<std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, int> >, std::__detail::_Select1st, std::equal_to<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::hash<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_rehash(unsigned long, unsigned long const&)
+000000000005f0c0 W std::_Hashtable<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::allocator<std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > > >, std::__detail::_Select1st, std::equal_to<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::hash<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::_M_rehash(unsigned long, unsigned long const&)
+00000000000144e0 W std::_Hashtable<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::allocator<std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > > >, std::__detail::_Select1st, std::equal_to<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::hash<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::~_Hashtable()
+00000000000144e0 W std::_Hashtable<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::allocator<std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > > >, std::__detail::_Select1st, std::equal_to<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::hash<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >::~_Hashtable()
+0000000000059710 W std::_Hashtable<long long, std::pair<long long const, int>, std::allocator<std::pair<long long const, int> >, std::__detail::_Select1st, std::equal_to<long long>, std::hash<long long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true> >::_M_rehash(unsigned long, unsigned long const&)
+00000000000510d0 W void std::_Destroy_aux<false>::__destroy<TargetCondition*>(TargetCondition*, TargetCondition*)
+                 U std::random_device::_M_fini()@GLIBCXX_3.4.18
+                 U std::random_device::_M_init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)@GLIBCXX_3.4.21
+                 U std::random_device::_M_getval()@GLIBCXX_3.4.18
+0000000000010c90 W std::random_device::random_device()
+0000000000010c90 W std::random_device::random_device()
+                 U std::runtime_error::runtime_error(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)@GLIBCXX_3.4.21
+                 U std::runtime_error::~runtime_error()@GLIBCXX_3.4
+0000000000010490 t std::unordered_map<int, CardMaster, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, CardMaster> > >::~unordered_map()
+0000000000010490 t std::unordered_map<int, CardMaster, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, CardMaster> > >::~unordered_map()
+000000000000fe40 t std::unordered_map<int, Skill, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, Skill> > >::~unordered_map()
+000000000000fe40 t std::unordered_map<int, Skill, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, Skill> > >::~unordered_map()
+000000000000fad0 t std::unordered_map<int, Attack, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, Attack> > >::~unordered_map()
+000000000000fad0 t std::unordered_map<int, Attack, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, Attack> > >::~unordered_map()
+000000000000fd90 W std::unordered_map<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, int, std::hash<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::equal_to<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::allocator<std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, int> > >::~unordered_map()
+000000000000fd90 W std::unordered_map<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, int, std::hash<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::equal_to<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::allocator<std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, int> > >::~unordered_map()
+000000000000fa40 W std::unordered_map<long long, int, std::hash<long long>, std::equal_to<long long>, std::allocator<std::pair<long long const, int> > >::~unordered_map()
+000000000000fa40 W std::unordered_map<long long, int, std::hash<long long>, std::equal_to<long long>, std::allocator<std::pair<long long const, int> > >::~unordered_map()
+0000000000018650 W std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::_M_gen_rand()
+0000000000005670 t unsigned long std::uniform_int_distribution<unsigned long>::operator()<std::random_device>(std::random_device&, std::uniform_int_distribution<unsigned long>::param_type const&) [clone .isra.0]
+0000000000007900 t unsigned long std::uniform_int_distribution<unsigned long>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_int_distribution<unsigned long>::param_type const&) [clone .constprop.0] [clone .isra.0]
+0000000000021430 t void std::vector<CardEffect, std::allocator<CardEffect> >::_M_realloc_insert<CardEffect>(__gnu_cxx::__normal_iterator<CardEffect*, std::vector<CardEffect, std::allocator<CardEffect> > >, CardEffect&&)
+0000000000014ee0 W void std::vector<EnergyType, std::allocator<EnergyType> >::_M_realloc_insert<EnergyType const&>(__gnu_cxx::__normal_iterator<EnergyType*, std::vector<EnergyType, std::allocator<EnergyType> > >, EnergyType const&)
+000000000001fe90 t std::vector<EvolveInfo, std::allocator<EvolveInfo> >::_M_default_append(unsigned long)
+0000000000018500 t void std::vector<EvolveInfo, std::allocator<EvolveInfo> >::_M_realloc_insert<EvolveInfo const&>(__gnu_cxx::__normal_iterator<EvolveInfo*, std::vector<EvolveInfo, std::allocator<EvolveInfo> > >, EvolveInfo const&)
+000000000001a320 t void std::vector<SearchState, std::allocator<SearchState> >::_M_realloc_insert<>(__gnu_cxx::__normal_iterator<SearchState*, std::vector<SearchState, std::allocator<SearchState> > >)
+00000000000212c0 t void std::vector<AttackEnergy, std::allocator<AttackEnergy> >::_M_realloc_insert<AttackEnergy>(__gnu_cxx::__normal_iterator<AttackEnergy*, std::vector<AttackEnergy, std::allocator<AttackEnergy> > >, AttackEnergy&&)
+0000000000020080 t std::vector<GameFunction, std::allocator<GameFunction> >::_M_default_append(unsigned long)
+00000000000167a0 t void std::vector<GameFunction, std::allocator<GameFunction> >::_M_realloc_insert<GameFunction const&>(__gnu_cxx::__normal_iterator<GameFunction*, std::vector<GameFunction, std::allocator<GameFunction> > >, GameFunction const&)
+0000000000014d50 t SelectOption& std::vector<SelectOption, std::allocator<SelectOption> >::emplace_back<>()
+000000000001fa90 t std::vector<SelectOption, std::allocator<SelectOption> >::_M_default_append(unsigned long)
+0000000000014be0 t void std::vector<SelectOption, std::allocator<SelectOption> >::_M_realloc_insert<>(__gnu_cxx::__normal_iterator<SelectOption*, std::vector<SelectOption, std::allocator<SelectOption> > >)
+00000000000560b0 t void std::vector<TargetCondition, std::allocator<TargetCondition> >::_M_realloc_insert<TargetCondition const&>(__gnu_cxx::__normal_iterator<TargetCondition*, std::vector<TargetCondition, std::allocator<TargetCondition> > >, TargetCondition const&)
+0000000000013dc0 t std::vector<TargetCondition, std::allocator<TargetCondition> >::~vector()
+0000000000013dc0 t std::vector<TargetCondition, std::allocator<TargetCondition> >::~vector()
+00000000000191e0 t std::vector<TriggeredAbility, std::allocator<TriggeredAbility> >::_M_default_append(unsigned long)
+0000000000019440 t void std::vector<TriggeredAbility, std::allocator<TriggeredAbility> >::_M_realloc_insert<>(__gnu_cxx::__normal_iterator<TriggeredAbility*, std::vector<TriggeredAbility, std::allocator<TriggeredAbility> > >)
+0000000000018340 t void std::vector<TriggeredAbility, std::allocator<TriggeredAbility> >::_M_realloc_insert<TriggeredAbility const&>(__gnu_cxx::__normal_iterator<TriggeredAbility*, std::vector<TriggeredAbility, std::allocator<TriggeredAbility> > >, TriggeredAbility const&)
+00000000000184c0 t std::vector<TriggeredAbility, std::allocator<TriggeredAbility> >::push_back(TriggeredAbility const&)
+0000000000005d20 t std::vector<TriggeredAbility, std::allocator<TriggeredAbility> >::operator=(std::vector<TriggeredAbility, std::allocator<TriggeredAbility> > const&) [clone .isra.0]
+0000000000014b90 t Log& std::vector<Log, std::allocator<Log> >::emplace_back<LogType&>(LogType&)
+00000000000202d0 t std::vector<Log, std::allocator<Log> >::_M_default_append(unsigned long)
+0000000000014940 t void std::vector<Log, std::allocator<Log> >::_M_realloc_insert<LogType&>(__gnu_cxx::__normal_iterator<Log*, std::vector<Log, std::allocator<Log> > >, LogType&)
+0000000000019700 t void std::vector<Effect, std::allocator<Effect> >::_M_realloc_insert<>(__gnu_cxx::__normal_iterator<Effect*, std::vector<Effect, std::allocator<Effect> > >)
+0000000000008a90 t AreaRef& std::vector<AreaRef, std::allocator<AreaRef> >::emplace_back<AreaRef>(AreaRef&&) [clone .isra.0]
+0000000000018ea0 t std::vector<AreaRef, std::allocator<AreaRef> >::_M_default_append(unsigned long)
+0000000000021170 t void std::vector<AreaRef, std::allocator<AreaRef> >::_M_realloc_insert<AreaRef>(__gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, AreaRef&&)
+0000000000014300 t std::vector<AreaRef, std::allocator<AreaRef> >::resize(unsigned long)
+0000000000005bc0 t std::vector<AreaRef, std::allocator<AreaRef> >::operator=(std::vector<AreaRef, std::allocator<AreaRef> > const&) [clone .isra.0]
+000000000001fcd0 t std::vector<CardRef, std::allocator<CardRef> >::_M_default_append(unsigned long)
+0000000000016490 t void std::vector<CardRef, std::allocator<CardRef> >::_M_realloc_insert<CardRef const&>(__gnu_cxx::__normal_iterator<CardRef*, std::vector<CardRef, std::allocator<CardRef> > >, CardRef const&)
+0000000000005890 t std::vector<CardRef, std::allocator<CardRef> >::operator=(std::vector<CardRef, std::allocator<CardRef> > const&) [clone .isra.0]
+0000000000019e20 t void std::vector<Trigger, std::allocator<Trigger> >::_M_realloc_insert<>(__gnu_cxx::__normal_iterator<Trigger*, std::vector<Trigger, std::allocator<Trigger> > >)
+000000000001a5c0 W std::vector<char, std::allocator<char> >::_M_default_append(unsigned long)
+000000000001ef90 W void std::vector<char, std::allocator<char> >::_M_realloc_insert<char>(__gnu_cxx::__normal_iterator<char*, std::vector<char, std::allocator<char> > >, char&&)
+00000000000147f0 W void std::vector<char, std::allocator<char> >::_M_realloc_insert<char const&>(__gnu_cxx::__normal_iterator<char*, std::vector<char, std::allocator<char> > >, char const&)
+00000000000145b0 W std::vector<unsigned char, std::allocator<unsigned char> >::_M_default_append(unsigned long)
+000000000001a760 W std::vector<int, std::allocator<int> >::_M_default_append(unsigned long)
+0000000000019090 W void std::vector<int, std::allocator<int> >::_M_realloc_insert<int const&>(__gnu_cxx::__normal_iterator<int*, std::vector<int, std::allocator<int> > >, int const&)
+0000000000005a60 t std::vector<int, std::allocator<int> >::operator=(std::vector<int, std::allocator<int> > const&) [clone .isra.0]
+000000000001a940 W void std::vector<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, std::allocator<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > > >::_M_realloc_insert<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const&>(__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >*, std::vector<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, std::allocator<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > > > >, std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const&)
+000000000001a1d0 t void std::vector<State*, std::allocator<State*> >::_M_realloc_insert<State* const&>(__gnu_cxx::__normal_iterator<State**, std::vector<State*, std::allocator<State*> > >, State* const&)
+0000000000021ec0 t void std::vector<State*, std::allocator<State*> >::_M_realloc_insert<State*>(__gnu_cxx::__normal_iterator<State**, std::vector<State*, std::allocator<State*> > >, State*&&)
+00000000000195b0 t void std::vector<Attack*, std::allocator<Attack*> >::_M_realloc_insert<Attack* const&>(__gnu_cxx::__normal_iterator<Attack**, std::vector<Attack*, std::allocator<Attack*> > >, Attack* const&)
+0000000000022330 t void std::vector<CardMaster const*, std::allocator<CardMaster const*> >::_M_realloc_insert<CardMaster const*>(__gnu_cxx::__normal_iterator<CardMaster const**, std::vector<CardMaster const*, std::allocator<CardMaster const*> > >, CardMaster const*&&)
+00000000000228a0 t void std::vector<Attack const*, std::allocator<Attack const*> >::_M_realloc_insert<Attack const*>(__gnu_cxx::__normal_iterator<Attack const**, std::vector<Attack const*, std::allocator<Attack const*> > >, Attack const*&&)
+000000000001a470 t void std::vector<std::array<State, 128ul>*, std::allocator<std::array<State, 128ul>*> >::_M_realloc_insert<std::array<State, 128ul>* const&>(__gnu_cxx::__normal_iterator<std::array<State, 128ul>**, std::vector<std::array<State, 128ul>*, std::allocator<std::array<State, 128ul>*> > >, std::array<State, 128ul>* const&)
+0000000000021d80 t void*& std::vector<void*, std::allocator<void*> >::emplace_back<void*>(void*&&) [clone .constprop.0] [clone .isra.0]
+0000000000021c30 W void std::vector<void*, std::allocator<void*> >::_M_realloc_insert<void*>(__gnu_cxx::__normal_iterator<void**, std::vector<void*, std::allocator<void*> > >, void*&&)
+000000000000fa10 W std::vector<void*, std::allocator<void*> >::~vector()
+000000000000fa10 W std::vector<void*, std::allocator<void*> >::~vector()
+0000000000022fb0 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_replace(unsigned long, unsigned long, char const*, unsigned long)
+0000000000022e10 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_mutate(unsigned long, unsigned long, char const*, unsigned long)
+0000000000006f00 t std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string<std::allocator<char> >(char const*, std::allocator<char> const&) [clone .constprop.0]
+000000000000f9e0 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string()
+000000000000f9e0 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string()
+0000000000006e40 t void std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::_M_construct<char8_t*>(char8_t*, char8_t*, std::forward_iterator_tag) [clone .isra.0]
+0000000000008700 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::append(char8_t const*, unsigned long) [clone .isra.0]
+0000000000008490 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::assign(char8_t const*) [clone .isra.0]
+0000000000008650 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::_M_append(char8_t const*, unsigned long) [clone .isra.0]
+0000000000021db0 W std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::_M_assign(std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const&)
+000000000001abb0 W std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::_M_mutate(unsigned long, unsigned long, char8_t const*, unsigned long)
+0000000000008260 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::push_back(char8_t) [clone .constprop.0]
+00000000000082d0 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::push_back(char8_t) [clone .constprop.2]
+0000000000008340 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::push_back(char8_t) [clone .constprop.3]
+00000000000083b0 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::push_back(char8_t) [clone .constprop.5]
+0000000000008420 t std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >::push_back(char8_t) [clone .constprop.6]
+0000000000010a90 W std::__cxx11::to_string(int)
+0000000000005600 t std::__detail::_Map_base<int, std::pair<int const, CardMaster>, std::allocator<std::pair<int const, CardMaster> >, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::at(int const&) [clone .constprop.0]
+000000000005bc50 t std::__detail::_Map_base<int, std::pair<int const, CardMaster>, std::allocator<std::pair<int const, CardMaster> >, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::operator[](int const&)
+0000000000016740 t std::__detail::_Map_base<int, std::pair<int const, Skill>, std::allocator<std::pair<int const, Skill> >, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::at(int const&)
+00000000000059f0 t std::__detail::_Map_base<int, std::pair<int const, Attack>, std::allocator<std::pair<int const, Attack> >, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::at(int const&) [clone .constprop.0]
+000000000005bf70 W std::__detail::_Map_base<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, int>, std::allocator<std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, int> >, std::__detail::_Select1st, std::equal_to<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::hash<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true>, true>::operator[](std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const&)
+000000000005f200 W std::__detail::_Map_base<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> >, std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::allocator<std::pair<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const, std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > > >, std::__detail::_Select1st, std::equal_to<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::hash<std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > >, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true>, true>::operator[](std::__cxx11::basic_string<char8_t, std::char_traits<char8_t>, std::allocator<char8_t> > const&)
+                 U std::ios_base::Init::Init()@GLIBCXX_3.4
+                 U std::ios_base::Init::~Init()@GLIBCXX_3.4
+                 U operator new(unsigned long)@GLIBCXX_3.4
+                 U std::_Hash_bytes(void const*, unsigned long, unsigned long)@CXXABI_1.3.5
+00000000000215a0 t void std::__introsort_loop<__gnu_cxx::__normal_iterator<CardEffect*, std::vector<CardEffect, std::allocator<CardEffect> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<RefreshEffect(State&, int)::{lambda(CardEffect const&, CardEffect const&)#2}> >(__gnu_cxx::__normal_iterator<CardEffect*, std::vector<CardEffect, std::allocator<CardEffect> > >, __gnu_cxx::__normal_iterator<CardEffect*, std::vector<CardEffect, std::allocator<CardEffect> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<RefreshEffect(State&, int)::{lambda(CardEffect const&, CardEffect const&)#2}>)
+0000000000022480 t void std::__introsort_loop<__gnu_cxx::__normal_iterator<CardMaster const**, std::vector<CardMaster const*, std::allocator<CardMaster const*> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<ApiAllCard(JsonBuilder&)::{lambda(CardMaster const*, CardMaster const*)#1}> >(__gnu_cxx::__normal_iterator<CardMaster const**, std::vector<CardMaster const*, std::allocator<CardMaster const*> > >, __gnu_cxx::__normal_iterator<CardMaster const**, std::vector<CardMaster const*, std::allocator<CardMaster const*> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<ApiAllCard(JsonBuilder&)::{lambda(CardMaster const*, CardMaster const*)#1}>)
+00000000000229f0 t void std::__introsort_loop<__gnu_cxx::__normal_iterator<Attack const**, std::vector<Attack const*, std::allocator<Attack const*> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<ApiAllAttack(JsonBuilder&)::{lambda(Attack const*, Attack const*)#1}> >(__gnu_cxx::__normal_iterator<Attack const**, std::vector<Attack const*, std::allocator<Attack const*> > >, __gnu_cxx::__normal_iterator<Attack const**, std::vector<Attack const*, std::allocator<Attack const*> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<ApiAllAttack(JsonBuilder&)::{lambda(Attack const*, Attack const*)#1}>)
+00000000000100e0 t void std::__introsort_loop<int*, long, __gnu_cxx::__ops::_Iter_less_iter>(int*, int*, long, __gnu_cxx::__ops::_Iter_less_iter) [clone .isra.0]
+                 U std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long)@GLIBCXX_3.4.9
+                 U std::__throw_bad_cast()@GLIBCXX_3.4
+                 U std::__throw_bad_alloc()@GLIBCXX_3.4
+                 U std::__throw_logic_error(char const*)@GLIBCXX_3.4
+                 U std::__throw_length_error(char const*)@GLIBCXX_3.4
+                 U std::__throw_out_of_range(char const*)@GLIBCXX_3.4
+                 U std::__throw_invalid_argument(char const*)@GLIBCXX_3.4
+                 U std::__throw_out_of_range_fmt(char const*, ...)@GLIBCXX_3.4.20
+                 U std::__throw_bad_array_new_length()@GLIBCXX_3.4.29
+                 U std::cerr@GLIBCXX_3.4
+0000000000018ae0 t void std::shuffle<__gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&>(__gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, __gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+0000000000014080 t void std::shuffle<__gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, std::random_device>(__gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, __gnu_cxx::__normal_iterator<AreaRef*, std::vector<AreaRef, std::allocator<AreaRef> > >, std::random_device&&)
+0000000000018750 t void std::shuffle<CardRef*, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&>(CardRef*, CardRef*, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+0000000000013e40 t void std::shuffle<CardRef*, std::random_device>(CardRef*, CardRef*, std::random_device&&)
+000000000013c2c0 b std::__ioinit
+000000000002ac10 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > std::operator+<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&, char const*)
+0000000000023230 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > std::operator+<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&)
+00000000000233c0 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > std::operator+<char, std::char_traits<char>, std::allocator<char> >(char const*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&)
+                 U typeinfo for std::runtime_error@GLIBCXX_3.4
+000000000003dd50 t Search::start(SearchStartConfig const&, State const&)::{lambda(std::vector<int, std::allocator<int> > const&, FixedListBase<int, CardRef, 61>&, int, AreaType)#1}::operator()(std::vector<int, std::allocator<int> > const&, FixedListBase<int, CardRef, 61>&, int, AreaType) const
+0000000000037f70 t Search::start(SearchStartConfig const&, State const&)::{lambda()#2}::operator()() const
+00000000001274e0 u std::__detail::__to_chars_10_impl<unsigned int>(char*, unsigned int, unsigned int)::__digits

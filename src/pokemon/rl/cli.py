@@ -1,4 +1,4 @@
-"""Typer CLI for the DQN: `pokemon-train smoke` (M0). Training lands in M1."""
+"""Typer CLI for the DQN: `pokemon-train smoke` (M0). Training and eval land in M1."""
 
 from __future__ import annotations
 
@@ -8,8 +8,11 @@ import jax
 import numpy as np
 import typer
 
-from pokemon.rl import features, net, rollout
+from pokemon.rl import checkpoint, features, net, policy, rollout
+from pokemon.rl import eval as ev
+from pokemon.rl import train as train_mod
 from pokemon.rl.config import DQNConfig
+from pokemon.rl.features import OPTION_DIM, STATE_DIM
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -55,3 +58,44 @@ def smoke(
         f"\n{games} games | {total_transitions} transitions | "
         f"{games / elapsed:.2f} games/sec | {elapsed:.1f}s"
     )
+
+
+@app.command()
+def train(
+    iterations: int = typer.Option(200, "--iterations", "-n"),
+    games_per_iter: int = typer.Option(8, "--games-per-iter"),
+    updates_per_iter: int = typer.Option(64, "--updates-per-iter"),
+    eval_every: int = typer.Option(10, "--eval-every"),
+    eval_games: int = typer.Option(50, "--eval-games"),
+    ckpt_dir: str = typer.Option("data/checkpoints", "--ckpt-dir"),
+    seed: int = typer.Option(0, "--seed"),
+):
+    """Train the DQN vs random_agent; checkpoints + eval win-rate as it goes."""
+    cfg = DQNConfig()
+    _, history = train_mod.train(
+        cfg,
+        iterations=iterations,
+        games_per_iter=games_per_iter,
+        updates_per_iter=updates_per_iter,
+        eval_every=eval_every,
+        eval_games=eval_games,
+        ckpt_dir=ckpt_dir,
+        seed=seed,
+    )
+    if history:
+        best = max(history, key=lambda h: h["winrate"])
+        typer.echo(f"best win-rate {best['winrate']:.2%} at iter {best['iter']}")
+
+
+@app.command()
+def eval(
+    ckpt: str = typer.Option("data/checkpoints/params.msgpack", "--ckpt"),
+    games: int = typer.Option(100, "--games", "-g"),
+    seed: int = typer.Option(0, "--seed"),
+):
+    """Evaluate a saved checkpoint (greedy) vs random_agent."""
+    model = net.QNet(hidden=DQNConfig().hidden)
+    template = net.init_params(model, jax.random.PRNGKey(0), STATE_DIM, OPTION_DIM)
+    params = checkpoint.load_params(template, ckpt)
+    winrate = ev.evaluate(policy.greedy_act(model, params), n_games=games, seed=seed)
+    typer.echo(f"win-rate vs random over {games} games: {winrate:.2%}")

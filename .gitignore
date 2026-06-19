@@ -10,6 +10,7 @@ build/
 data/*.parquet
 data/*.csv
 data/*.json
+data/checkpoints/
 !data/.gitkeep
 .direnv/
 .env

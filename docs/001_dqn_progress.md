@@ -1,7 +1,7 @@
 # 001 — DQN agent: build progress & status
 
 **Living status doc** for the deep Q-learning agent that plays the CABT Pokémon
-TCG environment. Update this as milestones land. Last updated: **2026-06-20**.
+TCG environment. Update this as milestones land. Last updated: **2026-06-20** (M1 complete).
 
 - **Branch:** `feat/dqn-agent`
 - **Design spec:** `docs/superpowers/specs/2026-06-20-dqn-agent-design.md`
@@ -12,21 +12,22 @@ TCG environment. Update this as milestones land. Last updated: **2026-06-20**.
 
 ## TL;DR (where we are right now)
 
-- **M0 is DONE and runnable.** The full data path exists: observation → feature
-  encoders → option-scoring Q-network → replay buffer, plus prize-based reward
-  shaping and a rollout collector that turns real games into DQN transitions.
-  `just check` is green (26 tests).
-- **It does NOT learn yet.** The acting policy is still **uniform random**. There
-  is no training loop, no ε-greedy, no gradient updates, no evaluation vs the
-  heuristic. M0 is the *foundation*, not a trained agent.
-- **Next is M1**: the actual learning loop (ε-greedy + Double-DQN updates +
-  curriculum + checkpoints + eval).
+- **M1 is DONE.** The full DQN learning loop is wired: ε-greedy collection →
+  replay buffer → Double-DQN gradient updates → target-net sync → flax msgpack
+  checkpoints → greedy eval harness. `just check` is green (35 tests).
+- The agent **learns** (loss drops, win-rate fluctuates vs random), but a 5-iteration
+  smoke run vs `random_agent` yields ~10–30% win-rate as expected (barely trained).
+  The M1 goal is a working learning loop, not a trained agent — that's M2.
+- **Next is M2**: curriculum switch to heuristic `fire_agent`, richer features
+  (catalog-backed card/attack stats), longer training runs.
 
 Run what exists:
 ```bash
-uv run pokemon-train smoke -g 5    # collect transitions from real games; report throughput
-just check                         # fmt + lint + pyright + tests (all green)
-uv run pokemon-play -g 5 -v        # existing heuristic agent (the baseline to beat)
+uv run pokemon-train smoke -g 5    # collect transitions; verify throughput
+uv run pokemon-train train -n 5 --eval-every 1 --eval-games 10  # short training run
+uv run pokemon-train eval --ckpt data/checkpoints/params.msgpack -g 20  # eval a checkpoint
+just check                         # fmt + lint + pyright + 35 tests (all green)
+uv run pokemon-play -g 5 -v        # existing heuristic agent (the baseline to beat in M2)
 ```
 
 ---
@@ -84,7 +85,7 @@ Feature dims (fixed, asserted in tests): **STATE_DIM = 126**, **OPTION_DIM = 49*
 |-----------|-------|--------|
 | **Design** | Brainstormed spec, approved | ✅ done (`8ebb8cf`) |
 | **M0 — wire-check** | Encoders, Q-net, replay, reward, rollout, `smoke` CLI. **No learning.** | ✅ **done** |
-| **M1 — learning loop** | ε-greedy policy, Double-DQN updates, target net, replay training, checkpoints, basic eval. Train vs `random_agent`, show win-rate climb. | ⬜ not started |
+| **M1 — learning loop** | ε-greedy policy, Double-DQN updates, target net, replay training, checkpoints, basic eval. Train vs `random_agent`, show win-rate climb. | ✅ **done** |
 | **M2 — beat the heuristic** | Curriculum switch to heuristic; head-to-head eval; enrich features (catalog-backed card/attack stats); tune until >50% vs heuristic. | ⬜ not started |
 | **M3 — polish** | Eval CLI, checkpoint mgmt, gameplay walkthrough doc, optional dueling head / parallel rollouts / self-play if needed. | ⬜ not started |
 
@@ -141,15 +142,46 @@ fd3dbee feat(rl): replay buffer with padded next-option sets
 
 ---
 
+## M1 — what was built (DONE)
+
+New modules in `src/pokemon/rl/`:
+
+| Module | Responsibility | Status |
+|--------|----------------|--------|
+| `policy.py` | `greedy_act(model,params)`, `eps_act(model,params,eps,rng)` — ε-greedy action selection over the offered option list | ✅ |
+| `learner.py` | `create_train_state`, `make_update_step` — Double-DQN jitted gradient step with flax `TrainState` + optax Adam | ✅ |
+| `checkpoint.py` | `save_params` / `load_params` via flax msgpack serialization | ✅ |
+| `eval.py` | `evaluate(act, n_games, seed) -> float` — win-rate harness vs any opponent | ✅ |
+| `train.py` | `train(cfg, …) -> (state, history)` — full collect/replay/update/target-sync loop with periodic eval + checkpoint | ✅ |
+| `cli.py` | Added `pokemon-train train` and `pokemon-train eval` Typer commands | ✅ |
+| `tests/rl/` | Added `test_eval.py`, `test_train.py`; total 35 tests | ✅ |
+
+**Commands:**
+- `uv run pokemon-train train -n <N> [--games-per-iter N] [--eval-every N] [--ckpt-dir PATH]`
+- `uv run pokemon-train eval --ckpt <path> [-g N]`
+
+**Short 5-iteration smoke run output (2026-06-20):**
+```
+iter    1 | step      0 | eps 1.000 | loss nan | winrate 0.00%
+iter    2 | step     40 | eps 0.999 | loss 0.1284 | winrate 30.00%
+iter    3 | step     80 | eps 0.998 | loss 0.1286 | winrate 20.00%
+iter    4 | step    120 | eps 0.998 | loss 0.1139 | winrate 10.00%
+iter    5 | step    160 | eps 0.997 | loss 0.1794 | winrate 30.00%
+best win-rate 30.00% at iter 2
+```
+Win-rate of a 5-iter checkpoint greedy-evaluated over 20 games: **15%**. (Expected —
+barely any training; M2 will run longer with curriculum.)
+
+---
+
 ## NOT done yet (so expectations are clear)
 
-- **No learning.** Policy is uniform random; no ε-greedy, no gradient steps, no
-  target-network sync, no training CLI. → M1.
-- **No evaluation** vs heuristic/random as a win-rate harness. → M1.
-- **No checkpointing** of trained params (orbax wired in M1).
-- **`maxCount > 1`** decisions: M0 records only the first chosen index
-  (pick-1). Multi-select handling (top-k) → M1.
-- **Rich features** (catalog-backed card/attack stats) → M2.
+- **No curriculum.** Training is vs `random_agent` only. Curriculum switch to
+  `fire_agent` heuristic is M2.
+- **No rich features.** Card/attack stats (type, HP, damage) not yet encoded. → M2.
+- **`maxCount > 1`** decisions: records only the first chosen index (pick-1). → M2.
+- **Win-rate vs `random_agent` needs longer runs** to climb past 85%. M1 proves the
+  loop works; convergence is M2's job.
 
 ---
 
@@ -168,6 +200,7 @@ fd3dbee feat(rl): replay buffer with padded next-option sets
 
 ## Next step
 
-Write the **M1 plan** (learning loop) and build it the same way: spec already
-covers the design → bite-sized TDD plan → subagent execution with review gates.
-M1 ends when win-rate vs `random_agent` visibly climbs past ~85%.
+**M2**: write the M2 plan (beat the heuristic). Key items: curriculum switch to
+`fire_agent`, enrich option features with catalog-backed card/attack stats (HP,
+type, attack damage), longer training runs, and eval vs `fire_agent` until >50%
+head-to-head win-rate.

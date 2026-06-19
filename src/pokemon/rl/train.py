@@ -47,7 +47,12 @@ def train(
             )
             for t in transitions:
                 buf.add(
-                    t["state"], t["option"], t["reward"], t["next_state"], t["next_options"], t["done"]
+                    t["state"],
+                    t["option"],
+                    t["reward"],
+                    t["next_state"],
+                    t["next_options"],
+                    t["done"],
                 )
             eps = max(cfg.eps_end, eps - eps_decay * len(transitions))
 
@@ -63,11 +68,20 @@ def train(
 
         if (it + 1) % eval_every == 0:
             winrate = ev.evaluate(
-                policy.greedy_act(model, state.params), opponent=opponent, n_games=eval_games, seed=seed
+                policy.greedy_act(model, state.params),
+                opponent=opponent,
+                n_games=eval_games,
+                seed=seed,
             )
             checkpoint.save_params(f"{ckpt_dir}/params.msgpack", state.params)
             history.append(
-                {"iter": it + 1, "step": step, "eps": round(eps, 3), "loss": last_loss, "winrate": winrate}
+                {
+                    "iter": it + 1,
+                    "step": step,
+                    "eps": round(eps, 3),
+                    "loss": last_loss,
+                    "winrate": winrate,
+                }
             )
             print(
                 f"iter {it + 1:4d} | step {step:6d} | eps {eps:.3f} | "

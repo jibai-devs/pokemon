@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import time
 
 import jax
@@ -69,9 +70,11 @@ def train(
     eval_games: int = typer.Option(50, "--eval-games"),
     ckpt_dir: str = typer.Option("data/checkpoints", "--ckpt-dir"),
     seed: int = typer.Option(0, "--seed"),
+    lr: float = typer.Option(1e-3, "--lr"),
+    eps_decay_steps: int = typer.Option(40000, "--eps-decay-steps"),
 ):
     """Train the DQN vs random_agent; checkpoints + eval win-rate as it goes."""
-    cfg = DQNConfig()
+    cfg = dataclasses.replace(DQNConfig(), lr=lr, eps_decay_steps=eps_decay_steps)
     _, history = train_mod.train(
         cfg,
         iterations=iterations,

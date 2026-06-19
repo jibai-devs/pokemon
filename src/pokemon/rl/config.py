@@ -15,7 +15,7 @@ class DQNConfig:
     target_update_interval: int = 1000
     eps_start: float = 1.0
     eps_end: float = 0.05
-    eps_decay_steps: int = 200_000
+    eps_decay_steps: int = 40_000
     # Max options stored per decision (pad/truncate the next-state option set).
     k_max: int = 64
     seed: int = 0

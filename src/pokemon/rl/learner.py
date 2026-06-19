@@ -31,9 +31,7 @@ def make_update_step(model: net.QNet, gamma: float):
             q_next = jnp.take_along_axis(q_next_target, next_act[:, None], axis=1)[:, 0]  # [B]
             has_next = jnp.any(mask, axis=-1)
             q_next = jnp.where(has_next, q_next, 0.0)
-            target = jax.lax.stop_gradient(
-                batch["reward"] + gamma * (1.0 - batch["done"]) * q_next
-            )
+            target = jax.lax.stop_gradient(batch["reward"] + gamma * (1.0 - batch["done"]) * q_next)
             return optax.huber_loss(q_sa, target).mean()
 
         loss, grads = jax.value_and_grad(loss_fn)(state.params)

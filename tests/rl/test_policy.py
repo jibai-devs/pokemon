@@ -29,8 +29,12 @@ def test_eps_one_picks_valid_random(main_obs):
 def test_multi_select_returns_distinct_topk():
     obs = {
         "select": {
-            "type": 1, "context": 8, "minCount": 2, "maxCount": 2,
-            "remainDamageCounter": 0, "remainEnergyCost": 0,
+            "type": 1,
+            "context": 8,
+            "minCount": 2,
+            "maxCount": 2,
+            "remainDamageCounter": 0,
+            "remainEnergyCost": 0,
             "option": [{"type": 14}, {"type": 14}, {"type": 14}],
         },
         "current": {"turn": 1, "yourIndex": 0, "players": [{}, {}]},

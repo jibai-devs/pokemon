@@ -73,3 +73,4 @@ pythonVersion = "3.14"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+markers = ["slow: tests that drive the real game engine (slower)"]

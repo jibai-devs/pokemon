@@ -1,8 +1,10 @@
 """Explore the CABT (Card Battle) Kaggle environment."""
 
 import json
+from collections import Counter
+
 import kaggle_environments as kaggle
-from kaggle_environments.envs.cabt.cabt import random_agent, first_agent, deck
+from kaggle_environments.envs.cabt.cabt import deck, first_agent, random_agent
 
 # ============================================================
 # 1. Environment Specification
@@ -22,7 +24,6 @@ print("2. DEFAULT DECK (60 card IDs)")
 print("=" * 60)
 print(f"Deck size: {len(deck)}")
 print(f"Unique cards: {sorted(set(deck))}")
-from collections import Counter
 counts = Counter(deck)
 print("Card counts:")
 for card_id, count in sorted(counts.items()):

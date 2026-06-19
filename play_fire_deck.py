@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Fire Deck Agent — plays the 000 fire deck in CABT."""
 
-import typer
 import kaggle_environments as kaggle
+import typer
 from kaggle_environments.envs.cabt.cabt import random_agent
 
 app = typer.Typer()
@@ -62,6 +62,7 @@ def _format_hand(hand: list) -> str:
         return "(empty)"
     names = [_card_name(c.get("id", -1)) for c in hand]
     from collections import Counter
+
     counts = Counter(names)
     return ", ".join(f"{n} x{c}" if c > 1 else n for n, c in counts.most_common())
 
@@ -108,9 +109,9 @@ def fire_agent(obs: dict) -> list[int]:
 
     # Phase 1: Submit deck
     if obs["select"] is None:
-        _log(f"\n{'='*60}")
+        _log(f"\n{'=' * 60}")
         _log(f"GAME {_game_num}: Submitting deck ({len(DECK)} cards)")
-        _log(f"{'='*60}")
+        _log(f"{'=' * 60}")
         return DECK
 
     select = obs["select"]
@@ -134,9 +135,13 @@ def fire_agent(obs: dict) -> list[int]:
             a_max = a.get("maxHp", "?")
             a_nrg = len(a.get("energies", []))
             bench_ids = [_card_name(c.get("id", -1)) for c in bench if c]
-            _log(f"\n--- Turn {turn} | Active: {a_name} HP={a_hp}/{a_max} Energy={a_nrg} | Bench: {bench_ids} | Hand: {len(hand)} ---")
+            _log(
+                f"\n--- Turn {turn} | Active: {a_name} HP={a_hp}/{a_max} Energy={a_nrg} | Bench: {bench_ids} | Hand: {len(hand)} ---"
+            )
         else:
-            _log(f"\n--- Turn {turn} | No active Pokemon | Bench: {len(bench)} | Hand: {len(hand)} ---")
+            _log(
+                f"\n--- Turn {turn} | No active Pokemon | Bench: {len(bench)} | Hand: {len(hand)} ---"
+            )
 
     # Log available options
     if _verbose:
@@ -147,12 +152,12 @@ def fire_agent(obs: dict) -> list[int]:
     # Coin flip: always go first
     for i, opt in enumerate(options):
         if opt.get("type") == 1:
-            _log(f"  -> Picking: GO FIRST")
+            _log("  -> Picking: GO FIRST")
             return [i]
 
     # Mulligan confirm
     if len(options) == 1 and options[0].get("type") == 0:
-        _log(f"  -> Picking: OK")
+        _log("  -> Picking: OK")
         return [0]
 
     # Single option
@@ -317,18 +322,18 @@ def play(
             draws += 1
 
         if verbose:
-            _log(f"\n{'='*60}")
+            _log(f"\n{'=' * 60}")
             _log(f"RESULT: {result} in {len(steps)} steps")
-            _log(f"{'='*60}")
+            _log(f"{'=' * 60}")
         else:
-            typer.echo(f"  Game {i+1}: {result} ({len(steps)} steps)")
+            typer.echo(f"  Game {i + 1}: {result} ({len(steps)} steps)")
 
     typer.echo()
     typer.echo(f"=== RESULTS ({games} games) ===")
-    typer.echo(f"Wins:   {wins} ({wins/games*100:.0f}%)")
-    typer.echo(f"Losses: {losses} ({losses/games*100:.0f}%)")
-    typer.echo(f"Draws:  {draws} ({draws/games*100:.0f}%)")
-    typer.echo(f"Avg game length: {total_steps/games:.0f} steps")
+    typer.echo(f"Wins:   {wins} ({wins / games * 100:.0f}%)")
+    typer.echo(f"Losses: {losses} ({losses / games * 100:.0f}%)")
+    typer.echo(f"Draws:  {draws} ({draws / games * 100:.0f}%)")
+    typer.echo(f"Avg game length: {total_steps / games:.0f} steps")
 
 
 if __name__ == "__main__":

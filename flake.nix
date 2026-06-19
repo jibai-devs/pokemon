@@ -10,15 +10,20 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, treefmt-nix, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      treefmt-nix,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        treefmtEval = treefmt-nix.lib.mkTreefmtEval {
-          projectRootFile = ./flake.nix;
-          imports = [ ./treefmt.nix ];
-        };
+        treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
       in
       {
         formatter = treefmtEval.config.build.wrapper;

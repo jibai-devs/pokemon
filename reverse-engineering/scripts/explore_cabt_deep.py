@@ -1,8 +1,9 @@
 """Deep explorer for CABT (Pokémon TCG Card Battle) environment."""
 
 import json
+
 import kaggle_environments as kaggle
-from kaggle_environments.envs.cabt.cabt import random_agent, first_agent, deck
+from kaggle_environments.envs.cabt.cabt import first_agent, random_agent
 
 env = kaggle.make("cabt", debug=True)
 env.reset()
@@ -16,7 +17,7 @@ print("SELECT OPTION TYPES OBSERVED")
 print("=" * 60)
 
 option_types = {}
-for i, step in enumerate(steps):
+for _i, step in enumerate(steps):
     for p in range(2):
         obs = step[p].get("observation", {})
         select = obs.get("select")
@@ -51,15 +52,21 @@ if len(steps) > 50:
             print(f"    deckCount: {player.get('deckCount')}")
             print(f"    discard ({len(player.get('discard', []))}): {player.get('discard', [])}")
             print(f"    prize ({len(player.get('prize', []))}): {player.get('prize', [])}")
-            print(f"    hand: {player.get('hand', []) if pi == current.get('yourIndex') else '(hidden)'}")
-            print(f"    poisoned={player.get('poisoned')}, burned={player.get('burned')}, "
-                  f"asleep={player.get('asleep')}, paralyzed={player.get('paralyzed')}, "
-                  f"confused={player.get('confused')}")
+            print(
+                f"    hand: {player.get('hand', []) if pi == current.get('yourIndex') else '(hidden)'}"
+            )
+            print(
+                f"    poisoned={player.get('poisoned')}, burned={player.get('burned')}, "
+                f"asleep={player.get('asleep')}, paralyzed={player.get('paralyzed')}, "
+                f"confused={player.get('confused')}"
+            )
 
         select = obs.get("select")
         if select:
-            print(f"\n  Select: type={select.get('type')}, context={select.get('context')}, "
-                  f"min={select.get('minCount')}, max={select.get('maxCount')}")
+            print(
+                f"\n  Select: type={select.get('type')}, context={select.get('context')}, "
+                f"min={select.get('minCount')}, max={select.get('maxCount')}"
+            )
             print(f"  Options: {json.dumps(select.get('option', []))}")
 
 # ============================================================
@@ -77,7 +84,9 @@ for p in range(2):
         print(f"\nPlayer {p}:")
         players = current.get("players", [])
         for pi, player in enumerate(players):
-            print(f"  Player {pi}: active={player.get('active')}, bench={len(player.get('bench', []))}, "
-                  f"deck={player.get('deckCount')}, discard={len(player.get('discard', []))}, "
-                  f"prize={len(player.get('prize', []))}")
+            print(
+                f"  Player {pi}: active={player.get('active')}, bench={len(player.get('bench', []))}, "
+                f"deck={player.get('deckCount')}, discard={len(player.get('discard', []))}, "
+                f"prize={len(player.get('prize', []))}"
+            )
         print(f"  result: {current.get('result')}")

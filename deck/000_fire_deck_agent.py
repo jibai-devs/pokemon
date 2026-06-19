@@ -95,7 +95,6 @@ def _score_option(opt: dict, me: dict, hand: list, current: dict) -> float:
     elif opt_type == 8:
         area = opt.get("area", 0)
         index = opt.get("index", -1)
-        in_play_area = opt.get("inPlayArea", 0)
 
         if area == 2 and 0 <= index < len(hand):
             card = hand[index]
@@ -155,9 +154,9 @@ def _score_option(opt: dict, me: dict, hand: list, current: dict) -> float:
         attack_id = opt.get("attackId", 0)
         # Prefer higher damage attacks
         attack_damage = {
-            44: 60,   # Heat Blast
+            44: 60,  # Heat Blast
             45: 260,  # Blaze Blitz
-            17: 70,   # Hot Magma
+            17: 70,  # Hot Magma
             18: 140,  # Ground Burn
         }
         damage = attack_damage.get(attack_id, 50)
@@ -233,7 +232,7 @@ if __name__ == "__main__":
             draws += 1
 
     print(f"\n=== RESULTS ({games} games) ===")
-    print(f"Wins: {wins} ({wins/games*100:.0f}%)")
-    print(f"Losses: {losses} ({losses/games*100:.0f}%)")
-    print(f"Draws: {draws} ({draws/games*100:.0f}%)")
-    print(f"Avg game length: {total_steps/games:.0f} steps")
+    print(f"Wins: {wins} ({wins / games * 100:.0f}%)")
+    print(f"Losses: {losses} ({losses / games * 100:.0f}%)")
+    print(f"Draws: {draws} ({draws / games * 100:.0f}%)")
+    print(f"Avg game length: {total_steps / games:.0f} steps")

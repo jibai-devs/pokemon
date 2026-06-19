@@ -4,7 +4,6 @@
 import ctypes
 import json
 import os
-import sys
 
 # ─── Load the library ────────────────────────────────────────────────────────
 lib_dir = os.path.join(os.path.dirname(__file__), "..", "data", "sample_submission", "cg")
@@ -73,11 +72,11 @@ for a in attacks:
             energy_types.add(e)
         elif isinstance(e, dict):
             energy_types.add(e.get("type", str(e)))
-print(f"\n=== ENERGY TYPES (from attack costs) ===")
+print("\n=== ENERGY TYPES (from attack costs) ===")
 print(sorted(energy_types))
 
 # ─── 5. Extract unique attack names ─────────────────────────────────────────
-attack_names = sorted(set(a.get("name", "") for a in attacks if a.get("name")))
+attack_names = sorted({a.get("name", "") for a in attacks if a.get("name")})
 print(f"\n=== UNIQUE ATTACK NAMES ({len(attack_names)} total) ===")
 for name in attack_names[:50]:
     print(f"  {name}")
@@ -96,11 +95,8 @@ for s, count in sorted(stage_counts.items()):
 # ─── 7. Extract ability text if present ──────────────────────────────────────
 abilities = []
 for c in cards:
-    if "ability" in c and c["ability"]:
-        abilities.append({
-            "pokemon": c.get("name", "?"),
-            "ability": c["ability"]
-        })
+    if c.get("ability"):
+        abilities.append({"pokemon": c.get("name", "?"), "ability": c["ability"]})
 if abilities:
     print(f"\n=== ABILITIES ({len(abilities)} found) ===")
     out_abilities = os.path.join(os.path.dirname(__file__), "..", "data", "all_abilities.json")

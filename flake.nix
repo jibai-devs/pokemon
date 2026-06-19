@@ -72,13 +72,19 @@
             # uv manages Python — install 3.14 if missing
             uv python install 3.14 2>/dev/null || true
 
-            # create venv if not present
-            if [ ! -d .venv ]; then
+            # activate existing venv or create one
+            if [ -d .venv ]; then
+              export VIRTUAL_ENV="$(pwd)/.venv"
+              export PATH="$VIRTUAL_ENV/bin:$PATH"
+            else
               echo "Creating .venv with Python 3.14 via uv..."
               uv venv .venv --python 3.14
+              export VIRTUAL_ENV="$(pwd)/.venv"
+              export PATH="$VIRTUAL_ENV/bin:$PATH"
             fi
-            export VIRTUAL_ENV="$(pwd)/.venv"
-            export PATH="$VIRTUAL_ENV/bin:$PATH"
+
+            # sync deps from pyproject.toml / uv.lock
+            uv sync
 
             echo "Python: $(python --version 2>&1)"
             echo "uv:     $(uv --version)"

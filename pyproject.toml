@@ -32,6 +32,7 @@ dev = [
 
 [project.scripts]
 pokemon-play = "pokemon.cli:app"
+pokemon-train = "pokemon.rl.cli:app"
 
 [build-system]
 requires = ["hatchling"]

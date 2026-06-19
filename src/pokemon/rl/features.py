@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import numpy as np
 
+from pokemon import catalog
 from pokemon.cabt_enums import AreaType, OptionType
 
 BENCH_SLOTS = 5
@@ -109,6 +110,44 @@ def _option_card_id(opt: dict, obs: dict) -> int:
     if 0 <= idx < len(hand):
         return hand[idx].get("id", -1)
     return -1
+
+
+N_ENERGY_TYPE = 12  # EnergyType 0..11
+N_CARD_TYPE = 7  # CardType 0..6
+CARD_FEAT_DIM = 1 + N_CARD_TYPE + 1 + 1 + N_ENERGY_TYPE + 4  # known,type,hp,retreat,nrgtype,stages
+ATTACK_FEAT_DIM = 1 + 1 + 1 + N_ENERGY_TYPE  # known,damage,cost-count,cost-type multi-hot
+
+
+def card_features(card_id: int) -> list[float]:
+    rec = catalog.card_record(card_id)
+    if rec is None:
+        return [0.0] * CARD_FEAT_DIM
+    vec = [1.0]
+    vec += _onehot(rec.get("cardType"), N_CARD_TYPE)
+    vec += [min(rec.get("hp") or 0, 380) / 380.0]
+    vec += [min(rec.get("retreatCost") or 0, 4) / 4.0]
+    vec += _onehot(rec.get("energyType"), N_ENERGY_TYPE)
+    vec += [
+        1.0 if rec.get("basic") else 0.0,
+        1.0 if rec.get("stage1") else 0.0,
+        1.0 if rec.get("stage2") else 0.0,
+        1.0 if rec.get("ex") else 0.0,
+    ]
+    return vec
+
+
+def attack_features(attack_id: int) -> list[float]:
+    rec = catalog.attack_record(attack_id)
+    if rec is None:
+        return [0.0] * ATTACK_FEAT_DIM
+    energies = rec.get("energies") or []
+    vec = [1.0, min(rec.get("damage") or 0, 350) / 350.0, min(len(energies), 5) / 5.0]
+    types = [0.0] * N_ENERGY_TYPE
+    for e in energies:
+        if isinstance(e, int) and 0 <= e < N_ENERGY_TYPE:
+            types[e] = 1.0
+    vec += types
+    return vec
 
 
 def encode_option(opt: dict, obs: dict) -> np.ndarray:

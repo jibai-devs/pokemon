@@ -1,12 +1,14 @@
 """Drive one CABT game and turn our decisions into DQN transitions.
 
-M0 policy is uniform-random; M1 swaps in epsilon-greedy over the Q-network.
+The acting policy is injected as `act(obs) -> list[int]`; default is uniform
+random (M0 behavior). M1 passes an epsilon-greedy policy over the Q-network.
 """
 
 from __future__ import annotations
 
 import copy
 import random
+from collections.abc import Callable
 
 import kaggle_environments as kaggle
 import numpy as np
@@ -17,24 +19,32 @@ from pokemon.rl import features
 from pokemon.rl import reward as rwd
 
 
-def make_collector(records: list, rng: random.Random):
+def make_collector(records: list, act: Callable[[dict], list[int]]):
     def agent(obs: dict) -> list[int]:
         if obs["select"] is None:
             return FIRE_DECK
-        opts = obs["select"]["option"]
-        choice = rng.sample(range(len(opts)), obs["select"]["maxCount"])
+        choice = act(obs)
         records.append({"obs": copy.deepcopy(obs), "choice": choice})
         return choice
 
     return agent
 
 
-def play_game(opponent=random_agent, gamma: float = 0.99, seed: int | None = None):
-    rng = random.Random(seed)
+def _random_act(rng: random.Random) -> Callable[[dict], list[int]]:
+    def act(obs: dict) -> list[int]:
+        opts = obs["select"]["option"]
+        return rng.sample(range(len(opts)), obs["select"]["maxCount"])
+
+    return act
+
+
+def play_game(act=None, opponent=random_agent, gamma: float = 0.99, seed: int | None = None):
+    if act is None:
+        act = _random_act(random.Random(seed))
     records: list = []
     env = kaggle.make("cabt", debug=True)
     env.reset()
-    steps = env.run([make_collector(records, rng), opponent])
+    steps = env.run([make_collector(records, act), opponent])
     terminal_reward = float(steps[-1][0].get("reward") or 0.0)
 
     transitions: list[dict] = []
@@ -42,7 +52,7 @@ def play_game(opponent=random_agent, gamma: float = 0.99, seed: int | None = Non
     for i, rec in enumerate(records):
         obs = rec["obs"]
         state, options, _ = features.encode_decision(obs)
-        chosen = rec["choice"][0]  # M0: pick-1 (top-k approximation deferred)
+        chosen = rec["choice"][0]  # store the primary (highest-Q / first) option
         last = i == n - 1
         if last:
             next_state = np.zeros_like(state)

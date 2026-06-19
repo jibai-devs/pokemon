@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 """Fire Deck Agent — plays the 000 fire deck in CABT."""
 
+import hashlib
+import json
+from pathlib import Path
+
 import kaggle_environments as kaggle
 import typer
 from kaggle_environments.envs.cabt.cabt import random_agent
 
 app = typer.Typer()
 
+# Short, hand-picked labels that override the full catalog where a nicer name
+# is wanted (e.g. "Fire Energy" instead of catalog's "Basic {R} Energy").
 CARD_NAMES = {
     46: "Gouging Fire ex",
     76: "Slugma",
@@ -27,6 +33,29 @@ ATK_NAMES = {
     17: "Hot Magma (70)",
     18: "Ground Burn (140+)",
 }
+
+# Full reverse-engineered catalogs: id -> name/details for every known card and
+# attack. Used as a fallback when an id isn't in the hand-picked maps above.
+_DATA_DIR = Path(__file__).parent / "reverse-engineering" / "data"
+
+
+def _load_catalog() -> tuple[dict[int, str], dict[int, dict]]:
+    cards: dict[int, str] = {}
+    attacks: dict[int, dict] = {}
+    try:
+        for c in json.loads((_DATA_DIR / "all_cards.json").read_text()):
+            cards[c["cardId"]] = c["name"]
+    except OSError:
+        pass
+    try:
+        for a in json.loads((_DATA_DIR / "all_attacks.json").read_text()):
+            attacks[a["attackId"]] = a
+    except OSError:
+        pass
+    return cards, attacks
+
+
+_CARD_CATALOG, _ATK_CATALOG = _load_catalog()
 
 # Fire deck card IDs
 DECK = (
@@ -54,7 +83,38 @@ def _log(msg: str):
 
 
 def _card_name(card_id: int) -> str:
-    return CARD_NAMES.get(card_id, f"Card#{card_id}")
+    if card_id in CARD_NAMES:
+        return CARD_NAMES[card_id]
+    if card_id in _CARD_CATALOG:
+        return _CARD_CATALOG[card_id]
+    return f"Card#{card_id}"
+
+
+def _atk_name(atk_id: int) -> str:
+    if atk_id in ATK_NAMES:
+        return ATK_NAMES[atk_id]
+    a = _ATK_CATALOG.get(atk_id)
+    if a:
+        dmg = a.get("damage", 0)
+        return f"{a['name']} ({dmg})" if dmg else a["name"]
+    return f"#{atk_id}"
+
+
+def _deck_summary(deck: list[int]) -> tuple[list[str], str]:
+    """Return (per-card breakdown lines, checksum) for a deck list.
+
+    The checksum is a canonical fingerprint: ids are sorted first, so the same
+    multiset of cards always hashes the same regardless of build order.
+    """
+    from collections import Counter
+
+    counts = Counter(deck)
+    lines = [
+        f"  {n:2}x {_card_name(cid)} (#{cid})"
+        for cid, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    ]
+    digest = hashlib.sha256(",".join(map(str, sorted(deck))).encode()).hexdigest()[:8]
+    return lines, digest
 
 
 def _format_hand(hand: list) -> str:
@@ -96,11 +156,12 @@ def _format_option(opt: dict, hand: list) -> str:
         return "CONFIRM"
     if t == 13:
         atk = opt.get("attackId", 0)
-        return f"ATTACK: {ATK_NAMES.get(atk, f'#{atk}')}"
+        return f"ATTACK: {_atk_name(atk)}"
     if t == 14:
         return "END TURN"
     if t == 0:
-        return "OK"
+        n = opt.get("number")
+        return "OK" if n is None else f"OK#{n}"
     return f"?type={t}"
 
 
@@ -109,9 +170,14 @@ def fire_agent(obs: dict) -> list[int]:
 
     # Phase 1: Submit deck
     if obs["select"] is None:
+        lines, checksum = _deck_summary(DECK)
         _log(f"\n{'=' * 60}")
-        _log(f"GAME {_game_num}: Submitting deck ({len(DECK)} cards)")
+        _log(f"GAME {_game_num}: Submitting deck ({len(DECK)} cards, sha256:{checksum})")
         _log(f"{'=' * 60}")
+        # Print the full card breakdown only once to avoid repeating every game.
+        if _game_num <= 1:
+            for line in lines:
+                _log(line)
         return DECK
 
     select = obs["select"]

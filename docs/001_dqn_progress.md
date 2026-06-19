@@ -12,14 +12,23 @@ TCG environment. Update this as milestones land. Last updated: **2026-06-20** (M
 
 ## TL;DR (where we are right now)
 
-- **M1 is DONE.** The full DQN learning loop is wired: ε-greedy collection →
-  replay buffer → Double-DQN gradient updates → target-net sync → flax msgpack
-  checkpoints → greedy eval harness. `just check` is green (35 tests).
-- The agent **learns** (loss drops, win-rate fluctuates vs random), but a 5-iteration
-  smoke run vs `random_agent` yields ~10–30% win-rate as expected (barely trained).
-  The M1 goal is a working learning loop, not a trained agent — that's M2.
-- **Next is M2**: curriculum switch to heuristic `fire_agent`, richer features
-  (catalog-backed card/attack stats), longer training runs.
+- **M1 machinery is DONE and correct** — ε-greedy collection → replay → Double-DQN
+  updates → target-net sync → flax checkpoints → greedy eval. `just check` green
+  (35 tests); the toy-batch test proves the update converges (Q → reward).
+- **But the trained agent does NOT yet beat random.** A 200-iteration run vs
+  `random_agent` (loss 0.09→0.03) produced a greedy win-rate of **34% (±9%, n=100)**
+  vs a **30% (±9%)** random-policy baseline — statistically indistinguishable.
+  The learning curve did **not** climb toward the 85% goal. (See "M1 training result".)
+- **Diagnosis / what's blocking learning** (ranked): (1) **ε annealed far too slowly**
+  — `eps_decay_steps=200_000` transitions, so after ~48k transitions ε was still
+  0.74; data collection was ~75% random, so the net rarely reinforced its own play.
+  (2) **Thin features** — option vectors lack card/attack semantics (damage, type,
+  HP), so the Q-function literally can't tell a 260-dmg attack from a 60-dmg one
+  (this is the M2 feature work). (3) **Sparse reward + long horizon** — prize
+  shaping only fires on KOs; credit assignment over ~30 of our decisions/game is hard.
+- **Next is M2**: fix the ε schedule, enrich features with catalog-backed
+  card/attack stats, then re-train (and curriculum-switch to the heuristic). More
+  compute alone on the current setup is not expected to help.
 
 Run what exists:
 ```bash
@@ -171,6 +180,25 @@ best win-rate 30.00% at iter 2
 ```
 Win-rate of a 5-iter checkpoint greedy-evaluated over 20 games: **15%**. (Expected —
 barely any training; M2 will run longer with curriculum.)
+
+### M1 training result (200 iterations vs random, 2026-06-20)
+
+A real run — `pokemon-train train -n 200 --games-per-iter 8 --updates-per-iter 100
+--eval-every 10 --eval-games 30` (~10 min CPU; loss 0.09 → 0.03). Greedy win-rate
+per eval bounced in a **~30–50% band with no upward trend** (peak 56.7% at iter 110
+was eval noise). Measured over a larger 100-game sample:
+
+| Agent (100 games vs `random_agent`) | Win-rate |
+|---|---|
+| DQN trained (this run) | **34.0%** (±9.3%) |
+| Random-policy baseline (same deck) | 30.0% (±9.0%) |
+| Heuristic `fire_agent` (reference) | ~74% |
+
+**Conclusion: the trained agent is statistically indistinguishable from random** —
+the loop *runs and reduces loss*, but does not learn to beat random. See the
+ranked diagnosis in the TL;DR (slow ε anneal → mostly-random data; thin features;
+sparse long-horizon reward). The fix is M2 (features + ε schedule), not more
+compute on the current setup.
 
 ---
 

@@ -162,10 +162,13 @@ def encode_option(opt: dict, obs: dict) -> np.ndarray:
     ]
     card_id = _option_card_id(opt, obs)
     vec += [1.0 if card_id >= 0 else 0.0, (card_id % 2000) / 2000.0 if card_id >= 0 else 0.0]
+    # Semantic blocks (M2): what the referenced card / attack actually does.
+    vec += card_features(card_id)
+    vec += attack_features(opt.get("attackId", -1) if "attackId" in opt else -1)
     return np.asarray(vec, dtype=np.float32)
 
 
-OPTION_DIM = N_OPTION_TYPE + 2 * N_AREA + 4 + 2
+OPTION_DIM = N_OPTION_TYPE + 2 * N_AREA + 4 + 2 + CARD_FEAT_DIM + ATTACK_FEAT_DIM
 
 
 def encode_decision(obs: dict) -> tuple[np.ndarray, np.ndarray, int]:

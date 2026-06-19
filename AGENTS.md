@@ -19,7 +19,7 @@ the real game flow, then reconcile what we observe against the engine's
 documented enums.
 
 Concretely, the active thread is:
-1. Play fire-deck games with `play_fire_deck.py -v` and read the turn-by-turn log.
+1. Play fire-deck games with `pokemon-play -v` (or `python -m pokemon -v`) and read the turn-by-turn log.
 2. Decode selections via the real enums — see **`docs/000_plan_engine_enum_extraction.md`**
    (the live plan). Key fact: a selection is `select.type` + `select.context`,
    and `option.type` alone is not enough (this is why "OK#n" options look identical).
@@ -37,8 +37,8 @@ decoding is solid.
 - Play the fire deck (single-command Typer app — no subcommand name):
   ```bash
   uv run pokemon-play -g 5 -v        # 5 games, verbose
-  # or directly:
-  .venv/bin/python play_fire_deck.py -g 1 -v
+  uv run python -m pokemon -g 1 -v   # equivalent
+  just run -g 1 -v                   # equivalent
   ```
 - Lint/format must pass before committing: `uv run ruff check . && uv run ruff format --check .`
 
@@ -46,9 +46,8 @@ decoding is solid.
 
 | Path | Contents | Put here |
 |------|----------|----------|
-| `play_fire_deck.py` (root) | The mature fire-deck agent: Typer CLI (`app`), verbose logging, catalog-backed card/attack names, deck checksum. Exposed as the `pokemon-play` console script. | The current "play a deck and watch it" entrypoint. |
-| `src/pokemon/` | Installed package (currently just an empty `__init__.py`). | **Shared, reusable code** — engine enums, observation parsing, scoring, agent base classes. New durable modules go here (e.g. the planned `src/pokemon/cabt_enums.py`). |
-| `deck/` | Per-deck artifacts, numbered `NNN_<name>`: decklist `.py`, an agent `.py`, decklist `.md`, and a gameplay walkthrough `.md`. `000` is the fire deck. | A new deck → new `NNN_<name>.*` set here. |
+| `src/pokemon/` | The installed package (`pip`/`uv` editable). `catalog.py` (card/attack names + option formatting), `decks.py` (deck definitions + checksum), `agent.py` (`fire_agent`, `score_option`), `cli.py` (Typer `app`), `__main__.py` (`python -m pokemon`). Exposed as the `pokemon-play` console script. | **All shared, reusable code** — engine enums, observation parsing, scoring, agents. New durable modules go here (e.g. the planned `src/pokemon/cabt_enums.py`). |
+| `deck/` | Per-deck artifacts, numbered `NNN_<name>`: a thin decklist `.py` re-exporting `pokemon.decks`, a decklist `.md`, and a gameplay walkthrough `.md`. `000` is the fire deck. | A new deck → add it to `pokemon.decks`, then a `NNN_<name>.*` artifact set here. |
 | `docs/` | Engine + project notes. `CABT.md` = observation/option reference (partly reverse-engineered, partly stale). `000_plan_*.md` = execution plans. | Specs, plans, engine notes. Plans get a `NNN_plan_` prefix. |
 | `reverse-engineering/` | `README.md` (RE command cookbook), `scripts/` (engine explorers/extractors), `data/` (symbol dumps + `all_cards.json` 1267 cards / `all_attacks.json` 1556 attacks). | Anything about prying data/behavior out of `libcg.so`. The card/attack JSON here is the authoritative id→name source. |
 | `notebooks/` | Jupyter exploration (empty). | Throwaway/EDA notebooks. |
@@ -62,11 +61,12 @@ The CABT engine itself is vendored under the venv:
 
 ## Conventions
 
-- **Decks are numbered** `NNN_<name>` and keep all four artifacts in `deck/`
-  (decklist py + agent py + decklist md + gameplay md). Reuse `000` as the template.
+- **Decks are canonical in `pokemon.decks`**; the numbered `deck/NNN_<name>.*`
+  artifacts (thin decklist py + decklist md + gameplay md) document them. Reuse
+  `000` as the template.
 - **Card/attack names** come from the catalogs in `reverse-engineering/data/`,
-  not hand-typed maps. Look up by `cardId`/`attackId`; keep a small override map
-  only for nicer display names (see `play_fire_deck.py`).
+  not hand-typed maps. Look up by `cardId`/`attackId` via `pokemon.catalog`; keep
+  a small override map only for nicer display names.
 - **Enums over magic ints.** Once `src/pokemon/cabt_enums.py` exists, import
   `IntEnum`s instead of writing `if opt["type"] == 7`. The integers' meanings are
   defined by the engine; transcribe from the plan doc, verify empirically.
@@ -75,12 +75,11 @@ The CABT engine itself is vendored under the venv:
 
 ## Known rough edges (don't be surprised)
 
-- **Duplicated agent logic:** `deck/000_fire_deck_agent.py` is an older,
-  verbose-less near-copy of `play_fire_deck.py`. They drift. Long-term, factor the
-  shared scoring/parsing into `src/pokemon/` and have both import it.
-- **`just run` / `python -m pokemon` is broken:** `src/pokemon/` has no
-  `__main__.py`, so the `justfile run` target won't work yet. The real entrypoint
-  today is `play_fire_deck.py` (`pokemon-play`).
+- **Stale option labels:** `pokemon.catalog.format_option` and
+  `pokemon.agent.score_option` still use the older reverse-engineered type→label
+  mapping, which is partly wrong vs the engine's real `OptionType` (e.g. it treats
+  7=ATTACH/8=USE; the engine says 7=PLAY/8=ATTACH). Fixing this is Phase 1 of the
+  plan doc.
 - **`docs/CABT.md` is partly wrong:** its option-type table predates the official
   enums and mislabels some `OptionType`s (e.g. 7/8). When it conflicts with
   `docs/000_plan_engine_enum_extraction.md`, the plan (sourced from the engine
@@ -92,4 +91,4 @@ The CABT engine itself is vendored under the venv:
 2. `docs/000_plan_engine_enum_extraction.md` — the current plan + full enum reference + ABI.
 3. `docs/CABT.md` — observation shape (treat the option-type table with suspicion).
 4. `reverse-engineering/README.md` — how to extract more from the engine.
-5. `play_fire_deck.py` — the working reference agent.
+5. `src/pokemon/agent.py` + `catalog.py` — the working reference agent.

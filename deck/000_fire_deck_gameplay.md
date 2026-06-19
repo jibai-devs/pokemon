@@ -2,7 +2,7 @@
 
 ## How the Agent Plays
 
-The `play_fire_deck.py` program runs the fire deck against a random agent.
+`pokemon-play` (a.k.a. `python -m pokemon`) runs the fire deck against a random agent.
 
 ### Game Flow
 
@@ -81,7 +81,7 @@ Playing: Festival Grounds (Stadium)
 
 ```bash
 # Run the agent
-.venv/bin/python3 play_fire_deck.py
+uv run pokemon-play -g 5 -v        # or: uv run python -m pokemon -g 5 -v
 
 # Output:
 # === FIRE DECK AGENT ===
@@ -100,9 +100,9 @@ Playing: Festival Grounds (Stadium)
 ## Code Structure
 
 ```python
-# play_fire_deck.py
+# src/pokemon/agent.py (+ decks.py, catalog.py)
 
-DECK = [46]*2 + [76]*4 + [30]*4 + ...  # 60 cards
+FIRE_DECK = [46]*2 + [76]*4 + [30]*4 + ...  # 60 cards (pokemon.decks)
 
 def fire_agent(obs):
     if obs['select'] is None:

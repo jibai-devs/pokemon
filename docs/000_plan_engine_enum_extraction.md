@@ -2,7 +2,7 @@
 
 **Status:** proposed
 **Owner:** unassigned
-**Prereqs:** none (the agent runs today; see `play_fire_deck.py`)
+**Prereqs:** none (the agent runs today: `uv run pokemon-play -v`; code in `src/pokemon/`)
 
 > This is an execution plan written to be handed to an LLM agent. It contains
 > all the context needed to start cold. Read the whole "Context" section before
@@ -59,16 +59,17 @@ VisualizeData(battlePtr)     -> char*          # alternate JSON stream for the v
 ```
 Decks must be exactly 60 cards each (`game.py:battle_start`).
 
-### What the agent does today (`play_fire_deck.py`)
+### What the agent does today (`src/pokemon/`)
 - Reads `obs["select"]["option"]` and `["maxCount"]`. **It never reads
   `select["type"]` or `select["context"]`.** ← root cause.
-- `_format_option(opt, hand)` is a hand-written `if opt["type"] == N` chain that
-  maps `OptionType` ints to strings. `type == 0` returns `"OK"` (now `OK#<number>`).
-- `_score_option(...)` branches on `opt["type"]` only; type 0 gets a flat 20.0,
-  so the agent picks the first NUMBER option blindly.
+- `pokemon.catalog.format_option(opt, hand)` is a hand-written `if opt["type"] == N`
+  chain that maps `OptionType` ints to strings. `type == 0` returns `"OK"` (now
+  `OK#<number>`).
+- `pokemon.agent.score_option(...)` branches on `opt["type"]` only; type 0 gets a
+  flat 20.0, so the agent picks the first NUMBER option blindly.
 - Card/attack names already resolve via the full catalogs
   (`reverse-engineering/data/all_cards.json`, `all_attacks.json`) — see
-  `_card_name` / `_atk_name`. That part is done; do not redo it.
+  `pokemon.catalog.card_name` / `atk_name`. That part is done; do not redo it.
 
 ### The key insight
 `OptionType.NUMBER = 0` is **disambiguated by `SelectContext`**, which the engine
@@ -94,24 +95,23 @@ empirically (Phase 2) rather than assuming the vendored build is identical.
    `LogType`. Use `IntEnum` so existing int comparisons keep working, and add a
    `safe(cls, value)` helper that returns the member or a sentinel for unknown
    ints (forward-compat if the build has extras).
-2. In `play_fire_deck.py`, pull `sel_type = select.get("type")` and
-   `context = select.get("context")` in `fire_agent`, and **log them** in the
-   verbose turn header, e.g.
-   `Choices (4, pick 1) [SelectType.COUNT / SelectContext.DRAW_COUNT]:`.
-3. Rewrite `_format_option` to take `context` and use the enums:
+2. In `pokemon.agent.fire_agent`, pull `sel_type = select.get("type")` and
+   `context = select.get("context")`, and **log them** in the verbose turn
+   header, e.g. `Choices (4, pick 1) [SelectType.COUNT / SelectContext.DRAW_COUNT]:`.
+3. Rewrite `pokemon.catalog.format_option` to take `context` and use the enums:
    - `OptionType.NUMBER` → render `f"{context.name}={opt['number']}"`
      (e.g. `DRAW_COUNT=2`) instead of `OK#n`.
    - `OptionType.CARD` (3) → use `AreaType(opt['area']).name` + the catalog name.
    - Cover the option types we currently miss: `TOOL_CARD(4)`, `ENERGY_CARD(5)`,
      `ENERGY(6)`, `EVOLVE(9)`, `ABILITY(10)`, `DISCARD(11)`, `RETREAT(12)`,
      `SKILL(15)`, `SPECIAL_CONDITION(16)`. (Note: the doc's `OptionType` numbering
-     is the ground truth; our old labels in `_format_option` were partly wrong —
+     is the ground truth; our old labels in `format_option` were partly wrong —
      reconcile against the reference, do not trust the old `if t == …` numbers.)
-4. Make `_score_option` context-aware where it matters (at minimum: pick the
+4. Make `score_option` context-aware where it matters (at minimum: pick the
    sensible end of a `COUNT` selection per its `SelectContext` — usually max for
    DRAW_COUNT, situational for damage counters).
 
-**Watch out:** the old `_format_option` predates the docs and may have
+**Watch out:** the old `format_option` predates the docs and may have
 mislabeled types (it was reverse-engineered by observation). When the reference
 table and the old code disagree on what an integer means, **the reference wins**;
 flag the discrepancy in the PR description.
@@ -146,10 +146,10 @@ Enum *member names* are NOT in the binary (C++ discards them), so do not try to
   the integers flow across many games — empirical, at the C++ boundary:
   ```bash
   # gdb
-  gdb --args .venv/bin/python play_fire_deck.py -g 1 -v
+  gdb --args .venv/bin/python -m pokemon -g 1 -v
   #   break State::addOption ; run ; info args ; bt
   # Frida (auto-harvest every (context, optionType) the engine produces)
-  frida-trace -i 'Select' -i 'GetBattleData' -p $(pgrep -f play_fire_deck)
+  frida-trace -i 'Select' -i 'GetBattleData' -p $(pgrep -f 'm pokemon')
   #   resolve internal addOption via DebugSymbol.fromName in a JS hook
   ```
 - **Static decompile (only if needed):** load `libcg.so` in Ghidra
@@ -170,8 +170,8 @@ shipped build. Tools: Ghidra, `objdump -s -j .rodata`, `rizin -A`.
 | Path | Role |
 |------|------|
 | `src/pokemon/cabt_enums.py` | **new** — IntEnum transcription of the reference |
-| `play_fire_deck.py` | edit — read `type`/`context`; rewrite `_format_option`/`_score_option` |
-| `deck/000_fire_deck_agent.py` | near-duplicate of the agent w/o verbose; decide: import shared logic or leave |
+| `src/pokemon/catalog.py` | edit — rewrite `format_option` to take `context` and use the enums |
+| `src/pokemon/agent.py` | edit — read `select.type`/`context`; make `score_option` context-aware |
 | `reverse-engineering/scripts/verify_enums.py` | **new** — Phase 2 empirical verifier |
 | `docs/CABT.md` | update the "Select Option Types" table to match the real enums |
 
@@ -182,7 +182,7 @@ shipped build. Tools: Ghidra, `objdump -s -j .rodata`, `rizin -A`.
 - [ ] `cabt_enums.py` exists; `python -c "from pokemon.cabt_enums import *"` imports clean.
 - [ ] Verbose log shows `SelectType` + `SelectContext` per decision, and former
       "OK#n" options now read as their context (e.g. `DRAW_COUNT=2`).
-- [ ] No `?type=N` or bare `OK` left in `_format_option` output across a 50-game
+- [ ] No `?type=N` or bare `OK` left in `format_option` output across a 50-game
       verbose run.
 - [ ] Phase 2 verifier runs N games and reports **zero** unknown enum ints (or
       explicitly lists the unknowns + coverage gaps).
@@ -195,7 +195,7 @@ shipped build. Tools: Ghidra, `objdump -s -j .rodata`, `rizin -A`.
 ## Enum reference (transcribe these — authoritative)
 
 Source: upstream `cabt` engine API docs. IDs are the integer values that appear
-in the JSON. Where the old `_format_option` disagrees, **this wins.**
+in the JSON. Where the old `format_option` disagrees, **this wins.**
 
 ### SelectType — `select.type` (which OptionTypes appear)
 `0 MAIN` (PLAY/ATTACH/EVOLVE/ABILITY/DISCARD/RETREAT/ATTACK/END) ·
@@ -224,7 +224,7 @@ in the JSON. Where the old `_format_option` disagrees, **this wins.**
 | 15 | SKILL | `cardId, serial` |
 | 16 | SPECIAL_CONDITION | `specialConditionType` |
 
-> NOTE the divergence from our old map: the old `_format_option` treated
+> NOTE the divergence from our old map: the old `format_option` treated
 > `7=ATTACH, 8=USE, 3=PLAY`. The real engine is `7=PLAY, 8=ATTACH`. Reconcile.
 
 ### SelectContext — `select.context` (the disambiguator; SelectType in parens)

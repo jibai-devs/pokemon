@@ -31,7 +31,14 @@ dev = [
 ]
 
 [project.scripts]
-pokemon-play = "play_fire_deck:app"
+pokemon-play = "pokemon.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pokemon"]
 
 [tool.ruff]
 line-length = 100

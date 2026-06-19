@@ -28,3 +28,10 @@ def q_values(model: QNet, params, state: jnp.ndarray, options: jnp.ndarray) -> j
     # flax's `apply` is typed to optionally return mutated vars; wrap so the
     # static type is a plain array (no mutable collections are requested here).
     return jnp.asarray(model.apply(params, tiled, options))
+
+
+def q_values_batched(model: QNet, params, states: jnp.ndarray, options: jnp.ndarray) -> jnp.ndarray:
+    """Score a batch of option sets. states[B,S], options[B,K,O] -> [B,K]."""
+    b, k, _ = options.shape
+    tiled = jnp.broadcast_to(states[:, None, :], (b, k, states.shape[-1]))
+    return jnp.asarray(model.apply(params, tiled, options))

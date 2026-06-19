@@ -25,4 +25,6 @@ def init_params(model: QNet, rng, state_dim: int, option_dim: int):
 def q_values(model: QNet, params, state: jnp.ndarray, options: jnp.ndarray) -> jnp.ndarray:
     """Score every option in a single decision. state[S], options[K,O] -> [K]."""
     tiled = jnp.broadcast_to(state[None, :], (options.shape[0], state.shape[0]))
-    return model.apply(params, tiled, options)
+    # flax's `apply` is typed to optionally return mutated vars; wrap so the
+    # static type is a plain array (no mutable collections are requested here).
+    return jnp.asarray(model.apply(params, tiled, options))

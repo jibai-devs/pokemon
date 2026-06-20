@@ -1,7 +1,8 @@
 # 001 — DQN agent: build progress & status
 
 **Living status doc** for the deep Q-learning agent that plays the CABT Pokémon
-TCG environment. Update this as milestones land. Last updated: **2026-06-20** (M1 complete).
+TCG environment. Update this as milestones land. Last updated: **2026-06-20**
+(Speed A1+A2 complete).
 
 - **Branch:** `feat/dqn-agent`
 - **Design spec:** `docs/superpowers/specs/2026-06-20-dqn-agent-design.md`
@@ -95,9 +96,10 @@ Feature dims (fixed, asserted in tests): **STATE_DIM = 126**, **OPTION_DIM = 90*
 | **M0 — wire-check** | Encoders, Q-net, replay, reward, rollout, `smoke` CLI. **No learning.** | ✅ **done** |
 | **M1 — learning loop** | ε-greedy policy, Double-DQN updates, target net, replay training, checkpoints, basic eval. Train vs `random_agent`, show win-rate climb. | ✅ **done** |
 | **M2 — make it learn (vs random)** | Fix ε schedule; enrich option features (catalog card/attack stats, `OPTION_DIM`→90). Re-train vs random. | ◐ **partial** — learns (back-half ~54%), but checkpoint saves latest-not-best + policy unstable, so saved artifact = 33.5%. |
-| **M2.1 — capture & stabilize** | Save BEST checkpoint by eval; more eval games for selection; soft target updates / lower lr to tame 20%↔80% swings. | ⬜ next |
-| **M3 — beat the heuristic** | Curriculum switch to heuristic opponent; head-to-head eval; tune until >50% vs `fire_agent`. | ⬜ not started |
-| **M4 — polish** | Gameplay walkthrough doc, optional dueling head / parallel rollouts / self-play. | ⬜ not started |
+| **M2.1 — capture & stabilize** | Save BEST checkpoint by eval; more eval games for selection; soft target updates / lower lr to tame 20%↔80% swings. | ◐ best-by-eval done; EMA/stability still open |
+| **Speed (A1+A2)** | JIT padded/masked decision scorer; parallel rollout workers. | ✅ **done** — collection ~23× faster (see below) |
+| **M3 — beat the heuristic** | Curriculum switch to heuristic opponent; head-to-head eval; tune until >50% vs `fire_agent`. | ⬜ next (`--opponent heuristic` wired) |
+| **M4 — polish** | Gameplay walkthrough doc, optional dueling head / self-play. | ⬜ not started |
 
 ---
 
@@ -231,6 +233,24 @@ policies were overwritten.
 **Takeaway:** M2 unblocked learning; the gap now is **capturing and stabilizing** it
 → M2.1 (save best-by-eval checkpoint, more eval games for selection, soft target
 updates / lower lr).
+
+---
+
+## Speed (A1 + A2) — what was built (DONE, 2026-06-20)
+
+Training was rollout-bound, and profiling showed **our own per-decision overhead
+(172 ms/game) was larger than the engine itself** because the policy forward was
+un-jitted and called ~30×/game. Two fixes (see `docs/002_dqn_next_steps.md §A`):
+
+| Lever | Change | Effect (measured, CPU) |
+|---|---|---|
+| **A1** | `net.q_values_masked`: jitted scorer over a fixed-width padded option set (`features.encode_decision_padded`), `apply_fn` static so JAX caches the compile and reuses it every decision | per-decision overhead **172 → ~0 ms/game**; collection **283 → ~95 ms/game** (now at the engine floor) |
+| **A2** | `rl/parallel.py` `RolloutPool`: persistent `spawn` workers play independent games; `train.py --workers N`; `--opponent random\|heuristic` | **~8.5× at 16 workers** (~12 ms/game, ~82 games/s) |
+
+**Combined: collection ~23× faster than the original 283 ms/game.** A3 (encode
+caching) was skipped — A1 made encode+forward negligible. Profiler:
+`scripts/profile_dqn.py` (use `-w N` to time parallel collection). Tests: +4
+(`test_net` masked scorer, `test_parallel`), `just check` green (51 tests).
 
 ---
 

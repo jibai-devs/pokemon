@@ -4,7 +4,9 @@ Practical cheat-sheet for the `pokemon-train` CLI (the deep Q-learning agent in
 `src/pokemon/rl/`). For *what's been built and why*, see `docs/001_dqn_progress.md`.
 
 Everything runs through `uv run` (the project's venv). All commands are CPU-only
-here, so the engine games are the slow part (~5 games/sec).
+here, so the engine games are the slow part — but `--workers N` now runs rollouts
+across cores (~8.5× with 16 workers; combined with the jitted scorer, collection
+is ~23× faster than the original single-thread path).
 
 > **Heads-up:** every command first prints ~30 `open_spiel ... INFO` lines and an
 > `NVIDIA GPU ... falling back to cpu` notice. That's `kaggle_environments`
@@ -53,9 +55,10 @@ when the win-rate improves** (best-by-eval).
 # quick look (a couple minutes)
 uv run pokemon-train train -n 20 --eval-every 5 --eval-games 20
 
-# a real run (what we use; ~15-20 min on CPU)
-uv run pokemon-train train -n 250 --games-per-iter 8 --updates-per-iter 100 \
-  --eval-every 10 --eval-games 50 --eps-decay-steps 30000 --ckpt-dir data/checkpoints
+# a real run (what we use; much faster now with parallel rollouts)
+uv run pokemon-train train -n 250 --games-per-iter 16 --updates-per-iter 100 \
+  --eval-every 10 --eval-games 100 --eps-decay-steps 30000 --workers 16 \
+  --ckpt-dir data/checkpoints
 ```
 
 | Flag | Default | Meaning |
@@ -69,6 +72,8 @@ uv run pokemon-train train -n 250 --games-per-iter 8 --updates-per-iter 100 \
 | `--seed` | 0 | RNG seed |
 | `--lr` | 0.001 | Adam learning rate |
 | `--eps-decay-steps` | 40000 | transitions over which exploration ε anneals 1.0 → 0.05 (lower = greedier sooner) |
+| `--workers` | 1 | parallel rollout worker processes (1 = serial). Set to ~your core count; collection scales ~8.5× at 16 workers |
+| `--opponent` | random | `random` (vs `random_agent`) or `heuristic` (vs `fire_agent` — the real M3 target) |
 
 ### Reading the output
 
@@ -128,9 +133,12 @@ uv run pokemon-play -g 50          # heuristic fire_agent vs random (~74%)
 
 ## Tips
 
-- **Long runs:** training is CPU-bound (~5 games/sec). For a long run, append
-  ` | tee data/checkpoints/run.log` to keep the win-rate curve, and run it in the
-  background (your shell's `&`, `tmux`, etc.). `data/checkpoints/` is gitignored.
+- **Long runs:** training is CPU-bound, so use `--workers N` (≈ your core count)
+  to parallelize rollouts. For a long run, append ` | tee data/checkpoints/run.log`
+  to keep the win-rate curve, and run it in the background (`tmux`, etc.).
+  `data/checkpoints/` is gitignored.
+- **Profiling speed:** `uv run python scripts/profile_dqn.py -n 16 -u 50 -w 16`
+  reports engine vs collection vs update timings and parallel speedup.
 - **Run a command yourself in this chat:** prefix with `!`, e.g.
   `! uv run pokemon-train eval -g 50` — the output lands in the conversation.
 - **Reproducibility:** same `--seed` + same flags → same run. Change `--seed` for

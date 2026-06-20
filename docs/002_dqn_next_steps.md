@@ -2,7 +2,8 @@
 
 **Read this first if you're a new session continuing the DQN work.** It captures
 where we are, what we decided, and exactly what to do next. **Current focus:
-SPEED (Section A) — do that before anything else.**
+Section A (SPEED) is DONE — next is Section B1 (stabilize) then B2 (M3, beat the
+heuristic).**
 
 - **Branch:** `feat/dqn-agent`
 - **Status doc (results/diagnosis):** `docs/001_dqn_progress.md`
@@ -52,7 +53,30 @@ is **not JIT-compiled** and is called ~30×/game (plus we re-encode states).
 
 ---
 
-## A. FOCUS NOW — Speed (do this next)
+## A. Speed — ✅ DONE (2026-06-20)
+
+A1 + A2 landed (`c06171b`, `4082ec3`); A3 skipped (see below). Profiler lives at
+`scripts/profile_dqn.py` (`-w N` times parallel collection too).
+
+**Result (measured on this CPU):**
+- **A1 — JIT padded/masked scorer:** our per-decision overhead **172 → ~0 ms/game**;
+  collection **283 → ~95 ms/game** (now at the engine-rollout floor). The policy
+  forward (`net.q_values_masked`) is jitted with `apply_fn` as a static arg so JAX
+  caches the compile and reuses it across every decision; options are padded to
+  `k_max` + masked (`features.encode_decision_padded`) so shapes stay fixed.
+- **A2 — parallel rollouts:** `rl/parallel.py` `RolloutPool` (persistent `spawn`
+  workers) → **~8.5× at 16 workers** (~12 ms/game, ~82 games/s). Wired into
+  `train.py` behind `--workers` (1 = serial, default); `--opponent random|heuristic`
+  added at the same time (readies B2). **Combined A1+A2: collection ~23× faster.**
+- **A3 — encode caching: SKIPPED on purpose.** A1 already drove per-decision encode+
+  forward to ~0 and A2 parallelizes the engine, so caching per-card/attack vectors
+  would trim a now-negligible slice. Revisit only if a profiler shows encode is hot.
+
+Original plan kept below for reference.
+
+---
+
+### (reference) A. Speed plan as written
 
 Goal: make a training run / eval / sweep several× faster so all later work
 (stability, M3, hyperparameter search) is practical. Three levers, in order:
@@ -165,7 +189,10 @@ warmup; prints engine/our-overhead/updates shares.)
   they apply to the next run.
 
 ## Suggested first action for the next session
-1. Read `docs/001_dqn_progress.md` (results) + this doc.
-2. Ask the user for the latest `eval` number of the in-flight `lr=3e-4` run (did it
-   beat 30%?), then save the profiler script.
-3. `writing-plans` for **Section A (Speed)** → execute via subagents → re-profile.
+1. Read `docs/001_dqn_progress.md` (results) + this doc. Speed (Section A) is done.
+2. Start **B1 (stabilize):** add an EMA of the online params and eval/checkpoint the
+   EMA; bump default `--eval-games` to ≥100; sanity-check `lr`/`tau`. Now that runs
+   are ~20× faster, kick off real training with `--workers 16` to confirm the
+   speedup end-to-end and re-establish the win-rate curve.
+3. Then **B2 (M3):** `--opponent heuristic` is already wired — train the fire mirror
+   and push greedy win-rate >50% vs `fire_agent`.

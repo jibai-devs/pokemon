@@ -12,23 +12,21 @@ TCG environment. Update this as milestones land. Last updated: **2026-06-20** (M
 
 ## TL;DR (where we are right now)
 
-- **M1 machinery is DONE and correct** — ε-greedy collection → replay → Double-DQN
-  updates → target-net sync → flax checkpoints → greedy eval. `just check` green
-  (35 tests); the toy-batch test proves the update converges (Q → reward).
-- **But the trained agent does NOT yet beat random.** A 200-iteration run vs
-  `random_agent` (loss 0.09→0.03) produced a greedy win-rate of **34% (±9%, n=100)**
-  vs a **30% (±9%)** random-policy baseline — statistically indistinguishable.
-  The learning curve did **not** climb toward the 85% goal. (See "M1 training result".)
-- **Diagnosis / what's blocking learning** (ranked): (1) **ε annealed far too slowly**
-  — `eps_decay_steps=200_000` transitions, so after ~48k transitions ε was still
-  0.74; data collection was ~75% random, so the net rarely reinforced its own play.
-  (2) **Thin features** — option vectors lack card/attack semantics (damage, type,
-  HP), so the Q-function literally can't tell a 260-dmg attack from a 60-dmg one
-  (this is the M2 feature work). (3) **Sparse reward + long horizon** — prize
-  shaping only fires on KOs; credit assignment over ~30 of our decisions/game is hard.
-- **Next is M2**: fix the ε schedule, enrich features with catalog-backed
-  card/attack stats, then re-train (and curriculum-switch to the heuristic). More
-  compute alone on the current setup is not expected to help.
+- **M2 made it learn to beat random — but the saved checkpoint doesn't capture it.**
+  After fixing the ε schedule and enriching option features with catalog-backed
+  card/attack stats (`OPTION_DIM` 49→90), a re-train's **back-half evals average
+  ~54%** (ε at floor 0.05; individual iters hit 66–80%) vs the **30% random
+  baseline** — real learning, unlike M1. **But** the policy is **unstable
+  iter-to-iter** (20%↔80%) and we save the *latest* checkpoint, not the *best*,
+  so the final artifact measured only **33.5% (±6.5%, n=200)**. (See "M2 result".)
+- **M1 (earlier) did NOT beat random** — 34% (±9%) vs 30% baseline; that run's
+  blockers (slow ε, thin features) are the ones M2 fixed. (See "M1 training result".)
+- **Immediate next fixes** (high value, small): (1) **save the BEST checkpoint** by
+  eval win-rate, not the latest — would capture the ~55–65% policy the run already
+  produces; (2) **stabilize** the swings (more eval games for selection, Polyak/soft
+  target updates or lower lr). Then (M3) curriculum-switch to the heuristic.
+- **Still-open lever if needed:** sparse reward / long-horizon credit assignment
+  (prize shaping only fires on KOs) and state-Pokémon feature enrichment.
 
 Run what exists:
 ```bash
@@ -84,7 +82,8 @@ obs(JSON) ─► features.encode_decision ─► (state[126], options[K,49], k)
                           reward.shaped_reward (prize potential + terminal)
 ```
 
-Feature dims (fixed, asserted in tests): **STATE_DIM = 126**, **OPTION_DIM = 49**.
+Feature dims (fixed, asserted in tests): **STATE_DIM = 126**, **OPTION_DIM = 90**
+(M2 enriched options from 49 with catalog-backed card/attack semantics).
 
 ---
 
@@ -95,8 +94,10 @@ Feature dims (fixed, asserted in tests): **STATE_DIM = 126**, **OPTION_DIM = 49*
 | **Design** | Brainstormed spec, approved | ✅ done (`8ebb8cf`) |
 | **M0 — wire-check** | Encoders, Q-net, replay, reward, rollout, `smoke` CLI. **No learning.** | ✅ **done** |
 | **M1 — learning loop** | ε-greedy policy, Double-DQN updates, target net, replay training, checkpoints, basic eval. Train vs `random_agent`, show win-rate climb. | ✅ **done** |
-| **M2 — beat the heuristic** | Curriculum switch to heuristic; head-to-head eval; enrich features (catalog-backed card/attack stats); tune until >50% vs heuristic. | ⬜ not started |
-| **M3 — polish** | Eval CLI, checkpoint mgmt, gameplay walkthrough doc, optional dueling head / parallel rollouts / self-play if needed. | ⬜ not started |
+| **M2 — make it learn (vs random)** | Fix ε schedule; enrich option features (catalog card/attack stats, `OPTION_DIM`→90). Re-train vs random. | ◐ **partial** — learns (back-half ~54%), but checkpoint saves latest-not-best + policy unstable, so saved artifact = 33.5%. |
+| **M2.1 — capture & stabilize** | Save BEST checkpoint by eval; more eval games for selection; soft target updates / lower lr to tame 20%↔80% swings. | ⬜ next |
+| **M3 — beat the heuristic** | Curriculum switch to heuristic opponent; head-to-head eval; tune until >50% vs `fire_agent`. | ⬜ not started |
+| **M4 — polish** | Gameplay walkthrough doc, optional dueling head / parallel rollouts / self-play. | ⬜ not started |
 
 ---
 
@@ -199,6 +200,37 @@ the loop *runs and reduces loss*, but does not learn to beat random. See the
 ranked diagnosis in the TL;DR (slow ε anneal → mostly-random data; thin features;
 sparse long-horizon reward). The fix is M2 (features + ε schedule), not more
 compute on the current setup.
+
+### M2 result (features + ε fix, 200 iterations vs random, 2026-06-20)
+
+Re-train after the two fixes — `pokemon-train train -n 200 --games-per-iter 8
+--updates-per-iter 100 --eval-every 10 --eval-games 30 --eps-decay-steps 30000`
+(ε reaches the 0.05 floor by ~iter 130, so the back half is near-greedy collection).
+
+Per-iter greedy eval (30 games each) climbed out of the baseline band:
+```
+iter  10: 53%   iter  70: 50%   iter 130: 40%   iter 190: 60%
+iter  30: 60%   iter  90: 33%   iter 150: 67%   iter 200: 20%
+iter  50: 43%   iter 110: 80%   iter 180: 80%
+```
+Back-half (iters 130–200, ε=0.05; 240 games aggregated) averages **~54%** — clearly
+above the 30% baseline. **This is real learning; the features + ε fix worked.**
+
+**But the saved checkpoint underperforms:** measured over 200 games it is **33.5%
+(±6.5%)** — because (a) `train.py` saves the *latest* checkpoint each eval, not the
+*best*, and (b) the policy is **unstable iter-to-iter** (20%↔80%). Iter 200 was a
+down-swing (20%), so the saved artifact is a weak snapshot; the strong iter-110/180
+policies were overwritten.
+
+| Run | Saved-checkpoint win-rate vs random | Note |
+|---|---|---|
+| M1 (thin features, slow ε) | 34% (±9%, n=100) | at baseline — never learned |
+| M2 (rich features, fast ε) | 33.5% (±6.5%, n=200) | saved a down-swing; *back-half avg ~54%* |
+| Random-policy baseline | 30% | — |
+
+**Takeaway:** M2 unblocked learning; the gap now is **capturing and stabilizing** it
+→ M2.1 (save best-by-eval checkpoint, more eval games for selection, soft target
+updates / lower lr).
 
 ---
 

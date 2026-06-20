@@ -51,7 +51,15 @@ def train(
     best_winrate = -1.0
     history: list[dict] = []
 
-    pool = parallel.RolloutPool(cfg.hidden, cfg.k_max, workers) if workers > 1 else None
+    pool = None
+    if workers > 1:
+        print(
+            f"spinning up {workers} rollout workers (spawn; each imports "
+            f"kaggle_environments + JAX — this takes a few seconds)...",
+            flush=True,
+        )
+        pool = parallel.RolloutPool(cfg.hidden, cfg.k_max, workers)
+        print("workers ready; iteration 1 also pays a one-time JIT compile.", flush=True)
     opp_name = parallel.opponent_name(opponent)
 
     def _ingest(transitions: list[dict]) -> None:
@@ -69,6 +77,7 @@ def train(
 
     try:
         for it in range(iterations):
+            t0 = time.perf_counter()
             if pool is not None:
                 seeds = [int(rng.integers(1_000_000_000)) for _ in range(games_per_iter)]
                 results = pool.collect(
@@ -96,6 +105,7 @@ def train(
                     step += 1
                     last_loss = float(loss)
 
+            dt = time.perf_counter() - t0
             if (it + 1) % eval_every == 0:
                 winrate = ev.evaluate(
                     policy.greedy_act(model, state.params, cfg.k_max),
@@ -121,17 +131,29 @@ def train(
                 )
                 print(
                     f"iter {it + 1:4d} | step {step:6d} | eps {eps:.3f} | "
-                    f"loss {last_loss:.4f} | winrate {winrate:.2%} | best {best_winrate:.2%}{saved}"
+                    f"loss {last_loss:.4f} | winrate {winrate:.2%} | best {best_winrate:.2%}{saved}",
+                    flush=True,
+                )
+            else:
+                # Heartbeat on non-eval iterations so a long quiet stretch (esp.
+                # with a big --eval-every) is visibly alive, not locked.
+                print(
+                    f"iter {it + 1:4d} | step {step:6d} | eps {eps:.3f} | "
+                    f"loss {last_loss:.4f} | buf {buf.size} | {dt:.1f}s/it",
+                    flush=True,
                 )
     except KeyboardInterrupt:
         checkpoint.save_params(last_path, state.params)
-        print(f"\n[interrupted] latest params saved to {last_path}")
+        print(f"\n[interrupted] latest params saved to {last_path}", flush=True)
     finally:
         if pool is not None:
             pool.close()
 
-    print(f"\nrun dir: {run_dir}")
+    print(f"\nrun dir: {run_dir}", flush=True)
     if best_winrate >= 0:
-        print(f"best win-rate {best_winrate:.2%}  ->  {best_path}")
-        print(f"evaluate:  uv run pokemon-train eval --ckpt {best_path} -g 200 --seed 9000")
+        print(f"best win-rate {best_winrate:.2%}  ->  {best_path}", flush=True)
+        print(
+            f"evaluate:  uv run pokemon-train eval --ckpt {best_path} -g 200 --seed 9000",
+            flush=True,
+        )
     return state, history

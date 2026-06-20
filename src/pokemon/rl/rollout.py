@@ -7,16 +7,27 @@ random (M0 behavior). M1 passes an epsilon-greedy policy over the Q-network.
 from __future__ import annotations
 
 import copy
+import logging
 import random
 from collections.abc import Callable
 
-import kaggle_environments as kaggle
 import numpy as np
-from kaggle_environments.envs.cabt.cabt import random_agent
 
-from pokemon.decks import FIRE_DECK
-from pokemon.rl import features
-from pokemon.rl import reward as rwd
+# kaggle_environments emits a ~30-line open_spiel INFO banner at import (via its
+# own logger + stdout handler that it configures itself). Suppress just that
+# import-time noise — it would otherwise repeat in every spawn rollout worker —
+# then restore the prior logging state. This is the first kaggle import in the
+# train/eval/worker path, so it covers them all.
+_prev_disable = logging.root.manager.disable
+logging.disable(logging.INFO)
+import kaggle_environments as kaggle  # noqa: E402
+from kaggle_environments.envs.cabt.cabt import random_agent  # noqa: E402
+
+logging.disable(_prev_disable)
+
+from pokemon.decks import FIRE_DECK  # noqa: E402
+from pokemon.rl import features  # noqa: E402
+from pokemon.rl import reward as rwd  # noqa: E402
 
 
 def make_collector(records: list, act: Callable[[dict], list[int]]):

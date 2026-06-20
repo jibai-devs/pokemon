@@ -107,7 +107,8 @@ The CABT engine itself is vendored under the venv:
 ## Start-here reading order
 
 1. This file.
-2. `docs/001_dqn_progress.md` — DQN build status, decisions, milestone roadmap (current focus).
+2. **`docs/002_dqn_next_steps.md`** — handoff/roadmap; **current focus = speed**. Start here to continue the DQN work.
+3. `docs/001_dqn_progress.md` — DQN build status, decisions, results, diagnosis.
 3. `docs/000_plan_engine_enum_extraction.md` — engine decoding plan + full enum reference + ABI.
 4. `docs/CABT.md` — observation shape (treat the option-type table with suspicion).
 5. `src/pokemon/agent.py` + `catalog.py` + `cabt_enums.py` — the working heuristic agent.

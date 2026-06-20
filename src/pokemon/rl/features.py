@@ -150,6 +150,39 @@ def attack_features(attack_id: int) -> list[float]:
     return vec
 
 
+N_INPLAY_IDX = BENCH_SLOTS + 1  # inPlayIndex 0..5 (active=0; bench slots 0..4)
+TARGET_FEAT_DIM = 3 + CARD_FEAT_DIM  # target Pokémon state vec + its card identity
+# Disambiguation block: source slot + which in-play target the option refers to.
+# Without it ~44% of offered options encoded identically (e.g. attach-to-active vs
+# attach-to-bench), leaving the net blind to half its choices.
+TARGET_BLOCK_DIM = 2 + N_INPLAY_IDX + TARGET_FEAT_DIM  # source index, energyIndex, target
+
+
+def _target_pokemon(opt: dict, obs: dict) -> dict | None:
+    """The current player's in-play Pokémon an option refers to via
+    inPlayArea/inPlayIndex (active or a bench slot), or None."""
+    area = opt.get("inPlayArea")
+    if area not in (AreaType.ACTIVE, AreaType.BENCH):
+        return None
+    cur = obs.get("current") or {}
+    my = cur.get("yourIndex", 0)
+    players = cur.get("players") or []
+    me = players[my] if my < len(players) else {}
+    idx = opt.get("inPlayIndex", -1)
+    if area == AreaType.ACTIVE:
+        active = me.get("active") or []
+        return active[0] if active else None
+    bench = me.get("bench") or []
+    return bench[idx] if 0 <= idx < len(bench) else None
+
+
+def _target_features(opt: dict, obs: dict) -> list[float]:
+    p = _target_pokemon(opt, obs)
+    if not p:
+        return [0.0] * TARGET_FEAT_DIM
+    return _pokemon_vec(p) + card_features(p.get("id", -1))
+
+
 def encode_option(opt: dict, obs: dict) -> np.ndarray:
     vec = _onehot(opt.get("type"), N_OPTION_TYPE)
     vec += _onehot(opt.get("area"), N_AREA)
@@ -162,13 +195,24 @@ def encode_option(opt: dict, obs: dict) -> np.ndarray:
     ]
     card_id = _option_card_id(opt, obs)
     vec += [1.0 if card_id >= 0 else 0.0, (card_id % 2000) / 2000.0 if card_id >= 0 else 0.0]
+    # Which source slot + in-play target this option refers to (collision fix).
+    # `index` ranges up to deck size, so normalize by ~60 (not 10) to avoid
+    # saturating distinct deck-search / discard picks to the same value.
+    idx = opt.get("index")
+    eidx = opt.get("energyIndex")
+    vec += [
+        min(idx, 59) / 59.0 if isinstance(idx, int) and idx >= 0 else 0.0,
+        min(eidx, 11) / 11.0 if isinstance(eidx, int) and eidx >= 0 else 0.0,
+    ]
+    vec += _onehot(opt.get("inPlayIndex") if "inPlayIndex" in opt else None, N_INPLAY_IDX)
+    vec += _target_features(opt, obs)
     # Semantic blocks (M2): what the referenced card / attack actually does.
     vec += card_features(card_id)
     vec += attack_features(opt.get("attackId", -1) if "attackId" in opt else -1)
     return np.asarray(vec, dtype=np.float32)
 
 
-OPTION_DIM = N_OPTION_TYPE + 2 * N_AREA + 4 + 2 + CARD_FEAT_DIM + ATTACK_FEAT_DIM
+OPTION_DIM = N_OPTION_TYPE + 2 * N_AREA + 4 + 2 + TARGET_BLOCK_DIM + CARD_FEAT_DIM + ATTACK_FEAT_DIM
 
 
 def encode_decision(obs: dict) -> tuple[np.ndarray, np.ndarray, int]:

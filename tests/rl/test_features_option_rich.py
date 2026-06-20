@@ -4,7 +4,9 @@ from pokemon.rl import features
 
 
 def test_option_dim_grew_with_card_and_attack_feats():
-    assert features.OPTION_DIM == 49 + features.CARD_FEAT_DIM + features.ATTACK_FEAT_DIM
+    assert features.OPTION_DIM == (
+        49 + features.TARGET_BLOCK_DIM + features.CARD_FEAT_DIM + features.ATTACK_FEAT_DIM
+    )
 
 
 def test_attack_option_encodes_damage(main_obs):

@@ -74,8 +74,12 @@ def train(
     seed: int = typer.Option(0, "--seed"),
     lr: float = typer.Option(1e-3, "--lr"),
     eps_decay_steps: int = typer.Option(40000, "--eps-decay-steps"),
+    workers: int = typer.Option(1, "--workers", help="Parallel rollout workers (1 = serial)"),
+    opponent: str = typer.Option("random", "--opponent", help="random | heuristic"),
 ):
-    """Train the DQN vs random_agent; checkpoints + eval win-rate as it goes."""
+    """Train the DQN; parallel rollouts via --workers, choose foe via --opponent."""
+    from pokemon.rl.parallel import _resolve_opponent
+
     cfg = dataclasses.replace(DQNConfig(), lr=lr, eps_decay_steps=eps_decay_steps)
     _, history = train_mod.train(
         cfg,
@@ -85,6 +89,8 @@ def train(
         eval_every=eval_every,
         eval_games=eval_games,
         ckpt_dir=ckpt_dir,
+        opponent=_resolve_opponent(opponent),
+        workers=workers,
         seed=seed,
     )
     if history:

@@ -35,12 +35,27 @@ def _time_pure_engine(n: int, seed: int) -> float:
 
 
 def _time_collection(model, params, n: int, seed: int) -> float:
-    """Our full collection path: encode + (un-jitted) net forward + transitions."""
+    """Our full collection path: encode + (jitted) net forward + transitions."""
     act = policy.greedy_act(model, params)
     start = time.perf_counter()
     for g in range(n):
         rollout.play_game(act=act, opponent=random_agent, seed=seed + g)
     return time.perf_counter() - start
+
+
+def _time_collection_parallel(model, params, n: int, seed: int, workers: int) -> float:
+    """Parallel collection via the persistent worker pool (A2). Excludes the
+    one-time pool spin-up; first .collect() pays per-worker JIT compile."""
+    from pokemon.rl.config import DQNConfig
+    from pokemon.rl.parallel import RolloutPool
+
+    cfg = DQNConfig()
+    with RolloutPool(model.hidden, cfg.k_max, workers) as pool:
+        seeds = [seed + g for g in range(n)]
+        pool.collect(params, 0.0, n, "random", seeds, cfg.gamma)  # warmup compile
+        start = time.perf_counter()
+        pool.collect(params, 0.0, n, "random", seeds, cfg.gamma)
+        return time.perf_counter() - start
 
 
 def _time_updates(cfg: DQNConfig, model, params, n_updates: int) -> float:
@@ -82,6 +97,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("-n", "--games", type=int, default=8, help="games per phase")
     ap.add_argument("-u", "--updates", type=int, default=100, help="gradient updates")
+    ap.add_argument("-w", "--workers", type=int, default=0, help="also time parallel collection")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
@@ -111,6 +127,14 @@ def main() -> None:
     # subtraction can go slightly negative from run-to-run engine variance.
     print(f"  └ our overhead (encode+forward, ≈0 after A1): {overhead_per * 1e3:7.1f} ms/game")
     print(f"updates ({args.updates})    : {t_updates:6.2f}s  | {upd_per * 1e3:7.1f} ms/update")
+
+    if args.workers > 1:
+        t_par = _time_collection_parallel(model, params, args.games, args.seed, args.workers)
+        par_per = t_par / args.games
+        print(
+            f"parallel x{args.workers:<2d}  : {t_par:6.2f}s  | {par_per * 1e3:7.1f} ms/game | "
+            f"{args.games / t_par:5.2f} games/s | speedup {t_collect / t_par:4.1f}x vs serial"
+        )
 
     # Iteration model: an iteration spends `g` collection games + `u` updates.
     # Base the split on measured collection (the real training cost) — not on the

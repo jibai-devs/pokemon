@@ -10,7 +10,7 @@ import jax.numpy as jnp
 import numpy as np
 from kaggle_environments.envs.cabt.cabt import random_agent
 
-from pokemon.rl import checkpoint, learner, net, policy, rollout
+from pokemon.rl import checkpoint, learner, net, parallel, policy, rollout
 from pokemon.rl import eval as ev
 from pokemon.rl.config import DQNConfig
 from pokemon.rl.features import OPTION_DIM, STATE_DIM
@@ -26,6 +26,7 @@ def train(
     eval_games: int = 50,
     ckpt_dir: str = "data/checkpoints",
     opponent=random_agent,
+    workers: int = 1,
     seed: int = 0,
 ):
     # Each run gets its own subdir so a new run never clobbers a previous run's
@@ -50,26 +51,41 @@ def train(
     best_winrate = -1.0
     history: list[dict] = []
 
+    pool = parallel.RolloutPool(cfg.hidden, cfg.k_max, workers) if workers > 1 else None
+    opp_name = parallel.opponent_name(opponent)
+
+    def _ingest(transitions: list[dict]) -> None:
+        nonlocal eps
+        for t in transitions:
+            buf.add(
+                t["state"],
+                t["option"],
+                t["reward"],
+                t["next_state"],
+                t["next_options"],
+                t["done"],
+            )
+        eps = max(cfg.eps_end, eps - eps_decay * len(transitions))
+
     try:
         for it in range(iterations):
-            act = policy.eps_act(model, state.params, eps, rng, cfg.k_max)
-            for _ in range(games_per_iter):
-                transitions, _ = rollout.play_game(
-                    act=act,
-                    opponent=opponent,
-                    gamma=cfg.gamma,
-                    seed=int(rng.integers(1_000_000_000)),
+            if pool is not None:
+                seeds = [int(rng.integers(1_000_000_000)) for _ in range(games_per_iter)]
+                results = pool.collect(
+                    state.params, eps, games_per_iter, opp_name, seeds, cfg.gamma
                 )
-                for t in transitions:
-                    buf.add(
-                        t["state"],
-                        t["option"],
-                        t["reward"],
-                        t["next_state"],
-                        t["next_options"],
-                        t["done"],
+                for transitions, _ in results:
+                    _ingest(transitions)
+            else:
+                act = policy.eps_act(model, state.params, eps, rng, cfg.k_max)
+                for _ in range(games_per_iter):
+                    transitions, _ = rollout.play_game(
+                        act=act,
+                        opponent=opponent,
+                        gamma=cfg.gamma,
+                        seed=int(rng.integers(1_000_000_000)),
                     )
-                eps = max(cfg.eps_end, eps - eps_decay * len(transitions))
+                    _ingest(transitions)
 
             if buf.size >= cfg.batch_size:
                 for _ in range(updates_per_iter):
@@ -110,6 +126,9 @@ def train(
     except KeyboardInterrupt:
         checkpoint.save_params(last_path, state.params)
         print(f"\n[interrupted] latest params saved to {last_path}")
+    finally:
+        if pool is not None:
+            pool.close()
 
     print(f"\nrun dir: {run_dir}")
     if best_winrate >= 0:

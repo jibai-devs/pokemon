@@ -52,7 +52,7 @@ def train(
 
     try:
         for it in range(iterations):
-            act = policy.eps_act(model, state.params, eps, rng)
+            act = policy.eps_act(model, state.params, eps, rng, cfg.k_max)
             for _ in range(games_per_iter):
                 transitions, _ = rollout.play_game(
                     act=act,
@@ -82,7 +82,7 @@ def train(
 
             if (it + 1) % eval_every == 0:
                 winrate = ev.evaluate(
-                    policy.greedy_act(model, state.params),
+                    policy.greedy_act(model, state.params, cfg.k_max),
                     opponent=opponent,
                     n_games=eval_games,
                     seed=seed,

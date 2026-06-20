@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from functools import partial
+
 import flax.linen as nn
+import jax
 import jax.numpy as jnp
 
 
@@ -35,3 +38,17 @@ def q_values_batched(model: QNet, params, states: jnp.ndarray, options: jnp.ndar
     b, k, _ = options.shape
     tiled = jnp.broadcast_to(states[:, None, :], (b, k, states.shape[-1]))
     return jnp.asarray(model.apply(params, tiled, options))
+
+
+@partial(jax.jit, static_argnums=0)
+def q_values_masked(apply_fn, params, state: jnp.ndarray, options: jnp.ndarray, mask: jnp.ndarray):
+    """JIT-compiled decision scorer over a fixed-width, padded option set.
+
+    state[S], options[K,O], mask[K] -> Q[K] with ``-inf`` at masked (padding)
+    slots. `apply_fn` (the QNet's bound ``apply``) is a static arg, so JAX caches
+    the compilation and reuses it across every decision — this is the per-decision
+    speed win over the un-jitted `q_values` (see docs/002 Section A1)."""
+    k = options.shape[0]
+    tiled = jnp.broadcast_to(state[None, :], (k, state.shape[-1]))
+    q = jnp.asarray(apply_fn(params, tiled, options))
+    return jnp.where(mask, q, -jnp.inf)

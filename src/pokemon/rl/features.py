@@ -176,3 +176,22 @@ def encode_decision(obs: dict) -> tuple[np.ndarray, np.ndarray, int]:
     state = encode_state(obs)
     options = np.stack([encode_option(o, obs) for o in opts]).astype(np.float32)
     return state, options, len(opts)
+
+
+def encode_decision_padded(obs: dict, k_max: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, int]:
+    """Like `encode_decision` but pads the option set to a fixed width `k_max`
+    with a boolean mask, so the jitted scorer (`net.q_values_masked`) compiles
+    once on stable shapes. Returns state[S], options[k_max,O], mask[k_max], k.
+
+    If a decision offers more than `k_max` options, the extra ones are dropped
+    (consistent with the replay buffer's next-state truncation); `k_max=64`
+    comfortably covers real decisions."""
+    opts = obs["select"]["option"]
+    state = encode_state(obs)
+    k = min(len(opts), k_max)
+    options = np.zeros((k_max, OPTION_DIM), dtype=np.float32)
+    mask = np.zeros((k_max,), dtype=bool)
+    for i in range(k):
+        options[i] = encode_option(opts[i], obs)
+    mask[:k] = True
+    return state, options, mask, k

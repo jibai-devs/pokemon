@@ -65,7 +65,7 @@ uv run pokemon-train train -n 250 --games-per-iter 8 --updates-per-iter 100 \
 | `--updates-per-iter` | 64 | gradient steps per iteration (more learning per game) |
 | `--eval-every` | 10 | evaluate + maybe-save every N iterations |
 | `--eval-games` | 50 | games per evaluation (more = less noisy win-rate; ≥50 recommended) |
-| `--ckpt-dir` | `data/checkpoints` | where the best checkpoint is written (`params.msgpack`) |
+| `--ckpt-dir` | `data/checkpoints` | parent dir; each run writes its own `run-<timestamp>/` with `best.msgpack` (best-by-eval) + `last.msgpack` (latest, also on Ctrl-C) |
 | `--seed` | 0 | RNG seed |
 | `--lr` | 0.001 | Adam learning rate |
 | `--eps-decay-steps` | 40000 | transitions over which exploration ε anneals 1.0 → 0.05 (lower = greedier sooner) |
@@ -83,8 +83,10 @@ iter  110 | step  11000 | eps 0.182 | loss 0.0201 | winrate 80.00% | best 80.00%
 - **winrate** — greedy win-rate of *this* iteration vs random (noisy — that's why
   we save best, not last).
 - **best / (saved best)** — best win-rate so far; the checkpoint is overwritten
-  only when this improves. The file at `--ckpt-dir/params.msgpack` is always the
-  best-so-far model.
+  only when this improves. `run-<timestamp>/best.msgpack` is always the best-so-far
+  model for that run; **a new run never clobbers a previous run's best** (each run
+  is its own subdir). Ctrl-C is safe — `last.msgpack` is written on interrupt. The
+  end of training prints the exact `eval` command with the path.
 
 ---
 
@@ -94,12 +96,13 @@ Loads a checkpoint and reports its greedy win-rate vs `random_agent`. Use a larg
 `-g` to get a trustworthy number (30 games is ±18%; 200 games is ±~6%).
 
 ```bash
-uv run pokemon-train eval --ckpt data/checkpoints/params.msgpack -g 200
+# --ckpt accepts a file, a run dir, or data/checkpoints (uses the newest run's best):
+uv run pokemon-train eval --ckpt data/checkpoints -g 200
 ```
 
 | Flag | Default | Meaning |
 |------|---------|---------|
-| `--ckpt` | `data/checkpoints/params.msgpack` | checkpoint file to load |
+| `--ckpt` | `data/checkpoints` | file, run dir, or parent dir (auto-resolves to newest `run-*/best.msgpack`) |
 | `-g`, `--games` | 100 | games to evaluate over |
 | `--seed` | 0 | RNG seed (use a *different* seed than training to avoid lucky overlap) |
 
@@ -111,11 +114,11 @@ uv run pokemon-train eval --ckpt data/checkpoints/params.msgpack -g 200
 # 1. sanity check the pipeline
 uv run pokemon-train smoke -g 5
 
-# 2. train (writes the best checkpoint to data/checkpoints/params.msgpack)
+# 2. train (writes best to data/checkpoints/run-<timestamp>/best.msgpack; prints the eval cmd)
 uv run pokemon-train train -n 250 --eval-games 50 --eps-decay-steps 30000
 
 # 3. measure the trained agent honestly over many games
-uv run pokemon-train eval --ckpt data/checkpoints/params.msgpack -g 200 --seed 9000
+uv run pokemon-train eval --ckpt data/checkpoints -g 200 --seed 9000   # newest run's best
 
 # compare against the hand-coded baseline any time:
 uv run pokemon-play -g 50          # heuristic fire_agent vs random (~74%)

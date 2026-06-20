@@ -20,4 +20,5 @@ def test_train_smoke(tmp_path):
     assert state is not None
     assert len(history) >= 1
     assert all(0.0 <= h["winrate"] <= 1.0 for h in history)
-    assert (tmp_path / "params.msgpack").exists()
+    # Best checkpoint is saved under a per-run subdir (no cross-run clobber).
+    assert list(tmp_path.glob("run-*/best.msgpack")), "no best.msgpack written"

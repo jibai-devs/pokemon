@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+import time
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -25,6 +28,13 @@ def train(
     opponent=random_agent,
     seed: int = 0,
 ):
+    # Each run gets its own subdir so a new run never clobbers a previous run's
+    # best checkpoint. `best.msgpack` = best-by-eval; `last.msgpack` = latest
+    # (also written on Ctrl-C so an interrupted run is never lost).
+    run_dir = os.path.join(ckpt_dir, time.strftime("run-%Y%m%d-%H%M%S"))
+    best_path = os.path.join(run_dir, "best.msgpack")
+    last_path = os.path.join(run_dir, "last.msgpack")
+
     rng = np.random.default_rng(seed)
     model = net.QNet(hidden=cfg.hidden)
     params = net.init_params(model, jax.random.PRNGKey(cfg.seed), STATE_DIM, OPTION_DIM)
@@ -40,59 +50,69 @@ def train(
     best_winrate = -1.0
     history: list[dict] = []
 
-    for it in range(iterations):
-        act = policy.eps_act(model, state.params, eps, rng)
-        for _ in range(games_per_iter):
-            transitions, _ = rollout.play_game(
-                act=act, opponent=opponent, gamma=cfg.gamma, seed=int(rng.integers(1_000_000_000))
-            )
-            for t in transitions:
-                buf.add(
-                    t["state"],
-                    t["option"],
-                    t["reward"],
-                    t["next_state"],
-                    t["next_options"],
-                    t["done"],
+    try:
+        for it in range(iterations):
+            act = policy.eps_act(model, state.params, eps, rng)
+            for _ in range(games_per_iter):
+                transitions, _ = rollout.play_game(
+                    act=act,
+                    opponent=opponent,
+                    gamma=cfg.gamma,
+                    seed=int(rng.integers(1_000_000_000)),
                 )
-            eps = max(cfg.eps_end, eps - eps_decay * len(transitions))
+                for t in transitions:
+                    buf.add(
+                        t["state"],
+                        t["option"],
+                        t["reward"],
+                        t["next_state"],
+                        t["next_options"],
+                        t["done"],
+                    )
+                eps = max(cfg.eps_end, eps - eps_decay * len(transitions))
 
-        if buf.size >= cfg.batch_size:
-            for _ in range(updates_per_iter):
-                batch = buf.sample(cfg.batch_size, rng)
-                jbatch = {k: jnp.asarray(v) for k, v in batch.items()}
-                state, loss = update_step(state, target_params, jbatch)
-                target_params = learner.soft_update(target_params, state.params, cfg.tau)
-                step += 1
-                last_loss = float(loss)
+            if buf.size >= cfg.batch_size:
+                for _ in range(updates_per_iter):
+                    batch = buf.sample(cfg.batch_size, rng)
+                    jbatch = {k: jnp.asarray(v) for k, v in batch.items()}
+                    state, loss = update_step(state, target_params, jbatch)
+                    target_params = learner.soft_update(target_params, state.params, cfg.tau)
+                    step += 1
+                    last_loss = float(loss)
 
-        if (it + 1) % eval_every == 0:
-            winrate = ev.evaluate(
-                policy.greedy_act(model, state.params),
-                opponent=opponent,
-                n_games=eval_games,
-                seed=seed,
-            )
-            # Save the BEST checkpoint by eval win-rate (not the latest — the policy
-            # is noisy across iterations, so the last snapshot is often a down-swing).
-            saved = ""
-            if winrate > best_winrate:
-                best_winrate = winrate
-                checkpoint.save_params(f"{ckpt_dir}/params.msgpack", state.params)
-                saved = " (saved best)"
-            history.append(
-                {
-                    "iter": it + 1,
-                    "step": step,
-                    "eps": round(eps, 3),
-                    "loss": last_loss,
-                    "winrate": winrate,
-                    "best": best_winrate,
-                }
-            )
-            print(
-                f"iter {it + 1:4d} | step {step:6d} | eps {eps:.3f} | "
-                f"loss {last_loss:.4f} | winrate {winrate:.2%} | best {best_winrate:.2%}{saved}"
-            )
+            if (it + 1) % eval_every == 0:
+                winrate = ev.evaluate(
+                    policy.greedy_act(model, state.params),
+                    opponent=opponent,
+                    n_games=eval_games,
+                    seed=seed,
+                )
+                checkpoint.save_params(last_path, state.params)  # always keep the latest
+                saved = ""
+                if winrate > best_winrate:  # and the best-by-eval separately
+                    best_winrate = winrate
+                    checkpoint.save_params(best_path, state.params)
+                    saved = " (saved best)"
+                history.append(
+                    {
+                        "iter": it + 1,
+                        "step": step,
+                        "eps": round(eps, 3),
+                        "loss": last_loss,
+                        "winrate": winrate,
+                        "best": best_winrate,
+                    }
+                )
+                print(
+                    f"iter {it + 1:4d} | step {step:6d} | eps {eps:.3f} | "
+                    f"loss {last_loss:.4f} | winrate {winrate:.2%} | best {best_winrate:.2%}{saved}"
+                )
+    except KeyboardInterrupt:
+        checkpoint.save_params(last_path, state.params)
+        print(f"\n[interrupted] latest params saved to {last_path}")
 
+    print(f"\nrun dir: {run_dir}")
+    if best_winrate >= 0:
+        print(f"best win-rate {best_winrate:.2%}  ->  {best_path}")
+        print(f"evaluate:  uv run pokemon-train eval --ckpt {best_path} -g 200 --seed 9000")
     return state, history

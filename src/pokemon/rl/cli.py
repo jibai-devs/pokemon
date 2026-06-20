@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import dataclasses
+import glob
+import os
 import time
 
 import jax
@@ -90,15 +92,40 @@ def train(
         typer.echo(f"best win-rate {best['winrate']:.2%} at iter {best['iter']}")
 
 
+def _resolve_ckpt(path: str) -> str:
+    """Resolve a checkpoint file from a file OR a directory.
+
+    If given a directory, prefer its ``best.msgpack``; else the newest
+    ``run-*/best.msgpack`` inside it; else a legacy ``params.msgpack``.
+    """
+    if os.path.isfile(path):
+        return path
+    direct = os.path.join(path, "best.msgpack")
+    if os.path.isfile(direct):
+        return direct
+    runs = sorted(glob.glob(os.path.join(path, "run-*", "best.msgpack")))
+    if runs:
+        return runs[-1]
+    legacy = os.path.join(path, "params.msgpack")
+    if os.path.isfile(legacy):
+        return legacy
+    return path  # let load fail with a clear FileNotFoundError
+
+
 @app.command()
 def eval(
-    ckpt: str = typer.Option("data/checkpoints/params.msgpack", "--ckpt"),
+    ckpt: str = typer.Option("data/checkpoints", "--ckpt"),
     games: int = typer.Option(100, "--games", "-g"),
     seed: int = typer.Option(0, "--seed"),
 ):
-    """Evaluate a saved checkpoint (greedy) vs random_agent."""
+    """Evaluate a saved checkpoint (greedy) vs random_agent.
+
+    --ckpt accepts a file, a run dir, or data/checkpoints (uses the newest run's best).
+    """
+    resolved = _resolve_ckpt(ckpt)
+    typer.echo(f"loading checkpoint: {resolved}")
     model = net.QNet(hidden=DQNConfig().hidden)
     template = net.init_params(model, jax.random.PRNGKey(0), STATE_DIM, OPTION_DIM)
-    params = checkpoint.load_params(template, ckpt)
+    params = checkpoint.load_params(template, resolved)
     winrate = ev.evaluate(policy.greedy_act(model, params), n_games=games, seed=seed)
     typer.echo(f"win-rate vs random over {games} games: {winrate:.2%}")

@@ -6,6 +6,7 @@ understand games before training anything. Verbose logging is gated by module
 state set via :func:`set_verbose` / :func:`set_game_num` (the CLI drives these).
 """
 
+from pokemon.cabt_enums import AreaType, OptionType, SelectContext, SelectType, safe
 from pokemon.catalog import card_name, format_option
 from pokemon.decks import FIRE_DECK, deck_summary
 
@@ -46,6 +47,8 @@ def fire_agent(obs: dict) -> list[int]:
     select = obs["select"]
     options = select["option"]
     max_count = select["maxCount"]
+    sel_type = safe(SelectType, select.get("type"))
+    context = safe(SelectContext, select.get("context"))
     current = obs.get("current", {})
     my_idx = current.get("yourIndex", 0)
     players = current.get("players", [])
@@ -76,30 +79,28 @@ def fire_agent(obs: dict) -> list[int]:
 
     # Log available options
     if _verbose:
-        _log(f"  Choices ({len(options)}, pick {max_count}):")
+        st = sel_type.name if sel_type is not None else "?"
+        cx = context.name if context is not None else "?"
+        _log(f"  Choices ({len(options)}, pick {max_count}) [{st} / {cx}]:")
         for i, opt in enumerate(options):
-            _log(f"    [{i}] {format_option(opt, hand)}")
+            _log(f"    [{i}] {format_option(opt, hand, context)}")
 
-    # Coin flip: always go first
-    for i, opt in enumerate(options):
-        if opt.get("type") == 1:
-            _log("  -> Picking: GO FIRST")
-            return [i]
+    # Coin flip: take the first turn when the engine asks who goes first.
+    if context == SelectContext.IS_FIRST:
+        for i, opt in enumerate(options):
+            if opt.get("type") == OptionType.YES:
+                _log("  -> Picking: GO FIRST")
+                return [i]
 
-    # Mulligan confirm
-    if len(options) == 1 and options[0].get("type") == 0:
-        _log("  -> Picking: OK")
-        return [0]
-
-    # Single option
+    # Single option (e.g. a forced mulligan confirm, lone count).
     if len(options) == 1:
-        _log(f"  -> Picking: {format_option(options[0], hand)}")
+        _log(f"  -> Picking: {format_option(options[0], hand, context)}")
         return [0]
 
     # Score each option
     scores = []
     for i, opt in enumerate(options):
-        score = score_option(opt, me, hand, current)
+        score = score_option(opt, me, hand, current, context)
         scores.append((score, i))
 
     # Sort by score descending, pick best
@@ -107,112 +108,156 @@ def fire_agent(obs: dict) -> list[int]:
     chosen = [idx for _, idx in scores[:max_count]]
 
     if _verbose:
-        picked = [f"{format_option(options[i], hand)} (score={s})" for s, i in scores[:max_count]]
+        picked = [
+            f"{format_option(options[i], hand, context)} (score={s})" for s, i in scores[:max_count]
+        ]
         _log(f"  -> Picking: {', '.join(picked)}")
 
     return chosen
 
 
-def score_option(opt: dict, me: dict, hand: list, current: dict) -> float:
-    """Score an option - higher is better."""
-    opt_type = opt.get("type", -1)
+# Per-card desirability of putting a Pokémon from hand into play (used by both
+# PLAY and the setup CARD selection). Higher = play sooner.
+_POKEMON_PLAY = {
+    46: 90,  # Gouging Fire ex — main attacker, basic
+    76: 85,  # Slugma — basic, line into Magcargo ex
+}
+# How much we value keeping a card. Used to pick what to KEEP vs what to lose
+# (discard/return-to-deck), so duplicates and spare energy go first.
+_CARD_VALUE = {
+    46: 90,  # Gouging Fire ex
+    30: 80,  # Magcargo ex
+    76: 70,  # Slugma
+    2: 10,  # Fire Energy — plentiful, cheapest to lose
+}
+# SelectContexts where the chosen card LEAVES play for somewhere worse, so we
+# want to part with the least valuable card.
+_LOSE_CONTEXTS = frozenset(
+    {
+        SelectContext.DISCARD,
+        SelectContext.TO_DECK,
+        SelectContext.TO_DECK_BOTTOM,
+        SelectContext.TO_PRIZE,
+    }
+)
+
+
+def _card_value(card_id: int) -> float:
+    return _CARD_VALUE.get(card_id, 40.0)
+
+
+# Trainers/items/stadium and their base value when PLAYed from hand.
+_TRAINER_PLAY = {
+    1092: 75,  # Secret Box (item)
+    1121: 70,  # Ultra Ball (item)
+    1145: 65,  # Mega Signal (item)
+    1163: 55,  # Powerglass (item)
+}
+
+
+def _hand_card_id(opt: dict, hand: list) -> int:
+    """Resolve the hand card an option acts on, or -1 if not from our hand."""
+    if opt.get("area", AreaType.HAND) != AreaType.HAND:
+        return -1
+    index = opt.get("index", -1)
+    if 0 <= index < len(hand):
+        return hand[index].get("id", -1)
+    return -1
+
+
+def _play_score(card_id: int, me: dict, current: dict) -> float:
+    """Score playing ``card_id`` from hand during the main phase."""
+    if card_id in _POKEMON_PLAY:
+        return _POKEMON_PLAY[card_id]
+    if card_id == 30:  # Magcargo ex — only good once a Slugma exists to evolve
+        in_play = me.get("active", []) + me.get("bench", [])
+        return 95 if any(c.get("id") == 76 for c in in_play) else 20
+    if card_id == 1219:  # Team Rocket's Petrel (supporter)
+        return -50 if current.get("supporterPlayed", False) else 80
+    if card_id == 1227:  # Lillie's Determination (supporter)
+        return -50 if current.get("supporterPlayed", False) else 85
+    if card_id == 1245:  # Festival Grounds (stadium)
+        return -50 if current.get("stadiumPlayed", False) else 60
+    if card_id in _TRAINER_PLAY:
+        return _TRAINER_PLAY[card_id]
+    return 35
+
+
+def score_option(opt: dict, me: dict, hand: list, current: dict, context=None) -> float:
+    """Score an option - higher is better.
+
+    Dispatches on the engine's real :class:`OptionType` (7=PLAY, 8=ATTACH, …),
+    and uses ``context`` (a :class:`SelectContext`) where the type alone is
+    ambiguous — notably NUMBER, where we pick the sensible end of the range.
+    """
+    t = safe(OptionType, opt.get("type"))
     score = 0.0
 
-    # === Type 3: Play Pokemon from hand ===
-    if opt_type == 3:
-        area = opt.get("area", 0)
-        index = opt.get("index", -1)
+    # === PLAY a card from hand (Pokémon / trainer / item / stadium) ===
+    if t == OptionType.PLAY:
+        score += _play_score(_hand_card_id(opt, hand), me, current)
 
-        if area == 2 and 0 <= index < len(hand):
-            card = hand[index]
-            card_id = card.get("id", -1)
+    # === CARD selection (setup actives/bench, search/discard targets) ===
+    elif t == OptionType.CARD:
+        card_id = _hand_card_id(opt, hand)
+        if context in _LOSE_CONTEXTS:
+            # Lose the least valuable card: invert so cheap cards score highest.
+            score += 100.0 - _card_value(card_id)
+        elif card_id in _POKEMON_PLAY:
+            score += _POKEMON_PLAY[card_id]
+        elif card_id == 30:  # Magcargo ex is a Stage 1 — a poor setup basic
+            score += 20
+        elif card_id != -1:
+            score += 40
+        else:
+            score += 30
 
-            if card_id == 46:  # Gouging Fire ex
-                score += 90
-            elif card_id == 76:  # Slugma
-                score += 85
-            elif card_id == 30:  # Magcargo ex
-                active = me.get("active", [])
-                bench = me.get("bench", [])
-                has_slugma = any(c.get("id") == 76 for c in active + bench)
-                score += 95 if has_slugma else 20
-            elif card_id in {1092, 1121, 1145, 1163, 1219, 1227, 1245}:
-                score += 40
-            else:
-                score += 30
+    # === ATTACH energy to a Pokémon in play ===
+    elif t == OptionType.ATTACH:
+        card_id = _hand_card_id(opt, hand)
+        to_active = opt.get("inPlayArea") == AreaType.ACTIVE
+        if card_id == 2:  # Fire Energy
+            active = me.get("active", [])
+            n = len(active[0].get("energies", [])) if active and active[0] else 0
+            base = 95 if n == 0 else 80 if n < 3 else 60
+            score += base if to_active else base - 25
+        else:
+            score += 30
 
-    # === Type 8: Play trainer/item from hand ===
-    elif opt_type == 8:
-        area = opt.get("area", 0)
-        index = opt.get("index", -1)
+    # === EVOLVE a Pokémon in play ===
+    elif t == OptionType.EVOLVE:
+        card_id = _hand_card_id(opt, hand)
+        score += 95 if card_id == 30 else 70  # Slugma -> Magcargo ex
 
-        if area == 2 and 0 <= index < len(hand):
-            card = hand[index]
-            card_id = card.get("id", -1)
-
-            if card_id == 1121:  # Ultra Ball
-                score += 70
-            elif card_id == 1145:  # Mega Signal
-                score += 65
-            elif card_id == 1092:  # Secret Box
-                score += 75
-            elif card_id == 1219:  # Team Rocket's Petrel
-                if not current.get("supporterPlayed", False):
-                    score += 80
-                else:
-                    score -= 50
-            elif card_id == 1227:  # Lillie's Determination
-                if not current.get("supporterPlayed", False):
-                    score += 85
-                else:
-                    score -= 50
-            elif card_id == 1245:  # Festival Grounds
-                if not current.get("stadiumPlayed", False):
-                    score += 60
-                else:
-                    score -= 50
-            elif card_id == 1163:  # Powerglass
-                score += 55
-            else:
-                score += 35
-
-    # === Type 7: Attach energy ===
-    elif opt_type == 7:
-        index = opt.get("index", -1)
-        if 0 <= index < len(hand):
-            card = hand[index]
-            card_id = card.get("id", -1)
-            if card_id == 2:  # Fire energy
-                active = me.get("active", [])
-                if active:
-                    energies = active[0].get("energies", [])
-                    if len(energies) == 0:
-                        score += 95
-                    elif len(energies) < 3:
-                        score += 80
-                    else:
-                        score += 60
-                else:
-                    score += 50
-            else:
-                score += 30
-
-    # === Type 13: Attack ===
-    elif opt_type == 13:
-        attack_id = opt.get("attackId", 0)
+    # === ATTACK ===
+    elif t == OptionType.ATTACK:
         attack_damage = {44: 60, 45: 260, 17: 70, 18: 140}
-        score += attack_damage.get(attack_id, 50)
+        score += attack_damage.get(opt.get("attackId", 0), 50)
 
-    # === Other types ===
-    elif opt_type == 9:
-        score += 70
-    elif opt_type == 10:
+    # === Yes/No — context-aware (default: lean yes, as before) ===
+    elif t == OptionType.YES:
+        score += 50
+    elif t == OptionType.NO:
+        score += 40
+
+    # === NUMBER — pick the sensible end of the range per context ===
+    elif t == OptionType.NUMBER:
+        n = opt.get("number", 0) or 0
+        # DRAW_COUNT / damage / heal: more is better, so prefer the largest n.
+        score += float(n)
+
+    # === Remaining option types — fixed priorities ===
+    elif t == OptionType.ABILITY:
         score += 65
-    elif opt_type == 12:
-        score += 60
-    elif opt_type == 14:
+    elif t == OptionType.RETREAT:
+        score += 30
+    elif t == OptionType.DISCARD:
+        # Prefer discarding low-value cards (energy/duplicates) over key Pokémon.
+        card_id = _hand_card_id(opt, hand)
+        score += 70 if card_id in (2, -1) else 20
+    elif t == OptionType.END:
         score += 10
-    elif opt_type == 0:
-        score += 20
+    else:
+        score += 25
 
     return score

@@ -1,6 +1,7 @@
 # 000 — Plan: Decode CABT selections via the engine's real enums
 
-**Status:** proposed
+**Status:** Phase 1 + Phase 2 done (2026-06-19). Phases 3–4 (binary RE) not
+needed — Phase 2 found zero unknown enum ints. See acceptance criteria below.
 **Owner:** unassigned
 **Prereqs:** none (the agent runs today: `uv run pokemon-play -v`; code in `src/pokemon/`)
 
@@ -179,16 +180,24 @@ shipped build. Tools: Ghidra, `objdump -s -j .rodata`, `rizin -A`.
 
 ## Acceptance criteria
 
-- [ ] `cabt_enums.py` exists; `python -c "from pokemon.cabt_enums import *"` imports clean.
-- [ ] Verbose log shows `SelectType` + `SelectContext` per decision, and former
-      "OK#n" options now read as their context (e.g. `DRAW_COUNT=2`).
-- [ ] No `?type=N` or bare `OK` left in `format_option` output across a 50-game
+- [x] `cabt_enums.py` exists; `python -c "from pokemon.cabt_enums import *"` imports clean.
+- [x] Verbose log shows `SelectType` + `SelectContext` per decision (e.g.
+      `Choices (3, pick 1) [COUNT / DRAW_COUNT]`), and former "OK#n" options now
+      read as their context (e.g. `DRAW_COUNT=2`).
+- [x] No `?type=N` or bare `OK` left in `format_option` output across a 50-game
       verbose run.
-- [ ] Phase 2 verifier runs N games and reports **zero** unknown enum ints (or
-      explicitly lists the unknowns + coverage gaps).
-- [ ] `docs/CABT.md` option-type table reconciled with the reference; any place
-      the old code was wrong is called out.
-- [ ] `ruff check` / `ruff format --check` pass; one verbose game still completes.
+- [x] Phase 2 verifier (`reverse-engineering/scripts/verify_enums.py`) runs N games,
+      reports **zero** unknown enum ints, and lists coverage gaps (unobserved
+      members needing other decks to trigger). Returns non-zero on any unknown.
+- [x] `docs/CABT.md` option-type + area tables reconciled with the reference; the
+      old wrong labels (7=ATTACH/8=USE, 4=Bench, …) are called out.
+- [x] `ruff check` / `ruff format --check` pass (full `just check` green incl.
+      pyright + new `tests/`); verbose games complete.
+
+> **Side effect worth noting:** fixing the option-type dispatch (old code had the
+> action types swapped — it attached when it meant to play) lifted the fire deck's
+> win-rate vs `random_agent` from ~43% to ~74% over 50 games. The old map wasn't
+> just mislabeling; the agent was acting on the wrong semantics.
 
 ---
 

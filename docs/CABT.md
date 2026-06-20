@@ -64,8 +64,8 @@ obs = {
     "remainingOverageTime": float,   # banked time in seconds
     "step": int,                     # current step number
     "select": None | {               # null during deck submission
-        "type": int,                 # context type (see below)
-        "context": int,              # context ID
+        "type": int,                 # SelectType — which OptionTypes appear (see below)
+        "context": int,              # SelectContext — disambiguates the selection
         "minCount": int,             # minimum selections
         "maxCount": int,             # maximum selections
         "remainDamageCounter": int,
@@ -133,28 +133,53 @@ obs = {
 
 ## Select Option Types
 
-All options are dicts with at least a `"type"` key.
+All options are dicts with at least a `"type"` key. **Canonical source:**
+`src/pokemon/cabt_enums.py` (`OptionType`), transcribed from the engine docs and
+verified empirically by `reverse-engineering/scripts/verify_enums.py`. The table
+below matches the engine's real `OptionType`.
 
-| Type | Shape | Meaning |
-|------|-------|---------|
-| 0 | `{type:0, number:int}` | Contextual choice (mulligan confirm, etc.) |
-| 1 | `{type:1}` | Coin flip: choose heads (go first) |
-| 2 | `{type:2}` | Coin flip: choose tails (go second) |
-| 3 | `{type:3, area:int, index:int, playerIndex:int}` | Play a card from hand/area |
-| 7 | `{type:7, index:int}` | Attach energy to a Pokémon |
-| 8 | `{type:8, area:int, index:int, inPlayArea:int, inPlayIndex:int}` | Use attack or ability |
-| 9 | `{type:9, area:int, index:int, inPlayArea:int, inPlayIndex:int}` | Select target for an effect |
-| 10 | `{type:10, area:int, index:int}` | Select from prize cards |
-| 12 | `{type:12}` | Confirm / mulligan acknowledge |
-| 13 | `{type:13, attackId:int}` | Attack selection (by attack ID) |
-| 14 | `{type:14}` | End turn / pass |
+> ⚠️ **This table was previously wrong.** The earlier reverse-engineered version
+> read these by observation and mislabeled the action types: it claimed
+> `3 = play a card`, `7 = attach energy`, `8 = use attack/ability`, `9 = select
+> target`, `10 = select prize`, `12 = confirm`. The engine actually uses
+> `3 = CARD` (generic card pick), `7 = PLAY`, `8 = ATTACH`, `9 = EVOLVE`,
+> `10 = ABILITY`, `12 = RETREAT`. Acting on the old labels meant the agent was
+> attaching when it meant to play (and vice-versa); fixing the dispatch lifted
+> the fire deck's win-rate vs `random_agent` from ~43% to ~74%.
 
-### Area Codes (observed)
+| Type | Name | Shape | Meaning |
+|------|------|-------|---------|
+| 0 | NUMBER | `{number}` | A count; meaning set by `select.context` (e.g. `DRAW_COUNT`) |
+| 1 | YES | `{}` | "Yes" in a yes/no select (context says which question) |
+| 2 | NO | `{}` | "No" in a yes/no select |
+| 3 | CARD | `{area, index, playerIndex}` | Pick a card (setup actives/bench, search, discard…) |
+| 4 | TOOL_CARD | `{area, index, playerIndex, toolIndex}` | Pick an attached tool card |
+| 5 | ENERGY_CARD | `{area, index, playerIndex, energyIndex}` | Pick an attached energy card |
+| 6 | ENERGY | `{area, index, playerIndex, energyIndex, count}` | Pick attached energy (e.g. discard for cost) |
+| 7 | PLAY | `{index}` | Play a card from hand (index into hand) |
+| 8 | ATTACH | `{area, index, inPlayArea, inPlayIndex}` | Attach energy to a Pokémon in play |
+| 9 | EVOLVE | `{area, index, inPlayArea, inPlayIndex}` | Evolve a Pokémon in play |
+| 10 | ABILITY | `{area, index}` | Use an ability |
+| 11 | DISCARD | `{area, index}` | Discard a card |
+| 12 | RETREAT | `{}` | Retreat the active Pokémon |
+| 13 | ATTACK | `{attackId}` | Use an attack (by attack ID) |
+| 14 | END | `{}` | End turn / pass |
+| 15 | SKILL | `{cardId, serial}` | Use a card skill |
+| 16 | SPECIAL_CONDITION | `{specialConditionType}` | Choose a special condition |
 
-- `2` — Hand
-- `4` — Bench
-- `5` — Hand (energy attachment context)
-- `7` — Prize
+`select.type` (`SelectType`) groups which OptionTypes appear, and
+`select.context` (`SelectContext`) disambiguates them — e.g. a `NUMBER` option is
+`DRAW_COUNT` in one place and `DAMAGE_COUNTER_COUNT` in another. See
+`cabt_enums.py` for the full `SelectType` / `SelectContext` tables, and
+`docs/000_plan_engine_enum_extraction.md` for the authoritative reference.
+
+### Area Codes (`AreaType`)
+
+`1 DECK` · `2 HAND` · `3 DISCARD` · `4 ACTIVE` · `5 BENCH` · `6 PRIZE` ·
+`7 STADIUM` · `8 ENERGY` · `9 TOOL` · `10 PRE_EVOLUTION` · `11 PLAYER` · `12 LOOKING`
+
+> The old notes here guessed `4 = Bench`, `5 = Hand (energy)`, `7 = Prize` from a
+> handful of observations — all wrong. `4 = ACTIVE`, `5 = BENCH`, `7 = STADIUM`.
 
 ## Built-in Agents
 

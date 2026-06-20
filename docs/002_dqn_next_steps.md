@@ -128,6 +128,24 @@ warmup; prints engine/our-overhead/updates shares.)
 
 ---
 
+## A2.5 — Option-feature audit & fix (DONE, 2026-06-20)
+
+Before tuning, audited correctness. **Code is correct** (Double-DQN target,
+masking, potential-based reward all check out) and **the QNet is small (~122k
+params) — not too complex.** The real bug was the *input*: **44% of offered
+options encoded to a vector identical to another option in the same decision**
+(`encode_option` ignored `index`/`inPlayIndex`/`energyIndex` — which source card,
+which in-play target, which attached energy), so the net was blind to ~half its
+choices and `argmax` picked arbitrarily. Fixed by encoding source/target identity
++ the referenced target Pokémon's features. **Collision rate 44% → 0.04%**,
+`OPTION_DIM` 90 → 127 (re-train). Guard test added (`tests/rl/test_features_option.py`).
+**Re-baseline before autoresearch** — this likely changes everything below.
+
+State features are still thin (no Pokémon identity in `encode_state`) → next
+representation lever after re-baseline (see B2 last bullet).
+
+---
+
 ## B. Backlog (after speed) — in priority order
 
 ### B1. Stabilize the policy (so win-rate stops swinging)
@@ -161,7 +179,7 @@ warmup; prints engine/our-overhead/updates shares.)
 
 ## Reference facts (don't re-derive)
 
-- **Dims:** `STATE_DIM=126`, `OPTION_DIM=90` (referenced by symbol everywhere — a
+- **Dims:** `STATE_DIM=126`, `OPTION_DIM=127` (referenced by symbol everywhere — a
   feature change auto-propagates; old checkpoints become incompatible → re-train).
 - **Baselines vs `random_agent`:** random-policy ≈ 30%, heuristic `fire_agent` ≈ 74%.
 - **Eval noise:** 30 games ≈ ±18% (95% CI), 100 ≈ ±9%, 200 ≈ ±6%. Use ≥100 to compare.

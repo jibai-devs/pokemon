@@ -83,8 +83,9 @@ obs(JSON) ─► features.encode_decision ─► (state[126], options[K,49], k)
                           reward.shaped_reward (prize potential + terminal)
 ```
 
-Feature dims (fixed, asserted in tests): **STATE_DIM = 126**, **OPTION_DIM = 90**
-(M2 enriched options from 49 with catalog-backed card/attack semantics).
+Feature dims (fixed, asserted in tests): **STATE_DIM = 126**, **OPTION_DIM = 127**
+(M2 enriched options from 49 with catalog-backed card/attack semantics; a later
+audit added source/target identity, 90 → 127, killing a 44% option-collision bug).
 
 ---
 
@@ -98,6 +99,7 @@ Feature dims (fixed, asserted in tests): **STATE_DIM = 126**, **OPTION_DIM = 90*
 | **M2 — make it learn (vs random)** | Fix ε schedule; enrich option features (catalog card/attack stats, `OPTION_DIM`→90). Re-train vs random. | ◐ **partial** — learns (back-half ~54%), but checkpoint saves latest-not-best + policy unstable, so saved artifact = 33.5%. |
 | **M2.1 — capture & stabilize** | Save BEST checkpoint by eval; more eval games for selection; soft target updates / lower lr to tame 20%↔80% swings. | ◐ best-by-eval done; EMA/stability still open |
 | **Speed (A1+A2)** | JIT padded/masked decision scorer; parallel rollout workers. | ✅ **done** — collection ~23× faster (see below) |
+| **Option-feature audit/fix** | Encode source/target identity (`index`/`inPlayIndex`/`energyIndex` + target Pokémon). | ✅ **done** — option-encoding collisions 44% → 0.04%; `OPTION_DIM` 90→127. Re-baseline. |
 | **M3 — beat the heuristic** | Curriculum switch to heuristic opponent; head-to-head eval; tune until >50% vs `fire_agent`. | ⬜ next (`--opponent heuristic` wired) |
 | **M4 — polish** | Gameplay walkthrough doc, optional dueling head / self-play. | ⬜ not started |
 

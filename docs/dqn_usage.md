@@ -145,7 +145,7 @@ uv run pokemon-play -g 50          # heuristic fire_agent vs random (~74%)
   the eval so you measure on different games than you trained/selected on.
 - **Checkpoints are deck-specific & dim-specific.** A checkpoint trained with one
   `OPTION_DIM` (feature set) can't load after the features change — re-train. The
-  current feature set is `STATE_DIM=126`, `OPTION_DIM=90`.
+  current feature set is `STATE_DIM=126`, `OPTION_DIM=127`.
 - **What "good" looks like:** random-policy baseline ≈ 30% vs `random_agent`; the
   heuristic ≈ 74%. A trained DQN should beat 30% clearly; the goal is to approach
   and pass the heuristic (that's the M3 target, vs the heuristic directly).

@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import logging
 import random
+import time
 from collections.abc import Callable
 
 import numpy as np
@@ -49,15 +50,55 @@ def _random_act(rng: random.Random) -> Callable[[dict], list[int]]:
     return act
 
 
-def play_game(act=None, opponent=random_agent, gamma: float = 0.99, seed: int | None = None):
+def _timed(fn: Callable, timers: dict, key: str) -> Callable:
+    """Wrap an agent callback to accumulate wall time it spends into timers[key]."""
+
+    def wrapped(obs: dict):
+        t = time.perf_counter()
+        try:
+            return fn(obs)
+        finally:
+            timers[key] = timers.get(key, 0.0) + (time.perf_counter() - t)
+
+    return wrapped
+
+
+def play_game(
+    act=None,
+    opponent=random_agent,
+    gamma: float = 0.99,
+    seed: int | None = None,
+    timers: dict | None = None,
+):
+    """Play one game and return (transitions, terminal_reward).
+
+    If `timers` (a dict) is passed, accumulate a wall-time breakdown into it —
+    `setup` (make+reset), `agent` (our callback: encode + scorer + record),
+    `opponent`, `run` (total env.run, which contains agent+opponent), and `post`
+    (our transition-assembly encoding). Engine/libcg time ~= run minus agent and
+    opponent.
+    Zero overhead when `timers is None` (no wrapping, no clock reads)."""
     if act is None:
         act = _random_act(random.Random(seed))
     records: list = []
-    env = kaggle.make("cabt", debug=True)
-    env.reset()
-    steps = env.run([make_collector(records, act), opponent])
+
+    if timers is None:
+        env = kaggle.make("cabt", debug=True)
+        env.reset()
+        steps = env.run([make_collector(records, act), opponent])
+    else:
+        t = time.perf_counter()
+        env = kaggle.make("cabt", debug=True)
+        env.reset()
+        timers["setup"] = timers.get("setup", 0.0) + (time.perf_counter() - t)
+        agent = _timed(make_collector(records, act), timers, "agent")
+        opp = _timed(opponent, timers, "opponent")
+        t = time.perf_counter()
+        steps = env.run([agent, opp])
+        timers["run"] = timers.get("run", 0.0) + (time.perf_counter() - t)
     terminal_reward = float(steps[-1][0].get("reward") or 0.0)
 
+    t_post = time.perf_counter() if timers is not None else 0.0
     transitions: list[dict] = []
     n = len(records)
     for i, rec in enumerate(records):
@@ -85,4 +126,6 @@ def play_game(act=None, opponent=random_agent, gamma: float = 0.99, seed: int | 
                 "done": done,
             }
         )
+    if timers is not None:
+        timers["post"] = timers.get("post", 0.0) + (time.perf_counter() - t_post)
     return transitions, terminal_reward

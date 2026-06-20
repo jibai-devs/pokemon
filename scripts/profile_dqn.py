@@ -1,10 +1,11 @@
-"""Profile where DQN training time goes: engine rollouts vs our collection
-overhead (encode + policy forward) vs gradient updates.
+"""Profile where DQN training time goes: engine (libcg) vs our own code
+(encode + Q-forward + transition assembly) vs gradient updates.
 
-Run: ``uv run python scripts/profile_dqn.py [-n GAMES] [-u UPDATES]``
+Run: ``uv run python scripts/profile_dqn.py [-n GAMES] [-u UPDATES] [-w WORKERS]``
 
-Prints per-unit timings and the % share of an iteration (engine / our overhead /
-updates) so we can see what to optimize. See docs/002_dqn_next_steps.md Section A.
+The rollout breakdown is measured *inside real games* via `rollout.play_game`'s
+`timers` hook (not by subtracting separately-timed phases), so the engine-vs-ours
+split is accurate. See docs/002_dqn_next_steps.md Section A.
 """
 
 from __future__ import annotations
@@ -14,7 +15,6 @@ import time
 
 import jax
 import jax.numpy as jnp
-import kaggle_environments as kaggle
 import numpy as np
 from kaggle_environments.envs.cabt.cabt import random_agent
 
@@ -24,29 +24,21 @@ from pokemon.rl.features import OPTION_DIM, STATE_DIM
 from pokemon.rl.replay import ReplayBuffer
 
 
-def _time_pure_engine(n: int, seed: int) -> float:
-    """Two built-in random_agents — engine cost with no Python policy of ours."""
-    start = time.perf_counter()
-    for _ in range(n):
-        env = kaggle.make("cabt", debug=True)
-        env.reset()
-        env.run([random_agent, random_agent])
-    return time.perf_counter() - start
-
-
-def _time_collection(model, params, n: int, seed: int) -> float:
-    """Our full collection path: encode + (jitted) net forward + transitions."""
+def _collect_with_timers(model, params, n: int, seed: int) -> dict:
+    """Play n games with the greedy policy, accumulating a per-phase wall-time
+    breakdown via play_game's `timers` hook."""
     act = policy.greedy_act(model, params)
-    start = time.perf_counter()
+    timers: dict = {}
+    # Warm the jitted scorer so its one-time compile isn't charged to game 1.
+    rollout.play_game(act=act, opponent=random_agent, seed=seed, timers={})
     for g in range(n):
-        rollout.play_game(act=act, opponent=random_agent, seed=seed + g)
-    return time.perf_counter() - start
+        rollout.play_game(act=act, opponent=random_agent, seed=seed + g, timers=timers)
+    return timers
 
 
 def _time_collection_parallel(model, params, n: int, seed: int, workers: int) -> float:
     """Parallel collection via the persistent worker pool (A2). Excludes the
     one-time pool spin-up; first .collect() pays per-worker JIT compile."""
-    from pokemon.rl.config import DQNConfig
     from pokemon.rl.parallel import RolloutPool
 
     cfg = DQNConfig()
@@ -95,7 +87,7 @@ def _time_updates(cfg: DQNConfig, model, params, n_updates: int) -> float:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("-n", "--games", type=int, default=8, help="games per phase")
+    ap.add_argument("-n", "--games", type=int, default=8, help="games for the rollout breakdown")
     ap.add_argument("-u", "--updates", type=int, default=100, help="gradient updates")
     ap.add_argument("-w", "--workers", type=int, default=0, help="also time parallel collection")
     ap.add_argument("--seed", type=int, default=0)
@@ -106,49 +98,57 @@ def main() -> None:
     params = net.init_params(model, jax.random.PRNGKey(cfg.seed), STATE_DIM, OPTION_DIM)
 
     print(f"STATE_DIM={STATE_DIM}  OPTION_DIM={OPTION_DIM}")
-    print(f"profiling: {args.games} games (engine + collection), {args.updates} updates\n")
+    print(f"profiling: {args.games} games (rollout breakdown), {args.updates} updates\n")
 
-    t_engine = _time_pure_engine(args.games, args.seed)
-    t_collect = _time_collection(model, params, args.games, args.seed)
-    t_updates = _time_updates(cfg, model, params, args.updates)
+    t = _collect_with_timers(model, params, args.games, args.seed)
+    g = args.games
+    # env.run contains both agent callbacks; engine/libcg = run minus ours minus opp.
+    setup = t.get("setup", 0.0)
+    run = t.get("run", 0.0)
+    agent = t.get("agent", 0.0)
+    opp = t.get("opponent", 0.0)
+    post = t.get("post", 0.0)
+    engine = run - agent - opp  # pure libcg + kaggle env loop (run minus our callbacks)
+    ours = agent + post  # our code: encode + Q-forward + record + transitions
+    total = setup + run + post  # = setup + engine + agent + opp + post
 
-    eng_per = t_engine / args.games
-    col_per = t_collect / args.games
-    upd_per = t_updates / args.updates
-    overhead_per = col_per - eng_per  # our encode + forward, on top of engine
+    def line(name: str, secs: float) -> str:
+        return f"  {name:<26s}: {secs / g * 1e3:7.2f} ms/game | {secs / total:6.1%}"
 
+    print(f"=== rollout breakdown ({g} games, opponent=random) ===")
+    print(line("engine/libcg (env.run)", engine))
+    print(line("engine setup (make+reset)", setup))
+    print(line("opponent callback", opp))
+    print(line("our agent (encode+Q+record)", agent))
+    print(line("our post (transition asm)", post))
+    print(f"  {'-' * 44}")
+    print(line("TOTAL per game", total))
     print(
-        f"pure engine    : {t_engine:6.2f}s  | {eng_per * 1e3:7.1f} ms/game | {args.games / t_engine:5.2f} games/s"
+        f"\n  → engine (libcg+setup): {(engine + setup) / total:.1%}  |  "
+        f"ours (agent+post): {ours / total:.1%}  |  opponent: {opp / total:.1%}"
     )
-    print(
-        f"our collection : {t_collect:6.2f}s  | {col_per * 1e3:7.1f} ms/game | {args.games / t_collect:5.2f} games/s"
-    )
-    # After A1 (jitted scorer) our overhead is ~0, so collection ≈ engine and this
-    # subtraction can go slightly negative from run-to-run engine variance.
-    print(f"  └ our overhead (encode+forward, ≈0 after A1): {overhead_per * 1e3:7.1f} ms/game")
-    print(f"updates ({args.updates})    : {t_updates:6.2f}s  | {upd_per * 1e3:7.1f} ms/update")
+
+    upd = _time_updates(cfg, model, params, args.updates)
+    upd_per = upd / args.updates
+    col_per = total / g
+    print(f"\nupdates ({args.updates}): {upd:.2f}s | {upd_per * 1e3:.2f} ms/update")
 
     if args.workers > 1:
         t_par = _time_collection_parallel(model, params, args.games, args.seed, args.workers)
         par_per = t_par / args.games
         print(
-            f"parallel x{args.workers:<2d}  : {t_par:6.2f}s  | {par_per * 1e3:7.1f} ms/game | "
-            f"{args.games / t_par:5.2f} games/s | speedup {t_collect / t_par:4.1f}x vs serial"
+            f"parallel x{args.workers:<2d}: {t_par:.2f}s | {par_per * 1e3:.1f} ms/game | "
+            f"{args.games / t_par:.1f} games/s | speedup {col_per / par_per:.1f}x vs serial"
         )
 
-    # Iteration model: an iteration spends `g` collection games + `u` updates.
-    # Base the split on measured collection (the real training cost) — not on the
-    # fragile engine/overhead subtraction. Engine is reported as the rollout floor
-    # that parallel workers (A2) can divide down toward.
-    g, u = 8, 100
-    iter_collect = col_per * g
-    iter_updates = upd_per * u
-    total = iter_collect + iter_updates
-    print(f"\nmodelled iteration ({g} games + {u} updates) = {total:.2f}s")
-    print(
-        f"  collection (rollouts) : {iter_collect / total:5.1%}  (engine floor ≈ {eng_per * g / total:5.1%})"
-    )
-    print(f"  updates               : {iter_updates / total:5.1%}")
+    # Modelled iteration: gi collection games + ui updates.
+    gi, ui = 8, 100
+    iter_collect = col_per * gi
+    iter_updates = upd_per * ui
+    it_total = iter_collect + iter_updates
+    print(f"\nmodelled iteration ({gi} games + {ui} updates) = {it_total:.2f}s")
+    print(f"  collection (rollouts) : {iter_collect / it_total:5.1%}")
+    print(f"  updates               : {iter_updates / it_total:5.1%}")
 
 
 if __name__ == "__main__":

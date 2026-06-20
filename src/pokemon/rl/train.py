@@ -37,6 +37,7 @@ def train(
     eps_decay = (cfg.eps_start - cfg.eps_end) / max(cfg.eps_decay_steps, 1)
     step = 0
     last_loss = float("nan")
+    best_winrate = -1.0
     history: list[dict] = []
 
     for it in range(iterations):
@@ -61,10 +62,9 @@ def train(
                 batch = buf.sample(cfg.batch_size, rng)
                 jbatch = {k: jnp.asarray(v) for k, v in batch.items()}
                 state, loss = update_step(state, target_params, jbatch)
+                target_params = learner.soft_update(target_params, state.params, cfg.tau)
                 step += 1
                 last_loss = float(loss)
-                if step % cfg.target_update_interval == 0:
-                    target_params = state.params
 
         if (it + 1) % eval_every == 0:
             winrate = ev.evaluate(
@@ -73,7 +73,13 @@ def train(
                 n_games=eval_games,
                 seed=seed,
             )
-            checkpoint.save_params(f"{ckpt_dir}/params.msgpack", state.params)
+            # Save the BEST checkpoint by eval win-rate (not the latest — the policy
+            # is noisy across iterations, so the last snapshot is often a down-swing).
+            saved = ""
+            if winrate > best_winrate:
+                best_winrate = winrate
+                checkpoint.save_params(f"{ckpt_dir}/params.msgpack", state.params)
+                saved = " (saved best)"
             history.append(
                 {
                     "iter": it + 1,
@@ -81,11 +87,12 @@ def train(
                     "eps": round(eps, 3),
                     "loss": last_loss,
                     "winrate": winrate,
+                    "best": best_winrate,
                 }
             )
             print(
                 f"iter {it + 1:4d} | step {step:6d} | eps {eps:.3f} | "
-                f"loss {last_loss:.4f} | winrate {winrate:.2%}"
+                f"loss {last_loss:.4f} | winrate {winrate:.2%} | best {best_winrate:.2%}{saved}"
             )
 
     return state, history

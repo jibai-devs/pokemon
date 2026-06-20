@@ -14,6 +14,11 @@ def create_train_state(model: net.QNet, params, lr: float) -> TrainState:
     return TrainState.create(apply_fn=model.apply, params=params, tx=optax.adam(lr))
 
 
+def soft_update(target_params, online_params, tau: float):
+    """Polyak averaging: target <- (1 - tau) * target + tau * online."""
+    return optax.incremental_update(online_params, target_params, tau)
+
+
 def make_update_step(model: net.QNet, gamma: float):
     @jax.jit
     def update_step(state: TrainState, target_params, batch):

@@ -74,13 +74,7 @@ def atk_name(atk_id: int) -> str:
 
 
 def format_option(opt: dict, hand: list) -> str:
-    """Human-readable label for an option dict.
-
-    NOTE: the type->label mapping here is the older reverse-engineered one and is
-    known to be partly wrong vs the engine's real ``OptionType`` enum (e.g. it
-    treats 7=ATTACH/8=USE; the engine says 7=PLAY/8=ATTACH). See
-    docs/000_plan_engine_enum_extraction.md for the planned fix.
-    """
+    """Human-readable label for an option dict (OptionType enum from engine docs)."""
     t = opt.get("type", -1)
     if t == 1:
         return "GO FIRST"
@@ -91,22 +85,24 @@ def format_option(opt: dict, hand: list) -> str:
         if 0 <= idx < len(hand):
             return f"PLAY {card_name(hand[idx].get('id', -1))}"
         return f"PLAY hand[{idx}]"
-    if t == 7:
+    if t == 7:  # PLAY — play card from hand
+        idx = opt.get("index", -1)
+        if 0 <= idx < len(hand):
+            return f"PLAY {card_name(hand[idx].get('id', -1))}"
+        return f"PLAY hand[{idx}]"
+    if t == 8:  # ATTACH — attach energy/tool
         idx = opt.get("index", -1)
         if 0 <= idx < len(hand):
             return f"ATTACH {card_name(hand[idx].get('id', -1))}"
         return f"ATTACH hand[{idx}]"
-    if t == 8:
-        idx = opt.get("index", -1)
-        if 0 <= idx < len(hand):
-            return f"USE {card_name(hand[idx].get('id', -1))}"
-        return f"USE hand[{idx}]"
     if t == 9:
-        return "SELECT TARGET"
+        return "EVOLVE"
     if t == 10:
-        return "SELECT PRIZE"
+        return "ABILITY"
+    if t == 11:
+        return "DISCARD"
     if t == 12:
-        return "CONFIRM"
+        return "RETREAT"
     if t == 13:
         return f"ATTACK: {atk_name(opt.get('attackId', 0))}"
     if t == 14:

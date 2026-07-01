@@ -1,0 +1,25 @@
+=== Meta report: 1500 replays (0 skipped/unparseable), 3000 deck instances ===
+
+Archetype                 | Count |  Win% | Key Pokemon
+-------------------------------------------------------
+Cinderace                 |   539 |   52% | Cinderace, Mega Starmie ex, Staryu
+Archaludon ex             |   281 |   68% | Archaludon ex, Duraludon, Relicanth
+Mega Lucario ex           |   273 |   49% | Mega Lucario ex, Riolu, Solrock, Hariyama, Lunatone
+Abra                      |   225 |   52% | Abra, Kadabra, Alakazam, Dudunsparce, Dunsparce
+Drakloak                  |   217 |   46% | Drakloak, Dreepy, Dragapult ex, Budew, Fezandipiti ex
+Hop's Phantump            |   192 |   54% | Hop's Phantump, Hop's Trevenant, Hop’s Cramorant, Hop’s Snorlax
+Abra                      |   160 |   49% | Abra, Alakazam, Kadabra, Dudunsparce, Dunsparce
+Snorunt                   |   150 |   46% | Snorunt, Staryu, Mega Froslass ex, Mega Starmie ex
+Dunsparce                 |   136 |   45% | Dunsparce, Hop's Phantump, Dudunsparce, Hop's Trevenant, Hop’s Snorlax
+Archaludon ex             |   107 |   38% | Archaludon ex, Cinderace, Duraludon
+
+Your deck (Fire): not found in replay dataset.
+Dominant archetype: Cinderace (18% of games, 52% win-rate).
+Recommendation: stay (fire=n/a dominant=52%/18% share).
+
+Notable trainers in top archetypes:
+  Cinderace: Pokégear 3.0x4.0, Buddy-Buddy Poffinx4.0, Crushing Hammerx4.0, Salvatorex4.0, Wally's Compassionx4.0
+  Archaludon ex: Night Stretcherx4.0, Ultra Ballx4.0, Poké Padx4.0, Carminex4.0, Lillie's Determinationx4.0
+  Mega Lucario ex: Dusk Ballx4.0, Carminex4.0, Poké Padx3.8, Fighting Gongx3.8, Lillie's Determinationx3.8
+  Abra: Dawnx4.0, Hildax4.0, Buddy-Buddy Poffinx4.0, Poké Padx4.0, Enhanced Hammerx3.3
+  Drakloak: Buddy-Buddy Poffinx4.0, Ultra Ballx4.0, Crispinx4.0, Lillie's Determinationx4.0, Crushing Hammerx4.0

@@ -20,4 +20,5 @@
 | [PKM-016](tickets/PKM-016.md) | Switch active deck to Psychic and add a central deck registry | done | high | feature |
 | [PKM-017](tickets/PKM-017.md) | Build a modular heuristic-based agent | in-progress | high | feature |
 | [PKM-018](tickets/PKM-018.md) | Build a card/attack reference sheet for the Psychic deck | done | medium | research |
-| [PKM-019](tickets/PKM-019.md) | Log-driven heuristic improvement loop | todo | medium | feature |
+| [PKM-019](tickets/PKM-019.md) | Log-driven heuristic improvement loop | in-progress | medium | feature |
+| [PKM-020](tickets/PKM-020.md) | Automated before/after win-rate validation for heuristic changes | todo | medium | feature |

@@ -60,12 +60,14 @@ ATK_NAMES = {
 }
 
 
-def _load_catalog() -> tuple[dict[int, str], dict[int, dict]]:
+def _load_catalog() -> tuple[dict[int, str], dict[int, dict], dict[int, list[int]]]:
     cards: dict[int, str] = {}
     attacks: dict[int, dict] = {}
+    card_attacks: dict[int, list[int]] = {}
     try:
         for c in json.loads((_DATA_DIR / "all_cards.json").read_text()):
             cards[c["cardId"]] = c["name"]
+            card_attacks[c["cardId"]] = c.get("attacks") or []
     except OSError:
         pass
     try:
@@ -73,10 +75,10 @@ def _load_catalog() -> tuple[dict[int, str], dict[int, dict]]:
             attacks[a["attackId"]] = a
     except OSError:
         pass
-    return cards, attacks
+    return cards, attacks, card_attacks
 
 
-_CARD_CATALOG, _ATK_CATALOG = _load_catalog()
+_CARD_CATALOG, _ATK_CATALOG, _CARD_ATTACKS = _load_catalog()
 
 
 def card_name(card_id: int) -> str:
@@ -95,6 +97,21 @@ def atk_name(atk_id: int) -> str:
         dmg = a.get("damage", 0)
         return f"{a['name']} ({dmg})" if dmg else a["name"]
     return f"#{atk_id}"
+
+
+def min_attack_energy_cost(card_id: int) -> int | None:
+    """Fewest energy cards needed for any of ``card_id``'s attacks, or
+    ``None`` if the card/its attacks aren't in the catalog.
+
+    Data-driven (reads real attack costs from the reverse-engineered
+    catalog) rather than a hardcoded per-card guess, so it works for any
+    Pokemon in any deck, not just ones we've special-cased.
+    """
+    attack_ids = _CARD_ATTACKS.get(card_id)
+    if not attack_ids:
+        return None
+    costs = [len(_ATK_CATALOG[aid]["energies"]) for aid in attack_ids if aid in _ATK_CATALOG]
+    return min(costs) if costs else None
 
 
 def format_option(opt: dict, hand: list) -> str:

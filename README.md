@@ -10,9 +10,13 @@ Below is a walkthrough grouped by what each batch of work actually accomplished.
 
 ## Status at a glance
 
-**Submitted:** a baseline agent (random-but-legal moves) is live in the competition.
-**In progress:** training data pipeline — replays downloaded and meta analyzed; featurization
-and behavioral cloning are the next unclaimed work (see [Still open](#still-open) below).
+**Submitted:** a heuristic agent for the Psychic deck (PKM-017), encoding Slowking's Seek
+Inspiration win condition. Confirmed win rate over the random baseline in local batches; a
+real Kaggle loss (PKM-019) surfaced a heuristic gap since fixed, not yet re-validated (see
+[Still open](#still-open)).
+**In progress:** log-driven heuristic improvement loop (PKM-019) — reading real game logs to
+find and fix specific heuristic mistakes; training data pipeline — replays downloaded and meta
+analyzed; featurization and behavioral cloning are the next unclaimed work.
 
 ## What's been built
 
@@ -143,6 +147,43 @@ Key findings (full report in [`data/meta_report.txt`](data/meta_report.txt)):
 - No archetype clears both switch thresholds (>55% win-rate *and* >30% meta share) →
   recommendation from the script: **stay with the Fire deck**.
 
+### 7. Heuristic agent + log-driven improvement loop (PKM-016, PKM-017, PKM-019)
+
+Switched the active deck to Psychic (Mega Kangaskhan ex / Latias ex control-ish shell, win
+condition is Slowking's Seek Inspiration) and replaced the random baseline with
+`src/pokemon/heuristics.py` — a priority list of small, independently testable rule functions
+(`DEFAULT_PSYCHIC_HEURISTICS`), falling back to random when none apply. This is what's live in
+`main.py`/`submission.tar.gz` now.
+
+Three real bugs were found by reading actual game traces, not from unit tests alone (see
+`AGENTS.md` Known issues and the tickets for details):
+
+- A hand-area option getting overridden by an unrelated `select.deck` entry.
+- A multi-card search heuristic under-counting its selection, which the engine accepted
+  silently as a draw instead of an error — a whole class of "return < minCount" bugs is now
+  guarded against in `make_heuristic_agent`'s dispatch loop.
+- Fodder-search heuristics (Ultra Ball/Poke Pad) competing with deck-stacking heuristics
+  (Ciphermaniac's Codebreaking) for the same scarce copy targets, undermining the deck's own win
+  condition. Fixed by splitting hand-search targets from deck-stacking targets.
+
+A **real Kaggle loss** (`data/recent_log.txt`) surfaced a fourth, subtler gap: Slowking got 6
+energy attachments over one game but was never once switched back into the active spot, while
+the backup attackers sat active the whole game without enough energy to attack either — zero
+attacks fired all game. Fixed (`attach_energy_to_attacker`, `switch_to_backup_attacker`), but not
+yet win-rate validated — see [Still open](#still-open).
+
+Reading that replay also surfaced two replay-format bugs serious enough to matter beyond this one
+fix: `scripts/parse_replay.py`'s `selected` field turns out to be off by one frame in the Kaggle
+export, and its Kaggle-format option labels are area-blind the same way `catalog.format_option`
+is. `scripts/analyze_heuristic_logs.py` is a new, deck-agnostic replay analyzer that fixes both —
+resolves any card/attack for either player generically, and corrects the off-by-one shift — and
+prints a condensed per-turn decision trace instead of raw board-state JSON:
+
+```bash
+python scripts/analyze_heuristic_logs.py data/recent_log.txt --player 1
+python scripts/analyze_heuristic_logs.py data/recent_log.txt --summary-only
+```
+
 ## Still open
 
 These are scoped but not yet built — see the linked ticket for the full spec:
@@ -155,6 +196,7 @@ These are scoped but not yet built — see the linked ticket for the full spec:
 | [PKM-011](tickets/PKM-011.md) | Deck evaluation — assess Fire deck against top archetypes (via simulation, since no direct replay data exists) |
 | [PKM-014](tickets/PKM-014.md) | MCTS decision-time search on top of the trained policy |
 | [PKM-015](tickets/PKM-015.md) | Opponent belief modeling via archetype determinization (ISMCTS) |
+| [PKM-020](tickets/PKM-020.md) | Automated before/after win-rate validation for heuristic changes |
 
 The planned order is featurize → behavioral cloning → PPO fine-tune → deck evaluation, per
 `AGENTS.md`'s "Current phase" section.

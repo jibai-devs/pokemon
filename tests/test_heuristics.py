@@ -6,7 +6,7 @@ without needing the real engine (WSL/libcg.so) — see PKM-017.
 
 from pokemon.heuristics import (
     _build_ctx,
-    attach_energy_to_slowking,
+    attach_energy_to_attacker,
     evolve_into_slowking,
     play_setup_pieces,
     prefer_copy_fodder_targets,
@@ -66,7 +66,7 @@ def test_evolve_into_slowking_from_hand():
     assert evolve_into_slowking(ctx) == [1]
 
 
-def test_attach_energy_to_slowking_prefers_undercharged_slowking():
+def test_attach_energy_to_attacker_prefers_undercharged_slowking_over_bench():
     active = [{"id": 163, "energies": []}]  # Slowking, no energy yet
     bench = [{"id": 756, "energies": [0, 0]}]  # Mega Kangaskhan ex, already charged
     select = {
@@ -79,10 +79,31 @@ def test_attach_energy_to_slowking_prefers_undercharged_slowking():
         ],
     }
     ctx = _build_ctx(_obs(select, active=active, bench=bench))
-    assert attach_energy_to_slowking(ctx) == [1]
+    assert attach_energy_to_attacker(ctx) == [1]
 
 
-def test_attach_energy_none_when_slowking_already_charged():
+def test_attach_energy_to_attacker_feeds_active_pokemon_when_slowking_charged_and_benched():
+    """Regression test for the real-game bug found via PKM-019's
+    ``recent_log.txt`` audit: a benched, already-loaded Slowking kept
+    absorbing energy meant for whichever Pokemon was actually active,
+    stranding it below its own attack cost. Once Slowking is at its
+    threshold, further attaches should go to the active Pokemon instead."""
+    active = [{"id": 756, "energies": [0]}]  # Mega Kangaskhan ex, 1/3 energy, active
+    bench = [{"id": 163, "energies": [5, 0]}]  # Slowking, already at its 2-energy cap, benched
+    select = {
+        "type": 0,
+        "context": 0,
+        "maxCount": 1,
+        "option": [
+            {"type": 8, "inPlayArea": 5, "inPlayIndex": 0},  # attach to bench Slowking
+            {"type": 8, "inPlayArea": 4, "inPlayIndex": 0},  # attach to active Mega Kangaskhan ex
+        ],
+    }
+    ctx = _build_ctx(_obs(select, active=active, bench=bench))
+    assert attach_energy_to_attacker(ctx) == [1]
+
+
+def test_attach_energy_none_when_slowking_and_active_both_charged():
     active = [{"id": 163, "energies": [5, 0]}]
     select = {
         "type": 0,
@@ -91,7 +112,7 @@ def test_attach_energy_none_when_slowking_already_charged():
         "option": [{"type": 8, "inPlayArea": 4, "inPlayIndex": 0}],
     }
     ctx = _build_ctx(_obs(select, active=active))
-    assert attach_energy_to_slowking(ctx) == [0]
+    assert attach_energy_to_attacker(ctx) == [0]
 
 
 def test_play_setup_pieces_prefers_codebreaking_over_other_plays():
@@ -125,9 +146,50 @@ def test_setup_active_prefers_slowking_line():
     assert setup_active_prefers_slowking_line(ctx) == [1]
 
 
-def test_switch_to_backup_attacker_prefers_mega_kangaskhan():
-    # Switching active chooses among the bench.
+def test_switch_to_backup_attacker_prefers_mega_kangaskhan_when_slowking_not_ready():
+    # Switching active chooses among the bench. Slowpoke isn't Slowking, so
+    # there's no charged-Slowking option to prefer.
     bench = [{"id": 162}, {"id": 756}]  # Slowpoke, Mega Kangaskhan ex
+    select = {
+        "type": 1,
+        "context": 3,  # SWITCH
+        "maxCount": 1,
+        "option": [
+            {"type": 3, "area": 5, "index": 0},
+            {"type": 3, "area": 5, "index": 1},
+        ],
+    }
+    ctx = _build_ctx(_obs(select, bench=bench))
+    assert switch_to_backup_attacker(ctx) == [1]
+
+
+def test_switch_to_backup_attacker_prefers_charged_slowking_over_backup():
+    """Regression test for the real-game bug found via PKM-019's
+    ``recent_log.txt`` audit: Slowking accumulated enough energy to attack
+    but was never switched back into active because this heuristic
+    unconditionally preferred the backup attackers on every switch."""
+    bench = [
+        {"id": 756, "energies": [0, 0, 0]},  # Mega Kangaskhan ex, charged
+        {"id": 163, "energies": [5, 0]},  # Slowking, at its 2-energy attack cost
+    ]
+    select = {
+        "type": 1,
+        "context": 3,  # SWITCH
+        "maxCount": 1,
+        "option": [
+            {"type": 3, "area": 5, "index": 0},
+            {"type": 3, "area": 5, "index": 1},
+        ],
+    }
+    ctx = _build_ctx(_obs(select, bench=bench))
+    assert switch_to_backup_attacker(ctx) == [1]
+
+
+def test_switch_to_backup_attacker_ignores_undercharged_slowking():
+    bench = [
+        {"id": 163, "energies": []},  # Slowking, not ready
+        {"id": 756, "energies": [0, 0]},  # Mega Kangaskhan ex
+    ]
     select = {
         "type": 1,
         "context": 3,  # SWITCH

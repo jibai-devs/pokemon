@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from pokemon.cabt_enums import AreaType, OptionType, SelectContext
-from pokemon.catalog import format_option
+from pokemon.catalog import format_option, min_attack_energy_cost
 from pokemon.decks import deck_summary
 
 # --- Psychic deck card IDs (see deck/001_psychic_deck_reference.md) ---------
@@ -206,18 +206,45 @@ def evolve_into_slowking(ctx: Ctx) -> list[int] | None:
     return None
 
 
-def attach_energy_to_slowking(ctx: Ctx) -> list[int] | None:
-    """Feed Slowking first — Seek Inspiration only needs 2 energy to fire."""
-    fallback = None
+def attach_energy_to_attacker(ctx: Ctx) -> list[int] | None:
+    """Feed Slowking to its attack threshold first — it's the deck's actual
+    win condition — then feed whichever Pokemon is *actually active*, so
+    energy doesn't get stranded on a benched Pokemon that can't use it.
+
+    An earlier version ("attach_energy_to_slowking") always targeted
+    Slowking regardless of board position. Real-game evidence (PKM-019's
+    ``data/recent_log.txt`` audit) showed this stranding energy: Slowking
+    got 6 separate attachments over one game while sitting on the bench the
+    entire time (nothing switched it back into active — see
+    ``switch_to_backup_attacker``'s fix below), while whichever backup
+    attacker *was* active sat at 1 energy all game, well under its actual
+    attack cost (Mega Kangaskhan ex/Latias ex both need 3). Zero attacks
+    fired the whole game as a result. Once Slowking has enough energy to
+    attack, further energy sent its way while benched is equally wasted —
+    better spent getting the current active Pokemon to *its* threshold.
+    """
+    slowking_cap = min_attack_energy_cost(SLOWKING) or 2
     for i, opt in enumerate(ctx.options):
         if opt.get("type") != OptionType.ATTACH:
             continue
         target = _board_card(ctx, opt.get("inPlayArea"), opt.get("inPlayIndex"))
-        if not target or target.get("id") != SLOWKING:
-            continue
-        if len(target.get("energies") or []) < 2:
+        if target and target.get("id") == SLOWKING and len(target.get("energies") or []) < slowking_cap:
             return [i]
-        fallback = fallback if fallback is not None else i
+
+    active = _active_card(ctx)
+    active_id = active.get("id") if active else None
+    active_cap = min_attack_energy_cost(active_id) if active_id is not None else None
+    fallback = None
+    if active_id is not None and active_cap is not None:
+        for i, opt in enumerate(ctx.options):
+            if opt.get("type") != OptionType.ATTACH:
+                continue
+            target = _board_card(ctx, opt.get("inPlayArea"), opt.get("inPlayIndex"))
+            if not target or target.get("id") != active_id:
+                continue
+            if len(target.get("energies") or []) < active_cap:
+                return [i]
+            fallback = fallback if fallback is not None else i
     return [fallback] if fallback is not None else None
 
 
@@ -245,10 +272,31 @@ def setup_active_prefers_slowking_line(ctx: Ctx) -> list[int] | None:
 
 
 def switch_to_backup_attacker(ctx: Ctx) -> list[int] | None:
-    """When choosing a new active Pokemon (retreat/switch/forced), prefer the
-    backup attackers (Mega Kangaskhan ex / Latias ex) over anything else."""
+    """When choosing a new active Pokemon (retreat/switch/forced), prefer
+    Slowking if it's already loaded enough to attack — it's the deck's
+    actual win condition, not the backup plan — and only fall back to the
+    backup attackers (Mega Kangaskhan ex / Latias ex) when Slowking isn't
+    ready.
+
+    Before this fix there was no heuristic that ever switched Slowking back
+    into active once it left: this one unconditionally preferred the backup
+    attackers on every switch decision, and ``setup_active_prefers_slowking_
+    line`` only covers the initial SETUP_ACTIVE_POKEMON pick, not later
+    switches. Real-game evidence (PKM-019's ``data/recent_log.txt`` audit):
+    Slowking accumulated 6 energy attachments over one game but was never
+    once switched back into active, while the backup attackers (parked
+    active the entire game) never reached their own 3-energy attack cost
+    either — zero attacks fired all game.
+    """
     if ctx.sel_context not in (SelectContext.SWITCH, SelectContext.TO_ACTIVE):
         return None
+    slowking_cap = min_attack_energy_cost(SLOWKING) or 2
+    for i, opt in enumerate(ctx.options):
+        if _option_card_id(ctx, opt) != SLOWKING:
+            continue
+        card = _board_card(ctx, opt.get("area"), opt.get("index"))
+        if card and len(card.get("energies") or []) >= slowking_cap:
+            return [i]
     for i, opt in enumerate(ctx.options):
         if _option_card_id(ctx, opt) in BACKUP_ATTACKERS:
             return [i]
@@ -336,7 +384,7 @@ def prefer_engine_targets_to_hand(ctx: Ctx) -> list[int] | None:
 DEFAULT_PSYCHIC_HEURISTICS: list[Heuristic] = [
     prefer_seek_inspiration,
     evolve_into_slowking,
-    attach_energy_to_slowking,
+    attach_energy_to_attacker,
     play_setup_pieces,
     setup_active_prefers_slowking_line,
     switch_to_backup_attacker,

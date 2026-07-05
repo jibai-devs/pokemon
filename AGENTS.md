@@ -72,7 +72,8 @@ Do not build the full CORAL coaching pipeline (Task6.md) — useful as a strateg
 | `main.py` | Kaggle submission entry point — random agent, reads `deck.csv` |
 | `deck.csv` | 60 card IDs for the submission bundle. Regenerate from the registry with `python -m pokemon export-deck -d <name>` — do not hand-edit |
 | `reverse-engineering/data/` | `all_cards.json` (1267 cards), `all_attacks.json` (1556 attacks) |
-| `scripts/parse_replay.py` | Parse a Kaggle replay JSON or run a local game; prints each decision step human-readably. Supports Kaggle ver=2 (string enums, `selected` label) and local (int enums) formats. Marks ~10% of frames `valid=False` where `selected` encodes card serials instead of option-list indices. |
+| `scripts/parse_replay.py` | Parse a Kaggle replay JSON or run a local game; prints each decision step human-readably. Supports Kaggle ver=2 (string enums, `selected` label) and local (int enums) formats. Marks ~10% of frames `valid=False` where `selected` encodes card serials instead of option-list indices. **Does not yet correct the off-by-one `selected` bug — see Known issues.** |
+| `scripts/analyze_heuristic_logs.py` | Deck-agnostic Kaggle-replay analyzer (PKM-019). Corrects the off-by-one `selected` bug and resolves any card option's zone (hand/bench/active/deck/discard/prize) for either player generically — not hardcoded to any deck. Prints a condensed per-turn decision trace + end-of-game summary (option-type counts, attacks used, picks by select context). `python scripts/analyze_heuristic_logs.py <replay.json> --player N` |
 | `scripts/process_cards.py` | Processes `data/EN_Card_Data.csv` (2022 rows, one per move) into one-row-per-card CSVs. Outputs `data/cards_processed.csv` (1267 cards, all), plus split files: `cards_pokemon.csv` (1056), `cards_trainer.csv` (191), `cards_energy.csv` (20). Adds `hp_int`, `retreat_int`, `damage_int` numeric columns and `moves_json` array. Run: `python scripts/process_cards.py --no-duckdb`. |
 | `data/EN_Card_Data.csv` | Raw card data (2022 rows, one per move, 17 columns). Source for process_cards.py. |
 | `data/cards_processed.csv` | Cleaned card dataset — 1267 cards, one row per card, moves as JSON array. |
@@ -85,8 +86,11 @@ Do not build the full CORAL coaching pipeline (Task6.md) — useful as a strateg
 **Known issues:**
 - ~~PKM-004~~ Fixed: OptionType 7/8 swap in `catalog.py`
 - ~~PKM-006~~ Fixed: `selected` in Kaggle replays encodes card serials in some `Card/*` contexts (Switch, SetupActivePokemon, Night Stretcher ToHand). ~10% of frames are marked `valid=False` and skipped by the featurizer. `Main/Main` frames (56%) are all valid.
-- **Open** (found during PKM-017): `catalog.format_option` always indexes into `hand` for OptionType 3/7, regardless of the option's `area` field — mislabels bench/active/deck-area options in verbose logs (e.g. a legitimate bench switch shows the wrong card name). Doesn't affect which option actually gets chosen, only log readability. Fix by threading board state into `format_option` and branching on `area`.
+- **Open, higher priority than it looks** (found during PKM-019, 2026-07-06): the Kaggle replay format's `selected` field is **off by one frame** — the option chosen for the decision at `vis[i]` is actually stored on `vis[i + 1]["selected"]`, not `vis[i]["selected"]`. Confirmed empirically: shifting recovers a valid in-range selection for 182/183 decisions in one real game vs. 151/183 unshifted (mostly coincidental overlap, not signal). `scripts/parse_replay.py` and PKM-006's `valid` flag do **not** account for this — they can look "valid" while reporting the wrong choice. `scripts/analyze_heuristic_logs.py` applies the shift; **fix this in `parse_replay.py`/the featurization plan (PKM-008) too before any behavioral-cloning training**, or BC will train on misaligned labels.
+- **Open** (found during PKM-017): `catalog.format_option` always indexes into `hand` for OptionType 3/7, regardless of the option's `area` field — mislabels bench/active/deck-area options in verbose logs (e.g. a legitimate bench switch shows the wrong card name). Doesn't affect which option actually gets chosen, only log readability. Fix by threading board state into `format_option` and branching on `area`. (`scripts/analyze_heuristic_logs.py` has its own generic, area-aware resolver and isn't affected; `catalog.format_option` itself, used by the local-format verbose CLI, is still unfixed.)
 - ~~Open (found during PKM-017)~~ Fixed: `prefer_copy_fodder_targets` used the same ranked target list (Metagross/Kyurem/Zeraora/Slowking/Slowpoke) for TO_HAND and TO_DECK search contexts alike. Ultra Ball/Poke Pad (TO_HAND) kept pulling Metagross/Kyurem into hand, removing them from the deck so Seek Inspiration could never discard-and-copy them. Split into `prefer_copy_fodder_targets` (TO_DECK only — stack Metagross/Kyurem on top ahead of a Seek Inspiration swing, confirmed correct strategy per real-play advice) and `prefer_engine_targets_to_hand` (TO_HAND only — fetch Slowking/Slowpoke). Seek Inspiration now fires repeatedly in verbose traces; win rate over 20 games went from 0% to 25% (random baseline: 20%).
+- ~~Open (found during PKM-019, 2026-07-06)~~ Fixed: `attach_energy_to_slowking` (now `attach_energy_to_attacker`) always targeted Slowking regardless of board position, and `switch_to_backup_attacker` always preferred the backup attackers on every switch — nothing ever switched Slowking back into active once benched. A real Kaggle replay (`data/recent_log.txt`) showed Slowking getting 6 energy attachments while permanently benched, and the backup attackers stuck at 1 energy all game (need 3) — zero attacks the entire game. Fixed both; added `catalog.min_attack_energy_cost(card_id)` (data-driven, reads real attack costs) so the fix isn't hardcoded per Pokemon. Not yet win-rate validated (see PKM-020).
+- ~~Open (found during PKM-019, 2026-07-06)~~ Fixed: `submission.tar.gz` never bundled `reverse-engineering/data/*.json`, so any `catalog` data-backed lookup (including the new `min_attack_energy_cost`) silently returned empty/`None` on Kaggle. Rebuilt the tar to include both JSON files (1.2MB) — see the updated bundling command below.
 
 ---
 
@@ -160,8 +164,14 @@ wsl -e bash -c "cd /mnt/c/Users/Luqman/Desktop/projects/pokemon && ~/.local/bin/
 Bundle and upload:
 
 ```bash
-tar -czf submission.tar.gz main.py deck.csv src/
+tar -czf submission.tar.gz main.py deck.csv src/ reverse-engineering/data/all_cards.json reverse-engineering/data/all_attacks.json
 ```
+
+The two catalog JSON files are required — without them, `pokemon.catalog`'s
+data-backed lookups (card/attack names beyond the hardcoded override map,
+`min_attack_energy_cost`) silently return empty/`None` on Kaggle. Missing
+until 2026-07-06 (see PKM-019); rebuild any older `submission.tar.gz` before
+relying on catalog-dependent heuristics.
 
 - Upload at `pokemon-tcg-ai-battle` on Kaggle
 - Up to 5 submissions/day; only the latest 2 are active in matchmaking
@@ -206,6 +216,7 @@ Full details in `docs/001_training_pipeline.md`. Summary:
 - Top-level: `{steps, rewards, statuses, info: {Agents: [{Name}]}, ...}`
 - Vis frames at `steps[0][0]["visualize"]` — list of `{select, selected, current, logs, ver:2}`
 - `selected` = chosen option indices (training label); `None` for deck submission frame. ~10% of frames encode card serials instead — these are marked `valid=False` by the parser and must be filtered before featurization.
+- **`selected` is also off by one frame** (found PKM-019, 2026-07-06): the true label for the decision at `vis[i]` lives on `vis[i + 1]["selected"]`, not `vis[i]`. Not yet corrected in `parse_replay.py` or accounted for in this pipeline's plan — must be fixed before featurization/BC training (PKM-008/009), or every label will be shifted by one decision.
 - `select.type` / `opt.type` are **strings**: `'Main'`, `'Card'`, `'YesNo'` / `'Play'`, `'Attack'`, `'End'`, etc.
 - Both players' hands fully visible in replay data (opponent hand only hidden at inference)
 - Card objects carry inline `name` field — no catalog lookup needed for display
@@ -260,6 +271,8 @@ python scripts/parse_replay.py example_replay.json --dump-step 5
 | PKM-016 | Switch active deck to Psychic and add a central deck registry | done | high |
 | PKM-017 | Build a modular heuristic-based agent | in-progress | high |
 | PKM-018 | Build a card/attack reference sheet for the Psychic deck | done | medium |
+| PKM-019 | Log-driven heuristic improvement loop | in-progress | medium |
+| PKM-020 | Automated before/after win-rate validation for heuristic changes | todo | medium |
 
 Full ticket details in `tickets/`.
 

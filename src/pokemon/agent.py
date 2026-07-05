@@ -1,13 +1,13 @@
-"""Baseline agent for the 000 fire deck.
+"""Baseline agent — submits a deck and picks random legal moves.
 
-Submits the fire deck and picks random legal moves. Verbose mode logs the full
-board state each turn so you can read game flow and understand the engine.
+Verbose mode logs the full board state each turn so you can read game flow and
+understand the engine.
 """
 
 import random
 
 from pokemon.catalog import card_name, format_option
-from pokemon.decks import FIRE_DECK, deck_summary
+from pokemon.decks import DEFAULT_DECK, FIRE_DECK, PSYCHIC_DECK, deck_summary
 
 _verbose = False
 _game_num = 0
@@ -28,18 +28,18 @@ def _log(msg: str) -> None:
         print(msg)
 
 
-def fire_agent(obs: dict) -> list[int]:
-    """Pick action(s) for the fire deck given an engine observation."""
+def _play(obs: dict, deck: list[int], deck_name: str) -> list[int]:
+    """Core agent logic: submit deck or pick random actions."""
 
     if obs["select"] is None:
-        lines, checksum = deck_summary(FIRE_DECK)
+        lines, checksum = deck_summary(deck)
         _log(f"\n{'=' * 60}")
-        _log(f"GAME {_game_num}: Submitting deck ({len(FIRE_DECK)} cards, sha256:{checksum})")
+        _log(f"GAME {_game_num}: Submitting {deck_name} ({len(deck)} cards, sha256:{checksum})")
         _log(f"{'=' * 60}")
         if _game_num <= 1:
             for line in lines:
                 _log(line)
-        return FIRE_DECK
+        return deck
 
     select = obs["select"]
     options = select["option"]
@@ -79,3 +79,18 @@ def fire_agent(obs: dict) -> list[int]:
         _log(f"  -> Picking: {', '.join(picked)}")
 
     return chosen
+
+
+def fire_agent(obs: dict) -> list[int]:
+    """Pick action(s) for the fire deck given an engine observation."""
+    return _play(obs, FIRE_DECK, "Fire Deck")
+
+
+def psychic_agent(obs: dict) -> list[int]:
+    """Pick action(s) for the psychic toolbox deck given an engine observation."""
+    return _play(obs, PSYCHIC_DECK, "Psychic Toolbox")
+
+
+def default_agent(obs: dict) -> list[int]:
+    """Pick action(s) for the current default deck given an engine observation."""
+    return _play(obs, DEFAULT_DECK, "Default Deck")

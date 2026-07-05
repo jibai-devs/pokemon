@@ -13,12 +13,18 @@ app = typer.Typer()
 def play(
     games: int = typer.Option(1, "--games", "-g", help="Number of games to play"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed game log"),
+    deck: str = typer.Option("psychic", "--deck", "-d", help="Deck to play: psychic, fire"),
 ):
-    """Play the fire deck against a random agent."""
+    """Play a deck against a random agent."""
     agent.set_verbose(verbose)
 
+    agent_fn = {
+        "psychic": agent.psychic_agent,
+        "fire": agent.fire_agent,
+    }.get(deck, agent.psychic_agent)
+
     if not verbose:
-        typer.echo(f"Playing {games} game(s)...")
+        typer.echo(f"Playing {games} game(s) with {deck} deck...")
         typer.echo()
 
     wins, losses, draws = 0, 0, 0
@@ -28,7 +34,7 @@ def play(
         agent.set_game_num(i + 1)
         env = kaggle.make("cabt", debug=True)
         env.reset()
-        steps = env.run([agent.fire_agent, random_agent])
+        steps = env.run([agent_fn, random_agent])
 
         final = steps[-1]
         reward = final[0].get("reward", 0)

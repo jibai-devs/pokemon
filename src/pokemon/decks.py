@@ -27,6 +27,44 @@ FIRE_DECK = (
 
 assert len(FIRE_DECK) == 60, f"FIRE_DECK has {len(FIRE_DECK)} cards, expected 60"
 
+# 001 Psychic Deck — Mega Kangaskhan ex / Latias ex control-ish shell (60 cards).
+PSYCHIC_DECK = (
+    [162] * 4  # Slowpoke
+    + [163] * 3  # Slowking
+    + [756] * 3  # Mega Kangaskhan ex
+    + [184] * 2  # Latias ex
+    + [144] * 2  # Kyurem
+    + [276] * 2  # Metagross
+    + [1071]  # Meowth ex
+    + [956]  # Zeraora
+    + [272]  # Lillie's Clefairy ex
+    + [140]  # Fezandipiti ex
+    + [1227] * 4  # Lillie's Determination
+    + [1188] * 4  # Ciphermaniac's Codebreaking
+    + [1152] * 4  # Poke Pad
+    + [1121] * 4  # Ultra Ball
+    + [1146] * 3  # Wondrous Patch
+    + [1097] * 2  # Night Stretcher
+    + [1092]  # Secret Box
+    + [1123]  # Switch
+    + [1175]  # Brave Bangle
+    + [1156]  # Lucky Helmet
+    + [1248] * 4  # Academy at Night
+    + [19] * 4  # Telepath Psychic Energy
+    + [5] * 4  # Basic Psychic Energy
+    + [9] * 3  # Boomerang Energy
+)
+
+assert len(PSYCHIC_DECK) == 60, f"PSYCHIC_DECK has {len(PSYCHIC_DECK)} cards, expected 60"
+
+# Central deck registry. Add a deck here once its card list is non-empty and
+# sums to 60; everything else (CLI, deck.csv export, agent) reads from this.
+DECKS: dict[str, list[int]] = {"fire": FIRE_DECK, "psychic": PSYCHIC_DECK}
+
+# The deck used by default when nothing else is specified.
+ACTIVE_DECK_NAME = "psychic"
+ACTIVE_DECK = DECKS[ACTIVE_DECK_NAME]
+
 
 def deck_summary(deck: list[int]) -> tuple[list[str], str]:
     """Return (per-card breakdown lines, checksum) for a deck list.

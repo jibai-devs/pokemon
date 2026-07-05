@@ -15,17 +15,41 @@ _DATA_DIR = Path(__file__).resolve().parents[2] / "reverse-engineering" / "data"
 # Hand-picked labels that override the full catalog where a nicer name is wanted
 # (e.g. "Fire Energy" instead of the catalog's "Basic {R} Energy").
 CARD_NAMES = {
+    # Fire deck (000)
     46: "Gouging Fire ex",
     76: "Slugma",
     30: "Magcargo ex",
     2: "Fire Energy",
-    1092: "Secret Box",
-    1121: "Ultra Ball",
     1145: "Mega Signal",
     1163: "Powerglass",
     1219: "Rocket Petrel",
     1227: "Lillie Determination",
     1245: "Festival Grounds",
+    # Shared trainers (used by both decks)
+    1092: "Secret Box",
+    1121: "Ultra Ball",
+    # Psychic deck (001)
+    5: "Psychic Energy",
+    9: "Boomerang Energy",
+    19: "Telepath Psychic Energy",
+    140: "Fezandipiti ex",
+    144: "Kyurem",
+    162: "Slowpoke",
+    163: "Slowking",
+    184: "Latias ex",
+    272: "Lillie's Clefairy ex",
+    276: "Metagross",
+    756: "Mega Kangaskhan ex",
+    956: "Zeraora",
+    1071: "Meowth ex",
+    1097: "Night Stretcher",
+    1123: "Switch",
+    1146: "Wondrous Patch",
+    1152: "Poke Pad",
+    1156: "Lucky Helmet",
+    1175: "Brave Bangle",
+    1188: "Ciphermaniac's Codebreaking",
+    1248: "Academy at Night",
 }
 
 ATK_NAMES = {
@@ -74,7 +98,17 @@ def atk_name(atk_id: int) -> str:
 
 
 def format_option(opt: dict, hand: list) -> str:
-    """Human-readable label for an option dict (OptionType enum from engine docs)."""
+    """Human-readable label for an option dict (OptionType enum from engine docs).
+
+    KNOWN ISSUE (see PKM-017): types 3 and 7 always index into ``hand``
+    regardless of the option's own ``area`` field. For hand-area options
+    that's correct, but a real playtest showed bench/active/deck-area
+    options (e.g. a "switch to bench Pokemon" choice) get mislabeled with
+    whatever happens to be at that index in hand — purely a display bug,
+    doesn't affect which option index actually gets chosen. Fix by
+    threading board state (``me``'s bench/active) into this function and
+    branching on ``opt.get("area")`` before assuming HAND.
+    """
     t = opt.get("type", -1)
     if t == 1:
         return "GO FIRST"

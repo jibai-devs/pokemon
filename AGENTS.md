@@ -42,13 +42,17 @@ recommendation is superseded. The plan is **behavioral cloning → PPO fine-tuni
 Next actions in order:
 
 1. ~~PKM-018~~ done — Psychic deck card/attack reference sheet built
-2. **PKM-017** — modular heuristic agent (in progress: plumbing works, games
-   complete normally, but Seek Inspiration itself hasn't been observed
-   firing in a real game yet — see the ticket for the open question)
-3. **PKM-008** — featurize replays into numpy tensors (same-deck games only if BC; filter `valid=False`)
-4. **PKM-009** — train BC policy; gate on > 70% win-rate vs random
-5. **PKM-010** — PPO self-play fine-tuning from BC checkpoint
-6. **PKM-011** — deck evaluation (feeds from PKM-012 output)
+2. **PKM-017** — modular heuristic agent (in progress: Seek Inspiration
+   confirmed firing after the 2026-07-05 fodder-targeting fix; 25% win-rate
+   over 20 games, above the 20% random baseline — needs a bigger batch and
+   more tuning)
+3. **PKM-019** — log-driven heuristic improvement loop (new): use verbose
+   playtest logs to find the next heuristic gap systematically, same
+   pattern as the Seek Inspiration fix, rather than one-off manual reads
+4. **PKM-008** — featurize replays into numpy tensors (same-deck games only if BC; filter `valid=False`)
+5. **PKM-009** — train BC policy; gate on > 70% win-rate vs random
+6. **PKM-010** — PPO self-play fine-tuning from BC checkpoint
+7. **PKM-011** — deck evaluation (feeds from PKM-012 output)
 
 Do not build the full CORAL coaching pipeline (Task6.md) — useful as a strategy report writeup but out of scope for the Aug 9 deadline.
 

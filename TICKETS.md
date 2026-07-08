@@ -12,13 +12,13 @@
 | [PKM-008](tickets/PKM-008.md) | Build featurize.py — replay → training tensors | todo | high | feature |
 | [PKM-009](tickets/PKM-009.md) | Build behavioral cloning training loop (train_bc.py) | todo | high | feature |
 | [PKM-010](tickets/PKM-010.md) | PPO self-play fine-tuning (train_rl.py) | todo | medium | feature |
-| [PKM-011](tickets/PKM-011.md) | Deck evaluation — survey meta and assess Psychic deck | todo | medium | research |
+| [PKM-011](tickets/PKM-011.md) | Deck evaluation — survey meta and assess new deck | todo | medium | research |
 | [PKM-012](tickets/PKM-012.md) | Deck extraction and meta analysis script | done | high | feature |
 | [PKM-013](tickets/PKM-013.md) | Process Pokemon cards CSV for analytics and ML | done | high | feature |
 | [PKM-014](tickets/PKM-014.md) | MCTS decision-time search on top of BC/PPO policy | todo | medium | feature |
 | [PKM-015](tickets/PKM-015.md) | Opponent belief modeling via archetype determinization (ISMCTS) | todo | medium | feature |
-| [PKM-016](tickets/PKM-016.md) | Switch active deck to Psychic and add a central deck registry | done | high | feature |
-| [PKM-017](tickets/PKM-017.md) | Build a modular heuristic-based agent | in-progress | high | feature |
-| [PKM-018](tickets/PKM-018.md) | Build a card/attack reference sheet for the Psychic deck | done | medium | research |
-| [PKM-019](tickets/PKM-019.md) | Log-driven heuristic improvement loop | in-progress | medium | feature |
+| [PKM-016](tickets/PKM-016.md) | Switch active deck to Psychic and add a central deck registry | superseded | high | feature |
+| [PKM-017](tickets/PKM-017.md) | Build a modular heuristic-based agent (Psychic-specific rules) | superseded | high | feature |
+| [PKM-018](tickets/PKM-018.md) | Build a card/attack reference sheet for the Psychic deck | superseded | medium | research |
+| [PKM-019](tickets/PKM-019.md) | Log-driven heuristic improvement loop | superseded | medium | feature |
 | [PKM-020](tickets/PKM-020.md) | Automated before/after win-rate validation for heuristic changes | todo | medium | feature |

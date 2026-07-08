@@ -60,14 +60,16 @@ ATK_NAMES = {
 }
 
 
-def _load_catalog() -> tuple[dict[int, str], dict[int, dict], dict[int, list[int]]]:
+def _load_catalog() -> tuple[dict[int, str], dict[int, dict], dict[int, list[int]], dict[int, dict]]:
     cards: dict[int, str] = {}
     attacks: dict[int, dict] = {}
     card_attacks: dict[int, list[int]] = {}
+    card_raw: dict[int, dict] = {}
     try:
         for c in json.loads((_DATA_DIR / "all_cards.json").read_text()):
             cards[c["cardId"]] = c["name"]
             card_attacks[c["cardId"]] = c.get("attacks") or []
+            card_raw[c["cardId"]] = c
     except OSError:
         pass
     try:
@@ -75,10 +77,26 @@ def _load_catalog() -> tuple[dict[int, str], dict[int, dict], dict[int, list[int
             attacks[a["attackId"]] = a
     except OSError:
         pass
-    return cards, attacks, card_attacks
+    return cards, attacks, card_attacks, card_raw
 
 
-_CARD_CATALOG, _ATK_CATALOG, _CARD_ATTACKS = _load_catalog()
+_CARD_CATALOG, _ATK_CATALOG, _CARD_ATTACKS, _CARD_RAW = _load_catalog()
+
+
+def card_info(card_id: int | None) -> dict | None:
+    """Raw catalog entry for a card (hp, basic/ex/stage flags, evolvesFrom,
+    attacks, weakness/resistance), or ``None`` if not in the catalog."""
+    if card_id is None:
+        return None
+    return _CARD_RAW.get(card_id)
+
+
+def attack_info(attack_id: int | None) -> dict | None:
+    """Raw catalog entry for an attack (damage, energies cost list), or
+    ``None`` if not in the catalog."""
+    if attack_id is None:
+        return None
+    return _ATK_CATALOG.get(attack_id)
 
 
 def card_name(card_id: int) -> str:

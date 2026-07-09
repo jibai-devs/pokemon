@@ -31,6 +31,7 @@ from pokemon.heuristics import (
     Ctx,
     Heuristic,
     _hand_card,
+    _option_card_id,
     _rank_and_pick,
     active_card,
     all_pokemon,
@@ -157,27 +158,36 @@ def _hand_option_card_id(ctx: Ctx, opt: dict) -> int | None:
     return card.get("id") if card else None
 
 
-def _resolve_opp_card(ctx: Ctx, opt: dict) -> dict | None:
-    """Resolve a CARD-shaped option against the OPPONENT's board.
+def _resolve_side_card(ctx: Ctx, opt: dict) -> tuple[dict | None, bool]:
+    """Resolve a CARD-shaped option's target card, returning ``(card, is_mine)``.
 
-    Select contexts that only ever target the opponent (Boss's Orders'
-    switch-in choice, Phantom Dive's bench-spread target) are resolved
-    directly against ``ctx.opp`` rather than reusing ``_option_card_id``
-    (which only resolves against ``ctx.me`` — see that function's
-    docstring), since which player's board an option's ``area``/``index``
-    refers to for these contexts isn't itself confirmed (Phase 2 gap), but
-    game rules guarantee it's always the opponent's here.
+    Real replays show each such option carries an explicit ``playerIndex``
+    (PKM-019 batch analysis) identifying whose board ``area``/``index``
+    refers to -- a plain SWITCH decision can resolve to either side (our own
+    voluntary retreat, or Boss's Orders forcing a pick on the opponent's
+    board) depending on who's actually being made to choose, and a prior
+    version of this function always assumed the opponent, which made it
+    evaluate our own bench as if it were the opponent's whenever the two
+    benches differed in size (silently dropping/misassigning candidates).
+    When ``playerIndex`` is absent, defaults to the opponent -- this
+    function's original, narrower scope (Boss's Orders / Phantom Dive
+    always target the opponent, and some call sites' options don't carry
+    the field).
     """
     area = opt.get("area")
     idx = opt.get("index")
     if idx is None:
-        return None
+        return None, False
+    player_idx = opt.get("playerIndex")
+    my_idx = ctx.current.get("yourIndex", 0)
+    is_mine = player_idx == my_idx if player_idx is not None else False
+    side = ctx.me if is_mine else ctx.opp
     if area == AreaType.ACTIVE:
-        return active_card(ctx.opp)
+        return active_card(side), is_mine
     if area == AreaType.BENCH:
-        bench = bench_cards(ctx.opp)
-        return bench[idx] if 0 <= idx < len(bench) else None
-    return None
+        bench = bench_cards(side)
+        return (bench[idx] if 0 <= idx < len(bench) else None), is_mine
+    return None, is_mine
 
 
 # --- Tier 5 — archetype signature table -------------------------------------
@@ -276,6 +286,25 @@ def mulligan(ctx: Ctx) -> list[int] | None:
     return None
 
 
+def _own_board_tier(ctx: Ctx, card: dict) -> int:
+    """A2: priority order when choosing among OUR OWN board for a switch --
+    best-ready attacker first, then the Drakloak line, then a Darkness-loaded
+    Munkidori, then any non-ex, ex last. Shared by ``active_replacement``
+    (forced KO switch) and ``boss_orders_target``'s own-board branch
+    (voluntary retreat / forced switch that resolves to our own bench) so
+    both use the same tiering rather than duplicating it."""
+    cid = card.get("id")
+    if cid == DRAGAPULT_EX and can_attack_now(card):
+        return 0
+    if cid == DRAKLOAK and not ctx.state.get(f"recon_used_{card.get('serial')}_{ctx.turn}"):
+        return 1
+    if cid == MUNKIDORI and EnergyType.DARKNESS in attached_energy_types(card):
+        return 2
+    if not is_ex(cid):
+        return 3
+    return 4
+
+
 def active_replacement(ctx: Ctx) -> list[int] | None:
     """A2: priority order over legal bench options after a forced KO switch."""
     if ctx.sel_context != SelectContext.TO_ACTIVE:
@@ -291,20 +320,7 @@ def active_replacement(ctx: Ctx) -> list[int] | None:
         candidates.append((i, bench[idx]))
     if not candidates:
         return None
-
-    def tier(card: dict) -> int:
-        cid = card.get("id")
-        if cid == DRAGAPULT_EX and can_attack_now(card):
-            return 0
-        if cid == DRAKLOAK and not ctx.state.get(f"recon_used_{card.get('serial')}_{ctx.turn}"):
-            return 1
-        if cid == MUNKIDORI and EnergyType.DARKNESS in attached_energy_types(card):
-            return 2
-        if not is_ex(cid):
-            return 3
-        return 4
-
-    candidates.sort(key=lambda ic: (tier(ic[1]), -(remaining_hp(ic[1]) or 0)))
+    candidates.sort(key=lambda ic: (_own_board_tier(ctx, ic[1]), -(remaining_hp(ic[1]) or 0)))
     return [candidates[0][0]]
 
 
@@ -323,6 +339,9 @@ def watchtower_meowth_sequencing(ctx: Ctx) -> list[int] | None:
     if MEOWTH_EX in ids and WATCHTOWER in ids:
         return [ids[MEOWTH_EX]]
     return None
+
+
+_FUEL_TARGETS = (DREEPY, DRAKLOAK, DRAGAPULT_EX, MUNKIDORI, BUDEW)
 
 
 def attach_energy(ctx: Ctx) -> list[int] | None:
@@ -365,7 +384,7 @@ def attach_energy(ctx: Ctx) -> list[int] | None:
         return [munkidoris[0][0]]
 
     fuel = [(i, target_card(opt)) for i, opt in attach_opts if energy_id(opt) in (FIRE_ENERGY, PSYCHIC_ENERGY)]
-    fuel = [(i, c) for i, c in fuel if c is not None and c.get("id") in (DREEPY, DRAKLOAK, DRAGAPULT_EX)]
+    fuel = [(i, c) for i, c in fuel if c is not None and c.get("id") in _FUEL_TARGETS]
     if not fuel:
         return None
     unready = [(i, c) for i, c in fuel if not (c.get("id") == DRAGAPULT_EX and energy_count(c) >= 2)]
@@ -374,7 +393,11 @@ def attach_energy(ctx: Ctx) -> list[int] | None:
     for i, c in unready:
         if c is active:
             return [i]
-    unready.sort(key=lambda ic: -energy_count(ic[1]))
+    # attacker line first (Dreepy/Drakloak/Dragapult ex); Munkidori needs Psychic
+    # for Mind Bend so it's a real payoff, not just a fallback; Budew's only
+    # attack is free, so it's last -- attaching there wastes the energy but
+    # beats leaving the decision to the random fallback.
+    unready.sort(key=lambda ic: (_FUEL_TARGETS.index(ic[1].get("id")), -energy_count(ic[1])))
     return [unready[0][0]]
 
 
@@ -400,14 +423,21 @@ def _discard_priority(card_id: int | None) -> int:
 
 
 def discard_sequencing(ctx: Ctx) -> list[int] | None:
+    """Options in a DISCARD-context select aren't reliably typed
+    ``OptionType.DISCARD`` (observed as generic ``OptionType.CARD`` across
+    every discard decision in three logged games, per PKM-019 batch
+    analysis) -- ``sel_context`` alone is what disambiguates this select as
+    a discard choice, so every option here is a candidate regardless of its
+    own ``type``. ``_hand_option_card_id`` already degrades to ``None`` for
+    non-HAND-area options (e.g. an attached-card removal choice under
+    DISCARD_CARD_OR_ATTACHED_CARD), so those are filtered out below rather
+    than by type.
+    """
     if ctx.sel_context not in (SelectContext.DISCARD, SelectContext.DISCARD_CARD_OR_ATTACHED_CARD):
-        return None
-    discard_opts = [(i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.DISCARD]
-    if not discard_opts:
         return None
     need = ctx.select.get("maxCount") or 1
     scored = []
-    for i, opt in discard_opts:
+    for i, opt in enumerate(ctx.options):
         cid = _hand_option_card_id(ctx, opt)
         if cid is None:
             continue
@@ -479,22 +509,98 @@ def bench_play_discretion(ctx: Ctx) -> list[int] | None:
     return [low[0][0]]
 
 
+def _dreepy_stalled(ctx: Ctx) -> bool:
+    """No Dreepy in play or hand -- the deck's evolution line has nothing
+    left to build on and needs a fresh one."""
+    return not any(c.get("id") == DREEPY for c in all_pokemon(ctx.me)) and not any(
+        c.get("id") == DREEPY for c in ctx.hand
+    )
+
+
+def play_search_for_dreepy(ctx: Ctx) -> list[int] | None:
+    """No prior heuristic ever valued playing Poke Pad or Night Stretcher, so
+    this Main-phase decision fell to whatever else won by default (usually
+    Attack/Attach) even when the Dreepy line was stalled and one of these
+    was a free search sitting right there (PKM-019, P2). Only overrides the
+    default when the line is actually stalled -- otherwise leaves the
+    decision to whatever already handles Attack/Attach/Supporters."""
+    if not _dreepy_stalled(ctx):
+        return None
+    ids: dict[int, int] = {}
+    for i, opt in enumerate(ctx.options):
+        if opt.get("type") != OptionType.PLAY:
+            continue
+        cid = _hand_option_card_id(ctx, opt)
+        if cid is not None:
+            ids.setdefault(cid, i)
+    if POKE_PAD in ids:
+        return [ids[POKE_PAD]]
+    if NIGHT_STRETCHER in ids:
+        return [ids[NIGHT_STRETCHER]]
+    return None
+
+
+def search_for_dreepy(ctx: Ctx) -> list[int] | None:
+    """The ToHand search-target decision that follows PLAY Poke Pad (deck
+    search, AreaType.DECK options) or Night Stretcher (discard retrieval,
+    AreaType.DISCARD options): pick Dreepy when it's offered and the line is
+    stalled. Gated to these two effects specifically (via ``select.effect``)
+    rather than any ToHand/DECK search, since other search effects in this
+    deck may have different priorities this heuristic isn't confident about."""
+    if ctx.sel_context != SelectContext.TO_HAND:
+        return None
+    effect_id = (ctx.select.get("effect") or {}).get("id")
+    if effect_id not in (POKE_PAD, NIGHT_STRETCHER):
+        return None
+    if not _dreepy_stalled(ctx):
+        return None
+    discard = ctx.me.get("discard") or []
+    for i, opt in enumerate(ctx.options):
+        if opt.get("type") != OptionType.CARD:
+            continue
+        area, idx = opt.get("area"), opt.get("index")
+        if idx is None:
+            continue
+        if area == AreaType.DECK:
+            cid = _option_card_id(ctx, opt)
+        elif area == AreaType.DISCARD:
+            card = discard[idx] if 0 <= idx < len(discard) else None
+            cid = card.get("id") if card else None
+        else:
+            continue
+        if cid == DREEPY:
+            return [i]
+    return None
+
+
 # --- Tier 4 — attack/targeting, archetype-agnostic --------------------------
 
 
 def boss_orders_target(ctx: Ctx) -> list[int] | None:
-    """Default Boss's Orders target: lethal-this-turn first, else the
-    matchup's priority target, else the highest-value (ex) benched piece."""
+    """Default target for a SWITCH/TO_ACTIVE CARD-shaped decision. Splits by
+    which side the options actually resolve to (see ``_resolve_side_card``):
+    a decision that resolves to OUR OWN board (voluntary retreat, or a
+    forced switch that happens to land on us) uses ``active_replacement``'s
+    attacker-priority tiering; a decision that resolves to the OPPONENT's
+    board (Boss's Orders, or any effect that forces their pick) uses
+    lethal-this-turn first, else the matchup's priority target, else the
+    highest-value (ex) benched piece."""
     if ctx.sel_context not in (SelectContext.SWITCH, SelectContext.TO_ACTIVE):
         return None
-    candidates = []
+    mine, theirs = [], []
     for i, opt in enumerate(ctx.options):
         if opt.get("type") != OptionType.CARD:
             continue
-        card = _resolve_opp_card(ctx, opt)
-        if card is not None:
-            candidates.append((i, card))
-    if not candidates:
+        card, is_mine = _resolve_side_card(ctx, opt)
+        if card is None:
+            continue
+        (mine if is_mine else theirs).append((i, card))
+
+    if mine:
+        mine.sort(key=lambda ic: (_own_board_tier(ctx, ic[1]), -(remaining_hp(ic[1]) or 0)))
+        return [mine[0][0]]
+
+    if not theirs:
         return None
     my_dmg = best_attack_damage(active_card(ctx.me))
     archetype = ctx.state.get("archetype")
@@ -508,8 +614,8 @@ def boss_orders_target(ctx: Ctx) -> list[int] | None:
         pref = priority_names.index(name) if name in priority_names else len(priority_names)
         return (0 if lethal else 1, pref, 0 if is_ex(card.get("id")) else 1, hp if hp is not None else 9999)
 
-    candidates.sort(key=score)
-    return [candidates[0][0]]
+    theirs.sort(key=score)
+    return [theirs[0][0]]
 
 
 def bench_spread_target(ctx: Ctx) -> list[int] | None:
@@ -522,8 +628,8 @@ def bench_spread_target(ctx: Ctx) -> list[int] | None:
     for i, opt in enumerate(ctx.options):
         if opt.get("type") != OptionType.CARD:
             continue
-        card = _resolve_opp_card(ctx, opt)
-        if card is not None and card in opp_bench:
+        card, is_mine = _resolve_side_card(ctx, opt)
+        if not is_mine and card is not None and card in opp_bench:
             candidates.append((i, card))
     if not candidates:
         return None
@@ -541,6 +647,30 @@ def bench_spread_target(ctx: Ctx) -> list[int] | None:
     candidates.sort(key=score)
     chosen = [i for i, _ in candidates[:need]]
     return chosen if len(chosen) >= need else None
+
+
+def evolve_choice(ctx: Ctx) -> list[int] | None:
+    """No prior heuristic ever selected an EVOLVE option, so ``attack_choice``
+    always won the Main-phase menu when both were legal -- Dreepy/Drakloak
+    never evolved into the deck's actual win condition (PKM-019, P1).
+    Evolves whenever doing so wouldn't forgo a lethal attack this turn
+    (evolving the active Pokemon costs its attack for the turn, so only a
+    lethal attack is worth trading away)."""
+    evolve_opts = [(i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.EVOLVE]
+    if not evolve_opts:
+        return None
+    attack_opts = [opt for opt in ctx.options if opt.get("type") == OptionType.ATTACK]
+    if not attack_opts:
+        return [evolve_opts[0][0]]
+    best_attack_dmg = 0
+    for opt in attack_opts:
+        atk = attack_info(opt.get("attackId"))
+        if atk:
+            best_attack_dmg = max(best_attack_dmg, atk.get("damage", 0))
+    opp_hp = remaining_hp(active_card(ctx.opp))
+    if opp_hp is not None and best_attack_dmg >= opp_hp:
+        return None  # a lethal attack is on the table -- don't trade it for evolving
+    return [evolve_opts[0][0]]
 
 
 def attack_choice(ctx: Ctx) -> list[int] | None:
@@ -574,11 +704,14 @@ DRAGAPULT_HEURISTICS: list[Heuristic] = [
     active_replacement,
     setup_pokemon,
     watchtower_meowth_sequencing,
+    search_for_dreepy,
+    play_search_for_dreepy,
     attach_energy,
     discard_sequencing,
     supporter_tiebreak,
     bench_play_discretion,
     boss_orders_target,
     bench_spread_target,
+    evolve_choice,
     attack_choice,
 ]

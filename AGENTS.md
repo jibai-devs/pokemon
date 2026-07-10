@@ -66,10 +66,15 @@ Next actions in order:
 
 1. **Run the heuristic agent in WSL** (`play -a heuristic -g 20 -v`) and confirm it doesn't
    crash, that mulligan/setup/forced-switch fire as expected, and that Boss's Orders/bench-spread
-   targeting actually resolves opponent cards (the two most speculative field-shape guesses above)
-2. Re-run PKM-019's log-driven improvement loop against real heuristic-agent replays to check
-   which rules fire, which no-op, and where the archetype-signature latch and priority targets
-   need correction
+   targeting actually resolves opponent cards (the two most speculative field-shape guesses above).
+   **Partially done (2026-07-09):** a 1-game smoke test in WSL ran clean (exit 0, no crash,
+   `attach_energy`/`active_replacement`/`boss_orders_target` all fired at least once) — a real
+   20-game batch with the loop below is still needed.
+2. Run PKM-019/PKM-020's log-driven improvement loop, now formalized in `heuristic_loop/`
+   (`run_batch.py` → `prepare_analysis.py` → agent reads the bundle → implement a fix →
+   `eval_heuristic_change.py` → record in `heuristic_loop/CHANGELOG.md`), against real
+   heuristic-agent replays to check which rules fire, which no-op, and where the
+   archetype-signature latch and priority targets need correction
 3. **PKM-008** — featurize replays into numpy tensors (same-deck games only if BC; filter `valid=False`)
 4. **PKM-009** — train BC policy; gate on > 70% win-rate vs random
 5. **PKM-010** — PPO self-play fine-tuning from BC checkpoint
@@ -127,6 +132,7 @@ Do not build the full CORAL coaching pipeline (Task6.md) — useful as a strateg
 | `data/` | DuckDB / datasets (empty; `just data` opens duckdb) | Generated data, game logs, training datasets |
 | `notebooks/` | Jupyter exploration | Throwaway EDA notebooks |
 | `scripts/` | Ad-hoc tooling | One-off scripts |
+| `heuristic_loop/` | Log-driven heuristic improvement loop (PKM-019/PKM-020): run a batch, bundle losses for an agent to read, validate a change's win-rate, `CHANGELOG.md` context page | Anything about iterating on `heuristics_dragapult.py` from real game logs — see `heuristic_loop/README.md` |
 | `tests/` | Pytest | Tests for `src/pokemon/` |
 
 The CABT engine is vendored at `.venv/lib/python3.14/site-packages/kaggle_environments/envs/cabt/` — **read-only.**

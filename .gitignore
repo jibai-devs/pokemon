@@ -19,3 +19,6 @@ errors.txt
 errors_dl.log
 infodump.txt
 pokemon-tcg-index.txt
+heuristic_loop/logs/
+heuristic_loop/inbox/*
+!heuristic_loop/inbox/.gitkeep

@@ -21,4 +21,4 @@
 | [PKM-017](tickets/PKM-017.md) | Build a modular heuristic-based agent (Psychic-specific rules) | superseded | high | feature |
 | [PKM-018](tickets/PKM-018.md) | Build a card/attack reference sheet for the Psychic deck | superseded | medium | research |
 | [PKM-019](tickets/PKM-019.md) | Log-driven heuristic improvement loop | superseded | medium | feature |
-| [PKM-020](tickets/PKM-020.md) | Automated before/after win-rate validation for heuristic changes | todo | medium | feature |
+| [PKM-020](tickets/PKM-020.md) | Automated before/after win-rate validation for heuristic changes | done | medium | feature |

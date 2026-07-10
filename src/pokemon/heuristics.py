@@ -147,6 +147,12 @@ def all_pokemon(player: dict) -> list[dict]:
     return ([a] if a else []) + bench_cards(player)
 
 
+def prizes_remaining(player: dict) -> int:
+    """How many of ``player``'s 6 prize cards are still untaken (``None``
+    entries are already-taken slots, per `docs/CABT.md`'s Player State)."""
+    return sum(1 for p in (player.get("prize") or []) if p is not None)
+
+
 def _hand_card(ctx: Ctx, idx: int | None) -> dict | None:
     if idx is None or not (0 <= idx < len(ctx.hand)):
         return None

@@ -27,6 +27,7 @@ from collections import Counter
 
 from pokemon.cabt_enums import AreaType, EnergyType, OptionType, SelectContext, SelectType
 from pokemon.catalog import attack_info, card_info
+from pokemon.deck_id import DeckIdentifier
 from pokemon.heuristics import (
     Ctx,
     Heuristic,
@@ -267,6 +268,25 @@ def archetype_latch(ctx: Ctx) -> list[int] | None:
         if any(s in seen_names for s in sigs):
             ctx.state["archetype"] = archetype
             break
+    return None
+
+
+def deck_belief_update(ctx: Ctx) -> list[int] | None:
+    """Side-effect-only hook (PKM-023) -- always returns ``None``. Folds this
+    decision's opponent-visible state into a per-game ``DeckIdentifier``
+    (``ctx.state["deck_id"]``) so any heuristic can read
+    ``archetype_belief()``/``opp_remaining()``/``p_in_hand()``/
+    ``identified_list()`` off it. Purely additive: nothing below yet reads
+    it for targeting -- the library's human-tournament archetypes don't
+    overlap ``TIER5_SIGNATURES``' low-elo-bot-meta keys, so swapping Tier 5
+    over needs its own per-archetype playbook mapping (plan 010 Phase 3,
+    separate work) and a win-rate parity check before the hard latch above
+    is replaced, not just supplemented."""
+    identifier = ctx.state.get("deck_id")
+    if identifier is None:
+        identifier = DeckIdentifier()
+        ctx.state["deck_id"] = identifier
+    identifier.update(ctx.opp)
     return None
 
 
@@ -991,6 +1011,7 @@ def attack_choice(ctx: Ctx) -> list[int] | None:
 
 DRAGAPULT_HEURISTICS: list[Heuristic] = [
     archetype_latch,
+    deck_belief_update,
     mulligan,
     active_replacement,
     setup_pokemon,

@@ -9,6 +9,7 @@ dist/
 build/
 data/*.parquet
 data/replays/
+data/meta_decks/raw/
 data/col_audit.json
 !data/.gitkeep
 .direnv/

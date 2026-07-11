@@ -31,54 +31,74 @@ Middle-leaderboard teams can still win through strong analysis. High rank alone 
 
 ## Current phase
 
-**Phase: Dragapult ex heuristic agent built, needs live/WSL validation.**
+**Phase: Dragapult ex heuristic agent live-validated and iterating; opponent-modeling layer under construction.**
 
 The baseline random agent is submitted. Replay format is confirmed and parser is working.
 **PKM-007** (1,500 replays downloaded) is done. The Dragapult ex deck ("Pult Noir") is registered
-in `pokemon.decks.DECKS` (2026-07-08), and a full deck-specific heuristic agent has been built
-against `docs/plans/007_heuristics_logic_plan.md` (v2) and `dragapult_deck_explanation.md` (v3) — see
-`src/pokemon/heuristics_dragapult.py`, registered as `HEURISTIC_SETS["dragapult"]`. The plan is
-still **behavioral cloning → PPO fine-tuning**, with this heuristic agent as the nearer-term
-improvement over the random baseline.
+in `pokemon.decks.DECKS`, and a full deck-specific heuristic agent covering all five tiers of
+`docs/plans/007_heuristics_logic_plan.md` is built — see `src/pokemon/heuristics_dragapult.py`,
+registered as `HEURISTIC_SETS["dragapult"]`. Unlike the earlier phase, this has now actually been
+**run against the real engine in WSL and iterated on real losses**, not just unit-tested.
 
-**What's implemented (2026-07-08):** all five tiers from the logic plan — Tier 1 setup-phase
-priority, Tier 2 mulligan + forced-active-replacement, Tier 3 energy/Munkidori-Darkness routing,
-discard sequencing, Supporter tiebreak, Watchtower/Meowth ex sequencing, bench-exposure
-discretion, Tier 4 ex-damage-blocker fallback + Boss's Orders/Phantom-Dive-spread targeting +
-default attack choice, and Tier 5 archetype-signature latch + per-matchup priority-target
-overrides for all ten Section 8 write-ups. Tier 5 is a deliberate simplification: it reuses one
-signature-detection + priority-target mechanism across all ten matchups rather than ten fully
-bespoke functions — it doesn't implement judgment-heavy prose (Judge's hand-deduction use,
-full Battle Cage/stadium awareness), which stays a random-fallback decision by design.
-Unit tests for every rule are in `tests/test_heuristics_dragapult.py` (synthetic `obs` dicts, no
-engine needed) and pass, along with `ruff`/`pyright` on the new/changed files.
+**Log-driven iteration loop is live and has already paid off (PKM-019/PKM-020, `heuristic_loop/`):**
+`run_batch.py` plays N games in WSL → `prepare_analysis.py` bundles losses → an agent (or the
+`analyze-heuristic-losses` skill) reads the bundle and logs every questionable decision →
+implement a fix → `eval_heuristic_change.py` measures win-rate delta old-vs-new via `git worktree`
+→ record the finding/change/validation in `heuristic_loop/CHANGELOG.md` (append-only, don't rewrite
+past entries). The first real batch (2026-07-10, `heuristic_loop/logs/20260710_122935`, 30 games/13
+losses) found four recurring gaps — a legal Item/Supporter never competing with a legal Attack for
+the turn, an `attach_energy` short-circuit defeating its own attacker-line priority, Crispin's two
+sub-decisions and Crushing-Hammer-vs-retreat-cost discard both falling entirely to random — fixed
+them and validated **42% → 61% win-rate over 120 games**. See `CHANGELOG.md` for the full writeup;
+that's the template every future heuristic change should follow (finding cited by game/turn, not
+"seemed suboptimal"; a measured win-rate delta, not an assumption).
 
-**Not yet done — the real next step:** none of this has been run against the actual engine
-(`libcg.so`, WSL-only). Several field-shape assumptions are best-effort and *unverified*
-(Phase 2 of `docs/plans/000_plan_engine_enum_extraction.md`): notably which `SelectContext` Boss's
-Orders' switch-in and Phantom Dive's bench-spread targeting actually use, and whether CARD-option
-`area`/`index` resolve against the opponent's board the way `_resolve_opp_card` assumes. Each
-heuristic is written to degrade to `None` (falls back to random) rather than guess wrong, but
-this **must be run via `uv run python -m pokemon play -a heuristic -g N -v` in WSL** before
-trusting it — watch the verbose log for which heuristics actually fire vs. silently no-op.
+**Opponent modeling (plan 010, PKM-022/023/024) is now under construction alongside the loop:**
+the current matchup-adaptation mechanism (`archetype_latch` + `TIER5_SIGNATURES`, a 10-bucket
+hand-written signature table keyed to the *low-elo bot* meta) is being supplemented — not yet
+replaced — by a belief system built from *human tournament* decklists. **PKM-022 (done):**
+`data/meta_decks/library.json`, scraped from a 179-player Regional (Limitless), 22 archetypes,
+Dragapult itself the #1 human archetype at 39% share. **PKM-023 (in-progress):**
+`src/pokemon/deck_id.py`'s `DeckIdentifier` — Bayesian elimination over that library from the
+opponent's cumulative revealed cards, three graceful-degradation levels (exact list → archetype
+core → true fringe). Wired in additively (`deck_belief_update` populates `ctx.state["deck_id"]`
+every decision) but **not yet consumed by any targeting heuristic** — the library's human-meta
+archetype names don't overlap `TIER5_SIGNATURES`' bot-meta keys, so swapping Tier 5 over needs a
+per-archetype playbook mapping (deferred, plan 010 Phase 3) plus a win-rate parity check first.
+Offline eval against all 1,500 replays (`scripts/eval_deck_identifier.py`) shows the honest
+picture: today's bot pool mostly doesn't match tournament lists (89% stay at fringe/level 3), which
+is exactly why PKM-024 (merging replay-extracted lists into the library) is parked until the ladder
+climbs or a pre-deadline refresh. `src/pokemon/determinize.py` (plan 009 Phase 1) is a separate,
+smaller piece already built — a legal-and-consistent hidden-zone sampler for a future decision-time
+search (`SearchBegin`), currently a placeholder resample-from-revealed-cards for the opponent side;
+`identified_list()` from PKM-023 is meant to replace that placeholder once trustworthy (see PKM-023
+"Downstream" in its ticket).
+
+**Known open bug (PKM-021):** `heuristics.py:prizes_remaining()` always returns 0 — the prize array
+is `None`-filled even for untaken prizes (only its *length* shrinks as prizes are taken), so
+`_boss_orders_wins_game`'s "does this KO actually end the game" check is currently vacuous
+(behaves like plain "is this KO lethal"). One-line fix (`len()` not a `None`-filtered count), not
+yet applied — check no other caller depends on the current broken behavior first.
+
+**Still not started:** behavioral cloning / PPO (PKM-008–010) — the heuristic agent remains the
+nearer-term improvement over random while that track waits. The **off-by-one `selected` bug**
+(see Known issues below) must be fixed before any BC training, or every label will be shifted by
+one decision.
 
 Next actions in order:
 
-1. **Run the heuristic agent in WSL** (`play -a heuristic -g 20 -v`) and confirm it doesn't
-   crash, that mulligan/setup/forced-switch fire as expected, and that Boss's Orders/bench-spread
-   targeting actually resolves opponent cards (the two most speculative field-shape guesses above).
-   **Partially done (2026-07-09):** a 1-game smoke test in WSL ran clean (exit 0, no crash,
-   `attach_energy`/`active_replacement`/`boss_orders_target` all fired at least once) — a real
-   20-game batch with the loop below is still needed.
-2. Run PKM-019/PKM-020's log-driven improvement loop, now formalized in `heuristic_loop/`
-   (`run_batch.py` → `prepare_analysis.py` → agent reads the bundle → implement a fix →
-   `eval_heuristic_change.py` → record in `heuristic_loop/CHANGELOG.md`), against real
-   heuristic-agent replays to check which rules fire, which no-op, and where the
-   archetype-signature latch and priority targets need correction
-3. **PKM-008** — featurize replays into numpy tensors (same-deck games only if BC; filter `valid=False`)
-4. **PKM-009** — train BC policy; gate on > 70% win-rate vs random
-5. **PKM-010** — PPO self-play fine-tuning from BC checkpoint
-6. **PKM-011** — deck evaluation (feeds from PKM-012 output)
+1. Fix **PKM-021** (`prizes_remaining`) — cheap, currently corrupting one win-detection heuristic.
+2. Confirm **PKM-023**'s win-rate non-regression via `heuristic_loop/eval_heuristic_change.py` (not
+   yet run this ticket — the additive `deck_belief_update` hook is low-risk but unconfirmed).
+3. Keep running the **heuristic_loop** batch → fix → validate cycle against fresh losses as the
+   agent plays more games — this is the main lever on ladder rank right now.
+4. Decide whether/how to wire `DeckIdentifier` into Tier 5 targeting (needs a playbook mapping from
+   library archetypes to priority targets — plan 010 Phase 3, not started).
+5. **PKM-008** — featurize replays into numpy tensors (same-deck games only if BC; filter
+   `valid=False`; fix the off-by-one `selected` bug first)
+6. **PKM-009** — train BC policy; gate on > 70% win-rate vs random
+7. **PKM-010** — PPO self-play fine-tuning from BC checkpoint
+8. **PKM-011** — deck evaluation (feeds from PKM-012 output)
 
 Do not build the full CORAL coaching pipeline (Task6.md) — useful as a strategy report writeup but out of scope for the Aug 9 deadline.
 
@@ -89,35 +109,46 @@ Do not build the full CORAL coaching pipeline (Task6.md) — useful as a strateg
 | File | Status |
 |------|--------|
 | `src/pokemon/agent.py` | `make_agent(deck)` builds a random-legal-move agent bound to any deck; `default_agent` is bound to `ACTIVE_DECK` |
-| `src/pokemon/heuristics.py` | Deck-agnostic heuristic agent framework (`Ctx`, `_build_ctx`, `_option_card_id`, `make_heuristic_agent(deck, rules)`) — falls back to random. `Ctx` carries a `state: dict` that persists across every decision in one game (owned by the agent closure, reset on deck submission) for heuristics that need cross-turn memory. `HEURISTIC_SETS["dragapult"]` is registered here (imports from `heuristics_dragapult.py` at the bottom of the file to avoid a circular import) |
-| `src/pokemon/heuristics_dragapult.py` | Dragapult ex deck-specific heuristics (PKM-017/007) — all five tiers from `docs/plans/007_heuristics_logic_plan.md`, see "Current phase" above for what's implemented/simplified |
-| `src/pokemon/cabt_enums.py` | IntEnum transcription of the engine's real enums (`SelectType`, `SelectContext`, `OptionType`, `AreaType`, ...) — not yet empirically verified (Phase 2 of the enum extraction plan) |
+| `src/pokemon/heuristics.py` | Deck-agnostic heuristic agent framework (`Ctx`, `_build_ctx`, `_option_card_id`, `make_heuristic_agent(deck, rules)`) — falls back to random. `Ctx` carries a `state: dict` that persists across every decision in one game (owned by the agent closure, reset on deck submission) for heuristics that need cross-turn memory. `HEURISTIC_SETS["dragapult"]` is registered here (imports from `heuristics_dragapult.py` at the bottom of the file to avoid a circular import). Also home to `prizes_remaining()` — **currently broken, see PKM-021 below** |
+| `src/pokemon/heuristics_dragapult.py` | Dragapult ex deck-specific heuristics (PKM-017/007), all five tiers of `docs/plans/007_heuristics_logic_plan.md`, live-iterated via `heuristic_loop/` (see "Current phase" and `heuristic_loop/CHANGELOG.md`). `deck_belief_update` (PKM-023) also registered here — populates `ctx.state["deck_id"]` but not yet consumed by any targeting rule |
+| `src/pokemon/deck_id.py` | PKM-023: `DeckIdentifier` — Bayesian-elimination belief over `data/meta_decks/library.json` from the opponent's cumulative revealed cards. Three-level API: `archetype_belief()`, `opp_remaining(card_id)`, `p_in_hand(card_id)`, `identified_list()`. Not yet wired into any targeting heuristic (see "Current phase") |
+| `src/pokemon/determinize.py` | Plan 009 Phase 1: `sample_determinization(obs, my_deck)` builds a legal, composition-consistent guess for every hidden zone the native `SearchBegin` search needs. Own side is exact (we know our 60-card list); opponent side is a placeholder resample-from-revealed-cards, meant to eventually be replaced by `deck_id.identified_list()` |
+| `src/pokemon/cabt_enums.py` | IntEnum transcription of the engine's real enums (`SelectType`, `SelectContext`, `OptionType`, `AreaType`, `CardType`, ...) — not yet empirically verified (Phase 2 of the enum extraction plan) |
 | `src/pokemon/decks.py` | Deck registry (`DECKS`, `ACTIVE_DECK_NAME`/`ACTIVE_DECK`) — `"dragapult"` registered (60 cards, `dragapult_deck_explanation.md` Section 1) |
-| `src/pokemon/catalog.py` | Card/attack name lookup + option formatting (enums corrected). `card_info(id)`/`attack_info(id)` return the raw catalog dict (hp, basic/ex/stage flags, evolvesFrom, attacks, weakness/resistance; damage, energies cost) — added for the Dragapult heuristics' breakpoint/energy-cost math |
+| `src/pokemon/catalog.py` | Card/attack name lookup + option formatting (enums corrected). `card_info(id)`/`attack_info(id)` return the raw catalog dict (hp, basic/ex/stage flags, evolvesFrom, attacks, weakness/resistance; damage, energies cost) — used by the Dragapult heuristics' breakpoint/energy-cost math and `deck_id`'s Pokemon-vs-Trainer weighting |
 | `src/pokemon/cli.py` | CLI runner (`pokemon-play` / `python -m pokemon`). `play -a random\|heuristic` picks the agent |
 | `tests/test_heuristics.py` | Framework-level tests (fallback-to-random, deck-submission) against synthetic `obs` dicts — runs without WSL/the engine |
-| `tests/test_heuristics_dragapult.py` | Tests for every Dragapult-specific rule (mulligan, forced-switch tiers, discard sequencing, ex-attack-blocker, Watchtower/Meowth sequencing, supporter tiebreak, archetype latch + priority targeting) — synthetic `obs` dicts, no engine needed |
+| `tests/test_heuristics_dragapult.py` | Tests for every Dragapult-specific rule — synthetic `obs` dicts, no engine needed |
+| `tests/test_deck_id.py` | PKM-023: `DeckIdentifier` against a synthetic library — elimination, level transitions, exact/range remaining counts, hypergeometric `p_in_hand`, Pokemon-vs-Trainer weighting, plus a smoke test against the real library |
+| `tests/test_determinize.py` | `sample_determinization` against synthetic `obs` (exact invariants) and real captured logs (structural sanity) |
+| `tests/test_meta_deck_library.py` | PKM-022: sanity checks on the built `library.json` (loads, every list sums to 60, cores non-empty, Dragapult is top archetype) |
 | `main.py` | Kaggle submission entry point — random agent, reads `deck.csv` |
 | `deck.csv` | 60 card IDs for the submission bundle. Regenerate from the registry with `python -m pokemon export-deck -d <name>` — do not hand-edit |
 | `reverse-engineering/data/` | `all_cards.json` (1267 cards), `all_attacks.json` (1556 attacks) |
 | `scripts/parse_replay.py` | Parse a Kaggle replay JSON or run a local game; prints each decision step human-readably. Supports Kaggle ver=2 (string enums, `selected` label) and local (int enums) formats. Marks ~10% of frames `valid=False` where `selected` encodes card serials instead of option-list indices. **Does not yet correct the off-by-one `selected` bug — see Known issues.** |
-| `scripts/analyze_heuristic_logs.py` | Deck-agnostic Kaggle-replay analyzer (PKM-019). Corrects the off-by-one `selected` bug and resolves any card option's zone (hand/bench/active/deck/discard/prize) for either player generically — not hardcoded to any deck. Prints a condensed per-turn decision trace + end-of-game summary (option-type counts, attacks used, picks by select context). `python scripts/analyze_heuristic_logs.py <replay.json> --player N` |
-| `scripts/process_cards.py` | Processes `data/EN_Card_Data.csv` (2022 rows, one per move) into one-row-per-card CSVs. Outputs `data/cards_processed.csv` (1267 cards, all), plus split files: `cards_pokemon.csv` (1056), `cards_trainer.csv` (191), `cards_energy.csv` (20). Adds `hp_int`, `retreat_int`, `damage_int` numeric columns and `moves_json` array. Run: `python scripts/process_cards.py --no-duckdb`. |
-| `data/EN_Card_Data.csv` | Raw card data (2022 rows, one per move, 17 columns). Source for process_cards.py. |
-| `data/cards_processed.csv` | Cleaned card dataset — 1267 cards, one row per card, moves as JSON array. |
-| `data/cards_pokemon.csv` | Pokemon cards only (1056): Basic, Stage 1, Stage 2. |
-| `data/cards_trainer.csv` | Trainer cards only (191): Item, Supporter, Pokemon Tool, Stadium. |
-| `data/cards_energy.csv` | Energy cards only (20): Basic Energy, Special Energy. |
+| `scripts/analyze_heuristic_logs.py` | Deck-agnostic Kaggle-replay analyzer (PKM-019). Corrects the off-by-one `selected` bug and resolves any card option's zone (hand/bench/active/deck/discard/prize) for either player generically. Prints a condensed per-turn decision trace + end-of-game summary. `python scripts/analyze_heuristic_logs.py <replay.json> --player N` |
+| `scripts/download_replays.py` | Bulk-downloads episode replays via the Kaggle API into `data/replays/raw/` (1,500 currently downloaded) |
+| `scripts/analyze_meta.py` | Fingerprints replay decks into archetypes by unique Pokemon-id set, reports count/win-rate/key-Pokemon per archetype (`data/meta_report.txt`) — the *bot-meta* counterpart to `fetch_limitless_decks.py`'s human-tournament meta |
+| `scripts/fetch_limitless_decks.py` | PKM-022: scrapes a Limitless tournament's decklists, maps card names to competition IDs via exact `(set, number)` lookup against `data/cards_processed.csv` (falls back to name matching for basic energies/off-catalog reprints), computes per-archetype cores/flex, writes `data/meta_decks/library.json`. Loud, nonzero-exit on any unmapped/ambiguous card — no silent matching |
+| `scripts/eval_deck_identifier.py` | PKM-023: offline eval harness — drives `DeckIdentifier` with the 1,500 replays' reveal sequences (no engine needed), reports level distribution, turn-of-first-concentration, and accuracy vs. the actual submitted list. Writes `data/meta_decks/deck_id_eval_report.txt` |
+| `scripts/process_cards.py` | Processes `data/EN_Card_Data.csv` (2022 rows, one per move) into one-row-per-card CSVs: `data/cards_processed.csv` (1267 cards), `cards_pokemon.csv` (1056), `cards_trainer.csv` (191), `cards_energy.csv` (20). Run: `python scripts/process_cards.py --no-duckdb` |
+| `data/meta_decks/library.json` | PKM-022 output: 22 archetypes from a 179-list Regional, cores/flex/meta-share per archetype. Dragapult is #1 at 39% |
+| `heuristic_loop/` | PKM-019/020's log-driven improvement loop: `run_batch.py` → `prepare_analysis.py` → fix → `eval_heuristic_change.py` → `CHANGELOG.md`. See `heuristic_loop/README.md` and "Current phase" above for the first real result (42% → 61% win-rate) |
 | `docs/plans/000_plan_engine_enum_extraction.md` | Plan to add full enum awareness (SelectType, SelectContext) |
 | `docs/plans/001_training_pipeline.md` | Replay format, featurization spec, network architecture, training strategy |
+| `docs/plans/007_heuristics_logic_plan.md` | Dragapult ex five-tier heuristic logic plan — what `heuristics_dragapult.py` implements |
+| `docs/plans/008_review_implementation_plan.md` / `008a_review_brief.md` | Review-driven heuristic gap-closing (feeds the `heuristic_loop` batches) |
+| `docs/plans/009_native_search_plan.md` | Decision-time search over the native engine (`SearchBegin`) — Phase 1 (`determinize.py`) done, later phases not started |
+| `docs/plans/010_meta_deck_library_plan.md` | Meta deck library + in-game opponent identification (PKM-022/023/024) — this is the plan behind the "Opponent modeling" paragraph above |
 
 **Known issues:**
 - ~~PKM-004~~ Fixed: OptionType 7/8 swap in `catalog.py`
 - ~~PKM-006~~ Fixed: `selected` in Kaggle replays encodes card serials in some `Card/*` contexts (Switch, SetupActivePokemon, Night Stretcher ToHand). ~10% of frames are marked `valid=False` and skipped by the featurizer. `Main/Main` frames (56%) are all valid.
-- **Open, higher priority than it looks** (found during PKM-019, 2026-07-06): the Kaggle replay format's `selected` field is **off by one frame** — the option chosen for the decision at `vis[i]` is actually stored on `vis[i + 1]["selected"]`, not `vis[i]["selected"]`. Confirmed empirically: shifting recovers a valid in-range selection for 182/183 decisions in one real game vs. 151/183 unshifted (mostly coincidental overlap, not signal). `scripts/parse_replay.py` and PKM-006's `valid` flag do **not** account for this — they can look "valid" while reporting the wrong choice. `scripts/analyze_heuristic_logs.py` applies the shift; **fix this in `parse_replay.py`/the featurization plan (PKM-008) too before any behavioral-cloning training**, or BC will train on misaligned labels.
-- **Open** (found during PKM-017): `catalog.format_option` always indexes into `hand` for OptionType 3/7, regardless of the option's `area` field — mislabels bench/active/deck-area options in verbose logs (e.g. a legitimate bench switch shows the wrong card name). Doesn't affect which option actually gets chosen, only log readability. Fix by threading board state into `format_option` and branching on `area`. (`scripts/analyze_heuristic_logs.py` has its own generic, area-aware resolver and isn't affected; `catalog.format_option` itself, used by the local-format verbose CLI, is still unfixed.)
-- **Note:** `submission.tar.gz` must bundle `reverse-engineering/data/*.json`, or any `catalog` data-backed lookup (e.g. `min_attack_energy_cost`) silently returns empty/`None` on Kaggle — see the bundling command below. This bit PKM-019 once already (fixed 2026-07-06); re-check it any time catalog-dependent heuristics are added for the new deck.
-- The Psychic-deck-specific heuristics (PKM-017/019/021: Seek Inspiration targeting, fodder-stacking, energy/switch logic for Slowking) were deleted along with the Psychic deck on 2026-07-08 — see git history before this date if any of that logic is worth reusing for the new deck.
+- **PKM-021, open:** `heuristics.py:prizes_remaining()` always returns 0 — real `obs` data shows prize-array entries are `None` whether or not that prize has been taken (a prize's contents are hidden even from its own owner until taken); what actually signals a taken prize is the array *shrinking*. This makes `_boss_orders_wins_game` in `heuristics_dragapult.py` vacuous (behaves like plain "is this KO lethal", dropping the "and it actually ends the game" half of its purpose). Fix is `len(player.get("prize") or [])`, not a `None`-filtered count — not yet applied.
+- **Open, higher priority than it looks** (found during PKM-019, 2026-07-06): the Kaggle replay format's `selected` field is **off by one frame** — the option chosen for the decision at `vis[i]` is actually stored on `vis[i + 1]["selected"]`, not `vis[i]["selected"]`. Confirmed empirically: shifting recovers a valid in-range selection for 182/183 decisions in one real game vs. 151/183 unshifted. `scripts/parse_replay.py` and PKM-006's `valid` flag do **not** account for this. `scripts/analyze_heuristic_logs.py` applies the shift; **fix this in `parse_replay.py`/the featurization plan (PKM-008) too before any behavioral-cloning training**, or BC will train on misaligned labels.
+- **Open** (found during PKM-017): `catalog.format_option` always indexes into `hand` for OptionType 3/7, regardless of the option's `area` field — mislabels bench/active/deck-area options in verbose logs. Doesn't affect which option actually gets chosen, only log readability. (`scripts/analyze_heuristic_logs.py` has its own generic, area-aware resolver and isn't affected.)
+- **Note:** `submission.tar.gz` must bundle `reverse-engineering/data/*.json`, or any `catalog` data-backed lookup (e.g. `min_attack_energy_cost`) silently returns empty/`None` on Kaggle — see the bundling command below. This bit PKM-019 once already; re-check it any time catalog-dependent heuristics are added.
+- The Psychic-deck-specific heuristics (PKM-017: Seek Inspiration targeting, fodder-stacking, energy/switch logic for Slowking — *not* the current PKM-021, which is an unrelated bug ticket reusing that number range) were deleted along with the Psychic deck on 2026-07-08 — see git history before this date if any of that logic is worth reusing.
 
 ---
 
@@ -125,16 +156,17 @@ Do not build the full CORAL coaching pipeline (Task6.md) — useful as a strateg
 
 | Path | Contents | Put new things here |
 |------|----------|---------------------|
-| `src/pokemon/` | Installed package. `agent.py`, `heuristics.py`, `cabt_enums.py`, `catalog.py`, `decks.py`, `cli.py`, `__main__.py` | All shared, reusable code |
+| `src/pokemon/` | Installed package. `agent.py`, `heuristics.py`, `heuristics_dragapult.py`, `deck_id.py`, `determinize.py`, `cabt_enums.py`, `catalog.py`, `decks.py`, `cli.py`, `__main__.py` | All shared, reusable code |
 | `deck/` | Everything about the current deck: `NNN_<name>.py` (thin re-export), `NNN_<name>.md` (decklist), `decklist.md`, gameplay walkthrough (`dragapult_deck_explanation.md`) | New deck → add to `pokemon.decks`, then artifacts here |
-| `docs/plans/` | Numbered execution plans (`NNN_plan_*.md`) | New design/execution plans |
+| `docs/plans/` | Numbered execution plans (`NNN_plan_*.md`) — see the codebase-state table above for what each one covers | New design/execution plans |
 | `docs/CABT.md` | Engine/environment reference notes | Engine notes |
 | `reverse-engineering/` | RE cookbook, scripts, `data/` (symbol dumps + card/attack JSON) | Anything about extracting data from `libcg.so` |
-| `data/` | DuckDB / datasets (empty; `just data` opens duckdb) | Generated data, game logs, training datasets |
+| `data/` | Card CSVs, `replays/raw/` (1,500 downloaded episodes), `meta_decks/` (PKM-022 library + PKM-023 eval report) | Generated data, game logs, training datasets |
 | `notebooks/` | Jupyter exploration | Throwaway EDA notebooks |
-| `scripts/` | Ad-hoc tooling | One-off scripts |
+| `scripts/` | Ad-hoc tooling — replay parsing/analysis, meta scraping (`fetch_limitless_decks.py`), deck-id offline eval | One-off scripts |
 | `heuristic_loop/` | Log-driven heuristic improvement loop (PKM-019/PKM-020): run a batch, bundle losses for an agent to read, validate a change's win-rate, `CHANGELOG.md` context page | Anything about iterating on `heuristics_dragapult.py` from real game logs — see `heuristic_loop/README.md` |
 | `tests/` | Pytest | Tests for `src/pokemon/` |
+| `tickets/`, `TICKETS.md` | Per-ticket detail files + the summary index — canonical ticket tracking (see "Tickets" below) | New tickets, per the format in the top-level `~/Desktop/projects/CLAUDE.md` |
 
 The CABT engine is vendored at `.venv/lib/python3.14/site-packages/kaggle_environments/envs/cabt/` — **read-only.**
 
@@ -280,30 +312,17 @@ python scripts/parse_replay.py example_replay.json --dump-step 5
 
 ## Tickets
 
-| ID | Title | Status | Priority |
-|----|-------|--------|----------|
-| PKM-001 | Create deck.csv | done | high |
-| PKM-002 | Create main.py entry point | done | high |
-| PKM-003 | Bundle and submit to Kaggle | done | high |
-| PKM-004 | Fix OptionType enum (7/8 swap) | done | medium |
-| PKM-005 | Build replay parser (parse_replay.py) | done | high |
-| PKM-006 | Fix `selected` alignment for Card-type contexts | done | medium |
-| PKM-007 | Download top-agent replay batch from Kaggle | done | high |
-| PKM-008 | Build featurize.py — replay → training tensors | todo | high |
-| PKM-009 | Build behavioral cloning training loop | todo | high |
-| PKM-010 | PPO self-play fine-tuning | todo | medium |
-| PKM-011 | Deck evaluation — survey meta and assess new deck | todo | medium |
-| PKM-012 | Deck extraction and meta analysis script | done | high |
-| PKM-013 | Process Pokemon cards CSV for analytics and ML | done | high |
-| PKM-014 | MCTS decision-time search on top of BC/PPO policy | todo | medium |
-| PKM-015 | Opponent belief modeling via archetype determinization (ISMCTS) | todo | medium |
-| PKM-016 | Switch active deck to Psychic and add a central deck registry | superseded | high |
-| PKM-017 | Build a modular heuristic-based agent (Psychic-specific rules) | superseded | high |
-| PKM-018 | Build a card/attack reference sheet for the Psychic deck | superseded | medium |
-| PKM-019 | Log-driven heuristic improvement loop | superseded | medium |
-| PKM-020 | Automated before/after win-rate validation for heuristic changes | todo | medium |
+Canonical index is **`TICKETS.md`** (one-line summary table, always current) with full detail per
+ticket in `tickets/PKM-NNN.md` — don't duplicate the table here, it will just drift out of sync
+again (this file's copy did, badly, before this update). Highlights as of this writing:
 
-Full ticket details in `tickets/`.
+- **Active:** PKM-021 (bug, `prizes_remaining()`), PKM-023 (in-progress, opponent deck identifier)
+- **Backlog, not started:** PKM-008/009/010 (BC/PPO), PKM-011 (deck eval), PKM-014/015
+  (MCTS/ISMCTS search), PKM-024 (merge replay lists into the meta library, parked until the ladder
+  climbs)
+- **Superseded:** PKM-016–019 (Psychic-deck-era work, dropped when the deck switched to Dragapult)
+
+See `TICKETS.md` for the full, current list.
 
 ---
 

@@ -7,7 +7,7 @@ Grounded against the actual engine surface in `src/pokemon/cabt_enums.py`
 `make_heuristic_agent` architecture in `heuristics.py` (ordered list of
 `Ctx -> indices|None` functions, first non-`None` match wins, else random).
 Where the engine's exact field semantics aren't yet empirically verified
-(`docs/000_plan_engine_enum_extraction.md` Phase 2), that's flagged inline —
+(`docs/plans/000_plan_engine_enum_extraction.md` Phase 2), that's flagged inline —
 these heuristics should degrade to "doesn't apply" rather than guess wrong,
 same as the existing `_option_card_id` comment already commits to.
 
@@ -239,7 +239,7 @@ substitute for it.
 - The exact `Ctx`/engine field names for "energy attached to a specific
   Pokémon," "damage counters already on a Pokémon," and "Ability used this
   turn" aren't yet confirmed against the live engine (Phase 2 of
-  `docs/000_plan_engine_enum_extraction.md`) — A2 tier 1–2, the Munkidori
+  `docs/plans/000_plan_engine_enum_extraction.md`) — A2 tier 1–2, the Munkidori
   rule's "near-term plan" check, Tier 4's breakpoint calculator, and D2's
   breakpoint-based retreat check all need those fields to actually
   implement, not just to plan in prose. **This is a blocking precondition

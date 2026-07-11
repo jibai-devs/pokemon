@@ -11,7 +11,7 @@ added as functions below (or in a separate module) and registered in
 ``HEURISTIC_SETS`` keyed by deck name (see ``pokemon.decks.DECKS``).
 
 Some heuristics may depend on ``select.deck`` / ``select.contextCard`` field
-shapes that `docs/000_plan_engine_enum_extraction.md` hasn't empirically
+shapes that `docs/plans/000_plan_engine_enum_extraction.md` hasn't empirically
 verified yet (its Phase 2) — best-effort, and should degrade to "doesn't
 apply" (returning ``None``) rather than guessing wrong.
 """
@@ -103,7 +103,7 @@ def _build_ctx(obs: dict, state: dict) -> Ctx:
 # --- Board-state helpers, deck-agnostic ------------------------------------
 #
 # Best-effort readers over the card-dict shapes observed in real Kaggle
-# replays (see docs/001_training_pipeline.md and example_replay.json):
+# replays (see docs/plans/001_training_pipeline.md and example_replay.json):
 # a card is ``{id, name, hp, maxHp, energies, energyCards, tools, ...}``.
 # These degrade to ``None``/``[]``/``False`` rather than raising if a field
 # is missing, per the "fail safe, don't guess wrong" convention already used

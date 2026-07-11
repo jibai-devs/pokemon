@@ -22,3 +22,4 @@ pokemon-tcg-index.txt
 heuristic_loop/logs/
 heuristic_loop/inbox/*
 !heuristic_loop/inbox/.gitkeep
+ptcgProgram 22/

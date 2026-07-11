@@ -36,7 +36,7 @@ Middle-leaderboard teams can still win through strong analysis. High rank alone 
 The baseline random agent is submitted. Replay format is confirmed and parser is working.
 **PKM-007** (1,500 replays downloaded) is done. The Dragapult ex deck ("Pult Noir") is registered
 in `pokemon.decks.DECKS` (2026-07-08), and a full deck-specific heuristic agent has been built
-against `docs/007_heuristics_logic_plan.md` (v2) and `dragapult_deck_explanation.md` (v3) — see
+against `docs/plans/007_heuristics_logic_plan.md` (v2) and `dragapult_deck_explanation.md` (v3) — see
 `src/pokemon/heuristics_dragapult.py`, registered as `HEURISTIC_SETS["dragapult"]`. The plan is
 still **behavioral cloning → PPO fine-tuning**, with this heuristic agent as the nearer-term
 improvement over the random baseline.
@@ -55,7 +55,7 @@ engine needed) and pass, along with `ruff`/`pyright` on the new/changed files.
 
 **Not yet done — the real next step:** none of this has been run against the actual engine
 (`libcg.so`, WSL-only). Several field-shape assumptions are best-effort and *unverified*
-(Phase 2 of `docs/000_plan_engine_enum_extraction.md`): notably which `SelectContext` Boss's
+(Phase 2 of `docs/plans/000_plan_engine_enum_extraction.md`): notably which `SelectContext` Boss's
 Orders' switch-in and Phantom Dive's bench-spread targeting actually use, and whether CARD-option
 `area`/`index` resolve against the opponent's board the way `_resolve_opp_card` assumes. Each
 heuristic is written to degrade to `None` (falls back to random) rather than guess wrong, but
@@ -90,7 +90,7 @@ Do not build the full CORAL coaching pipeline (Task6.md) — useful as a strateg
 |------|--------|
 | `src/pokemon/agent.py` | `make_agent(deck)` builds a random-legal-move agent bound to any deck; `default_agent` is bound to `ACTIVE_DECK` |
 | `src/pokemon/heuristics.py` | Deck-agnostic heuristic agent framework (`Ctx`, `_build_ctx`, `_option_card_id`, `make_heuristic_agent(deck, rules)`) — falls back to random. `Ctx` carries a `state: dict` that persists across every decision in one game (owned by the agent closure, reset on deck submission) for heuristics that need cross-turn memory. `HEURISTIC_SETS["dragapult"]` is registered here (imports from `heuristics_dragapult.py` at the bottom of the file to avoid a circular import) |
-| `src/pokemon/heuristics_dragapult.py` | Dragapult ex deck-specific heuristics (PKM-017/007) — all five tiers from `docs/007_heuristics_logic_plan.md`, see "Current phase" above for what's implemented/simplified |
+| `src/pokemon/heuristics_dragapult.py` | Dragapult ex deck-specific heuristics (PKM-017/007) — all five tiers from `docs/plans/007_heuristics_logic_plan.md`, see "Current phase" above for what's implemented/simplified |
 | `src/pokemon/cabt_enums.py` | IntEnum transcription of the engine's real enums (`SelectType`, `SelectContext`, `OptionType`, `AreaType`, ...) — not yet empirically verified (Phase 2 of the enum extraction plan) |
 | `src/pokemon/decks.py` | Deck registry (`DECKS`, `ACTIVE_DECK_NAME`/`ACTIVE_DECK`) — `"dragapult"` registered (60 cards, `dragapult_deck_explanation.md` Section 1) |
 | `src/pokemon/catalog.py` | Card/attack name lookup + option formatting (enums corrected). `card_info(id)`/`attack_info(id)` return the raw catalog dict (hp, basic/ex/stage flags, evolvesFrom, attacks, weakness/resistance; damage, energies cost) — added for the Dragapult heuristics' breakpoint/energy-cost math |
@@ -108,8 +108,8 @@ Do not build the full CORAL coaching pipeline (Task6.md) — useful as a strateg
 | `data/cards_pokemon.csv` | Pokemon cards only (1056): Basic, Stage 1, Stage 2. |
 | `data/cards_trainer.csv` | Trainer cards only (191): Item, Supporter, Pokemon Tool, Stadium. |
 | `data/cards_energy.csv` | Energy cards only (20): Basic Energy, Special Energy. |
-| `docs/000_plan_engine_enum_extraction.md` | Plan to add full enum awareness (SelectType, SelectContext) |
-| `docs/001_training_pipeline.md` | Replay format, featurization spec, network architecture, training strategy |
+| `docs/plans/000_plan_engine_enum_extraction.md` | Plan to add full enum awareness (SelectType, SelectContext) |
+| `docs/plans/001_training_pipeline.md` | Replay format, featurization spec, network architecture, training strategy |
 
 **Known issues:**
 - ~~PKM-004~~ Fixed: OptionType 7/8 swap in `catalog.py`
@@ -126,8 +126,9 @@ Do not build the full CORAL coaching pipeline (Task6.md) — useful as a strateg
 | Path | Contents | Put new things here |
 |------|----------|---------------------|
 | `src/pokemon/` | Installed package. `agent.py`, `heuristics.py`, `cabt_enums.py`, `catalog.py`, `decks.py`, `cli.py`, `__main__.py` | All shared, reusable code |
-| `deck/` | Per-deck artifacts: `NNN_<name>.py` (thin re-export), `NNN_<name>.md` (decklist), gameplay walkthrough | New deck → add to `pokemon.decks`, then artifacts here |
-| `docs/` | Engine notes, execution plans (`NNN_plan_*.md`) | Specs, plans, engine notes |
+| `deck/` | Everything about the current deck: `NNN_<name>.py` (thin re-export), `NNN_<name>.md` (decklist), `decklist.md`, gameplay walkthrough (`dragapult_deck_explanation.md`) | New deck → add to `pokemon.decks`, then artifacts here |
+| `docs/plans/` | Numbered execution plans (`NNN_plan_*.md`) | New design/execution plans |
+| `docs/CABT.md` | Engine/environment reference notes | Engine notes |
 | `reverse-engineering/` | RE cookbook, scripts, `data/` (symbol dumps + card/attack JSON) | Anything about extracting data from `libcg.so` |
 | `data/` | DuckDB / datasets (empty; `just data` opens duckdb) | Generated data, game logs, training datasets |
 | `notebooks/` | Jupyter exploration | Throwaway EDA notebooks |
@@ -232,13 +233,13 @@ Each turn the engine calls your agent with `obs`:
 | 13 | ATTACK | `attackId` |
 | 14 | END | — |
 
-See `docs/000_plan_engine_enum_extraction.md` for the full enum reference (SelectType, SelectContext, AreaType, etc.).
+See `docs/plans/000_plan_engine_enum_extraction.md` for the full enum reference (SelectType, SelectContext, AreaType, etc.).
 
 ---
 
 ## Training data pipeline
 
-Full details in `docs/001_training_pipeline.md`. Summary:
+Full details in `docs/plans/001_training_pipeline.md`. Summary:
 
 **Kaggle replay format (confirmed from `example_replay.json`):**
 - Top-level: `{steps, rewards, statuses, info: {Agents: [{Name}]}, ...}`

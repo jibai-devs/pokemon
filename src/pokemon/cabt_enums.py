@@ -1,7 +1,7 @@
 """IntEnum transcription of the CABT engine's real enums.
 
 Source: upstream cabt engine API docs, transcribed in
-``docs/000_plan_engine_enum_extraction.md``. Not yet empirically verified
+``docs/plans/000_plan_engine_enum_extraction.md``. Not yet empirically verified
 against the live engine (that doc's Phase 2) — treat these as the best
 available spec, not ground truth confirmed by observation.
 """

@@ -102,7 +102,7 @@ Once you have it, here's how to actually look at what's inside:
   `steps[0][0]["visualize"]`, each with `select` (options presented), `selected` (index of the
   option the player picked — the training label), and `current` (full board state). Frame 0's
   `action` field holds both players' 60-card deck submissions. Full field-by-field breakdown is
-  in [`docs/001_training_pipeline.md`](docs/001_training_pipeline.md).
+  in [`docs/plans/001_training_pipeline.md`](docs/plans/001_training_pipeline.md).
 
 ### 5. Card dataset processing (PKM-013)
 

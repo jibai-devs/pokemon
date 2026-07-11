@@ -37,7 +37,7 @@ without running the harness (should be rare — flag why).
 
 **Trigger:** `heuristic_loop/logs/20260710_122935` (fresh 30-game batch, 13
 losses; inbox/logs were empty going into this, so `run_batch.py` was run to
-seed evidence for `docs/008_review_implementation_plan.md` Phase 3). Full
+seed evidence for `docs/plans/008_review_implementation_plan.md` Phase 3). Full
 per-game findings in `heuristic_loop/logs/20260710_122935/issues_log.md`.
 
 **Finding:** Four findings, three cross-game recurring. (A) No heuristic

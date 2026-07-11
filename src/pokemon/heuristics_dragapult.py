@@ -1,7 +1,7 @@
 """Dragapult ex ("Pult Noir") deck-specific heuristics — PKM-017/007.
 
-Built against `docs/007_heuristics_logic_plan.md` (v2) and
-`docs/dragapult_deck_explanation.md` (v3). Tiers below mirror the plan's
+Built against `docs/plans/007_heuristics_logic_plan.md` (v2) and
+`deck/dragapult_deck_explanation.md` (v3). Tiers below mirror the plan's
 Tier 1-5 ladder; the ordering in ``DRAGAPULT_HEURISTICS`` at the bottom *is*
 the priority order (first-match-wins, per ``make_heuristic_agent``).
 
@@ -9,7 +9,7 @@ Several fields this module reads (``energyCards``, ``hp``/``maxHp``,
 ``inPlayArea``/``inPlayIndex`` on ATTACH options) come from the real Kaggle
 replay shape (see `example_replay.json`) but haven't been empirically
 verified against the *local* engine's option dicts (Phase 2 of
-`docs/000_plan_engine_enum_extraction.md`). Every rule here is written to
+`docs/plans/000_plan_engine_enum_extraction.md`). Every rule here is written to
 degrade to "doesn't apply" (``None``) rather than guess wrong, per that
 plan's own convention.
 
@@ -376,7 +376,7 @@ def _dragapult_fully_fueled(card: dict) -> bool:
 def _stranded_energy_risk(card: dict) -> int:
     """P2.6: a critically-damaged Pokemon is likely to be knocked out (or, if
     on our Bench, gusted into Active and knocked out) before it ever gets to
-    spend this turn's energy -- a closed-form proxy for review.md's "strands
+    spend this turn's energy -- a closed-form proxy for docs/plans/008a_review_brief.md's "strands
     energy on low-value Pokemon," since we can't see the opponent's actual
     next play (whether they even hold a Boss's Orders) to check directly."""
     hp = remaining_hp(card)

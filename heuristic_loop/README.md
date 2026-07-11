@@ -51,7 +51,7 @@ with:
 
 - `heuristic_loop/logs/<batch>/analysis_bundle.md` (from step 2)
 - `src/pokemon/heuristics_dragapult.py` (current logic)
-- `docs/007_heuristics_logic_plan.md` (intended design)
+- `docs/plans/007_heuristics_logic_plan.md` (intended design)
 - `reverse-engineering/data/all_cards.json` / `all_attacks.json` if the
   question is about a specific card's numbers
 

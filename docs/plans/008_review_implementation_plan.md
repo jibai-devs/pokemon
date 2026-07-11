@@ -1,21 +1,21 @@
-# 008 — Review Implementation Plan (post-`review.md`)
+# 008 — Review Implementation Plan (post-`008a_review_brief.md`)
 
-Source: `review.md` (external implementation-review brief for the Dragapult ex /
+Source: `docs/plans/008a_review_brief.md` (external implementation-review brief for the Dragapult ex /
 Munkidori heuristic agent), reconciled against the actual state of
-`src/pokemon/heuristics_dragapult.py` and `docs/007_heuristics_logic_plan.md`.
-Everything in `review.md` is wanted eventually — this doc orders it and notes
+`src/pokemon/heuristics_dragapult.py` and `docs/plans/007_heuristics_logic_plan.md`.
+Everything in the brief is wanted eventually — this doc orders it and notes
 where the brief's assumptions don't match this codebase.
 
 **Ground rule for all of this:** the engine (`libcg.so`) hands the agent one
 legal-option menu per real decision — there is no exposed forward model
 (`simulate_actions`/`apply_action`/`wins_game`) the agent can roll forward
-speculatively. `review.md`'s "shallow search" modules (Lethal Line Finder,
+speculatively. The brief's "shallow search" modules (Lethal Line Finder,
 Boss+Munkidori+Attack search, beam search) assume that primitive. It doesn't
 exist and building it is a separate, large project (effectively
 re-implementing or repeatedly re-invoking the real rules engine). Until that
 exists, those modules are **out of scope** — approximate their value with
 closed-form derived-state checks over the current option menu instead. This
-is the one place this plan deviates from `review.md`'s own recommendation
+is the one place this plan deviates from the brief's own recommendation
 bias.
 
 **Sequencing principle (per user 2026-07-10):** heuristics first. Everything
@@ -73,11 +73,11 @@ These are pure derived-state predicates, no new engine capability needed.
    turn.
 3. **Munkidori KO threshold in Phantom Dive allocation.** `bench_spread_target`
    has one flat `<=60` tier. Add a `<=30` ("one Adrena-Brain can finish")
-   tier above it, per `review.md`'s threshold table.
+   tier above it, per `docs/plans/008a_review_brief.md`'s threshold table.
 4. **Strengthen `_boss_orders_has_payoff`.** Currently "can my current
    attack KO a benched target" — extend to check whether the resulting KO
    actually ends the game (`prizes_remaining`), which is the cheap,
-   menu-local approximation of `review.md`'s Lethal Finder that's actually
+   menu-local approximation of `docs/plans/008a_review_brief.md`'s Lethal Finder that's actually
    buildable without a simulator.
 
 Regression tests for each, added to `tests/test_heuristics_dragapult.py`
@@ -136,7 +136,7 @@ but no regression signal strong enough to walk anything back.
 `heuristic_loop/CHANGELOG.md` has no real findings yet beyond the `fa87ffe`
 batch — these modules stay unwritten until a logged loss batch actually
 shows the mistake. Building them earlier risks tuning against imagined
-scenarios instead of real ones (same trap `review.md` itself warns against
+scenarios instead of real ones (same trap `docs/plans/008a_review_brief.md` itself warns against
 in its "What To Ignore Or Avoid" section).
 
 ### Batch 1 (2026-07-10, `heuristic_loop/logs/20260710_122935`, 30 games / 13
@@ -152,7 +152,7 @@ has full per-game detail), found four findings — three cross-game recurring:
   (attacking ends the turn). Worst instance: Crispin/Crushing Hammer/Boss's
   Orders sat legal and unused for 5 consecutive turns in one game while the
   opponent had a benched 2-prize ex the whole time. This is what
-  `review.md`'s Lethal/tactical-search modules were trying to route around —
+  `docs/plans/008a_review_brief.md`'s Lethal/tactical-search modules were trying to route around —
   turns out the actual gap was upstream of targeting, at "should we even be
   attacking this decision."
 - **(B) `attach_energy`'s active-priority short-circuit defeated its own
@@ -197,7 +197,7 @@ Don't pre-build those — look at what the next batch's losses actually show.
 
 ---
 
-## Out of scope for now (search infra)
+## Out of scope for now (search infra) — see `docs/plans/009_native_search_plan.md`
 
 Not being built until/unless a real forward model exists for this engine:
 
@@ -206,9 +206,16 @@ Not being built until/unless a real forward model exists for this engine:
 - Boss + Munkidori + attack tactical search.
 - General beam search over a turn.
 
-If any of these turn out to be worth it later, the prerequisite is a
-simulator/forward-model spike, not a heuristics PR — track that separately
-if it becomes necessary.
+**Update (2026-07-11):** the "no forward model exists" premise above turned
+out to be wrong — `libcg.so` exports a native MCTS search API
+(`AgentStart`/`SearchBegin`/`SearchStep`/`SearchEnd`/`SearchRelease`) that
+was never previously investigated, and the exact serialized state it needs
+is already delivered to every agent as `obs["search_begin_input"]` on every
+decision (silently unused until now). See `docs/plans/009_native_search_plan.md`
+for the evidence and a phased plan — the prerequisite is now a bounded RE
+spike to pin down `SearchBegin`'s argument layout, not a rules-engine
+rewrite. This section's heuristic-only fallback still stands if that spike
+doesn't pan out.
 
 ---
 
@@ -216,7 +223,7 @@ if it becomes necessary.
 
 - **Regression test discipline** — `tests/test_heuristics_dragapult.py`
   (36 tests as of Phase 1/2) + `heuristic_loop/eval_heuristic_change.py`'s before/after
-  win-rate harness (PKM-020) already is the infrastructure `review.md` asks
+  win-rate harness (PKM-020) already is the infrastructure `docs/plans/008a_review_brief.md` asks
   for under "Regression Tests." Just keep using it for every change above.
 - **Phantom Dive Allocator base logic** — `bench_spread_target` already
   exists with matchup-priority + HP-threshold scoring; Phase 1 item 3 only
@@ -230,5 +237,5 @@ if it becomes necessary.
 ## Reference
 
 Full module-by-module reasoning and the original decision table: see the
-review conversation (2026-07-10) that produced this doc, and `review.md`
+review conversation (2026-07-10) that produced this doc, and `docs/plans/008a_review_brief.md`
 itself for the un-reconciled original brief.

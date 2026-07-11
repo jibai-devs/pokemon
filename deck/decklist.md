@@ -1,6 +1,6 @@
 # Dragapult ex ("Pult Noir") — Decklist (60 cards)
 
-> Source of truth: `docs/dragapult_deck_explanation.md` Section 1 (confirmed by deck owner).
+> Source of truth: `deck/dragapult_deck_explanation.md` Section 1 (confirmed by deck owner).
 > No Duskull/Dusclops/Dusknoir, no Latias ex, no Shaymin, no Lillie's Clefairy ex in this build.
 
 ## Pokémon (18)

@@ -205,5 +205,5 @@ Output marks chosen options with `»`.
 
 - **Replay format confirmation:** download one real Kaggle replay and run `parse_replay.py` on it to confirm the `steps` structure matches what's documented here. The `visualize` key may or may not be present in downloaded replays (it's written by `cabt.py`'s `finish()` locally — Kaggle may or may not include it).
 - **Opponent hand visibility:** in the active player's observation, `players[opp]["hand"]` is `None` — only `handCount` is visible. Featurize opponent hand as count only.
-- **select.type vs. OptionType enum:** the DOCS.md option type table in AGENTS.md was derived from live observation; validate against `docs/000_plan_engine_enum_extraction.md` before finalising the option encoder.
+- **select.type vs. OptionType enum:** the DOCS.md option type table in AGENTS.md was derived from live observation; validate against `docs/plans/000_plan_engine_enum_extraction.md` before finalising the option encoder.
 - **maxCount > 1:** some select contexts allow picking multiple options (e.g., discarding multiple cards). The current architecture handles this by scoring all options and taking the top-k by logit; verify this matches the engine's expectations.

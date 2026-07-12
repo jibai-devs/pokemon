@@ -22,7 +22,7 @@
 | [PKM-018](tickets/PKM-018.md) | Build a card/attack reference sheet for the Psychic deck | superseded | medium | research |
 | [PKM-019](tickets/PKM-019.md) | Log-driven heuristic improvement loop | superseded | medium | feature |
 | [PKM-020](tickets/PKM-020.md) | Automated before/after win-rate validation for heuristic changes | done | medium | feature |
-| [PKM-021](tickets/PKM-021.md) | `prizes_remaining()` always returns 0 — broken prize-array visibility assumption | todo | medium | bug |
+| [PKM-021](tickets/PKM-021.md) | `prizes_remaining()` always returns 0 — broken prize-array visibility assumption | done | medium | bug |
 | [PKM-022](tickets/PKM-022.md) | Build meta deck library from Limitless tournament decklists | done | high | feature |
 | [PKM-023](tickets/PKM-023.md) | In-game opponent deck identification over the meta library | in-progress | high | feature |
-| [PKM-024](tickets/PKM-024.md) | Merge replay-extracted opponent lists into the meta library (future refresh) | todo | low | feature |
+| [PKM-024](tickets/PKM-024.md) | Merge replay-extracted opponent lists into the meta library (future refresh) | done | high | feature |

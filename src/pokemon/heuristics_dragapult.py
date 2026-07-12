@@ -13,21 +13,27 @@ verified against the *local* engine's option dicts (Phase 2 of
 degrade to "doesn't apply" (``None``) rather than guess wrong, per that
 plan's own convention.
 
-Tier 5 (matchup overrides) is deliberately implemented as one mechanism —
-archetype-signature latch + a per-archetype priority-target list — reused by
-the Tier 4 targeting rules, rather than ten fully bespoke functions. This
-captures the concrete, codifiable part of Section 8 (who to target first)
-without engine support for things like hand-content deduction (Judge) or
-full stadium-interaction awareness (Battle Cage) — those stay judgment calls
-left to the random fallback, as the plan intends for genuinely discretionary
-decisions.
+Tier 5 (matchup overrides) identification/classification -- the archetype-
+signature latch, the deck-id belief, and the per-archetype priority-target
+table they resolve to -- lives in ``pokemon.dragapult_matchups``, imported
+below and reused by the Tier 4 targeting rules here, rather than ten fully
+bespoke functions. This captures the concrete, codifiable part of Section 8
+(who to target first) without engine support for things like hand-content
+deduction (Judge) or full stadium-interaction awareness (Battle Cage) —
+those stay judgment calls left to the random fallback, as the plan intends
+for genuinely discretionary decisions.
 """
 
 from collections import Counter
 
 from pokemon.cabt_enums import AreaType, EnergyType, OptionType, SelectContext, SelectType
 from pokemon.catalog import attack_info, card_info
-from pokemon.deck_id import DeckIdentifier
+from pokemon.dragapult_matchups import (
+    TIER5_PRIORITY_TARGETS,
+    _matchup_bucket,
+    archetype_latch,
+    deck_belief_update,
+)
 from pokemon.heuristics import (
     Ctx,
     Heuristic,
@@ -206,40 +212,11 @@ def _resolve_side_card(ctx: Ctx, opt: dict) -> tuple[dict | None, bool]:
 
 # --- Tier 5 — archetype signature table -------------------------------------
 #
-# Detection: any opponent Pokemon/Stadium name seen so far this game (played
-# to bench/active, discarded, or in the Stadium slot) latches the matchup
-# identity for the rest of the game (plan's Tier 5 design). "mirror" is
-# checked last since "Dragapult ex" is the least distinctive signature.
-
-TIER5_SIGNATURES: dict[str, list[str]] = {
-    "arboliva": ["Arboliva ex", "Dolliv", "Smoliv"],
-    "alakazam": ["Alakazam", "Kadabra", "Dudunsparce"],
-    "mega_lucario": ["Mega Lucario ex", "Riolu"],
-    "n_zoroark": ["N's Zoroark ex", "Pecharunt ex"],
-    "cynthia_garchomp": ["Cynthia's Garchomp ex", "Cynthia's Gabite"],
-    "crustle_kangaskhan": ["Crustle", "Mega Kangaskhan ex", "Milotic ex"],
-    "grimmsnarl": ["Marnie's Grimmsnarl ex", "Froslass"],
-    "mega_starmie": ["Mega Starmie ex", "Mega Froslass ex"],
-    "raging_bolt": ["Raging Bolt", "Raging Bolt ex"],
-    "mega_box": ["Absol", "Area Zero Underdepths"],
-    "mirror": ["Dragapult ex"],
-}
-
-# Per Section 8: which opposing Pokemon to prioritize once an archetype is
-# latched — the concrete, codifiable half of each matchup write-up.
-TIER5_PRIORITY_TARGETS: dict[str, list[str]] = {
-    "arboliva": ["Meganium", "Dolliv", "Smoliv"],
-    "alakazam": ["Dudunsparce", "Genesect"],
-    "mega_lucario": ["Makuhita", "Lunatone", "Solrock", "Mega Lucario ex"],
-    "n_zoroark": ["Pecharunt ex", "N's Zoroark ex"],
-    "cynthia_garchomp": ["Cynthia's Garchomp ex", "Cynthia's Roserade"],
-    "crustle_kangaskhan": ["Milotic ex", "Mega Kangaskhan ex"],
-    "grimmsnarl": ["Munkidori", "Froslass"],
-    "mega_starmie": ["Munkidori", "Mega Froslass ex"],
-    "raging_bolt": ["Teal Mask Ogerpon ex"],
-    "mega_box": ["Absol"],
-    "mirror": ["Drakloak"],
-}
+# Identification/classification (TIER5_SIGNATURES/TIER5_PRIORITY_TARGETS,
+# archetype_latch, deck_belief_update, _matchup_bucket) now lives in
+# pokemon.dragapult_matchups, imported above. This section keeps only the
+# small matchup fact that's consumed directly by a decision rule below
+# without going through the bucket mechanism.
 
 # Section 8 (Crustle/Mega Kangaskhan ex): Mysterious Rock Inn blocks all
 # damage from Pokemon-ex attacks entirely.
@@ -247,47 +224,6 @@ EX_ATTACK_DENY_TARGETS = {"Crustle"}
 
 # Which of our own attacks come from an ex Pokemon (Phantom Dive, Cruel Arrow).
 _EX_ATTACK_IDS = {154, 183}
-
-
-def archetype_latch(ctx: Ctx) -> list[int] | None:
-    """Side-effect-only hook (Tier 5 detection) — always returns ``None``.
-    Run first every decision so later rules can read ``ctx.state["archetype"]``."""
-    if ctx.state.get("archetype"):
-        return None
-    seen_names: set[str] = set()
-    for c in all_pokemon(ctx.opp):
-        if c.get("name"):
-            seen_names.add(c["name"])
-    for c in ctx.opp.get("discard") or []:
-        if c.get("name"):
-            seen_names.add(c["name"])
-    for c in ctx.current.get("stadium") or []:
-        if c.get("name"):
-            seen_names.add(c["name"])
-    for archetype, sigs in TIER5_SIGNATURES.items():
-        if any(s in seen_names for s in sigs):
-            ctx.state["archetype"] = archetype
-            break
-    return None
-
-
-def deck_belief_update(ctx: Ctx) -> list[int] | None:
-    """Side-effect-only hook (PKM-023) -- always returns ``None``. Folds this
-    decision's opponent-visible state into a per-game ``DeckIdentifier``
-    (``ctx.state["deck_id"]``) so any heuristic can read
-    ``archetype_belief()``/``opp_remaining()``/``p_in_hand()``/
-    ``identified_list()`` off it. Purely additive: nothing below yet reads
-    it for targeting -- the library's human-tournament archetypes don't
-    overlap ``TIER5_SIGNATURES``' low-elo-bot-meta keys, so swapping Tier 5
-    over needs its own per-archetype playbook mapping (plan 010 Phase 3,
-    separate work) and a win-rate parity check before the hard latch above
-    is replaced, not just supplemented."""
-    identifier = ctx.state.get("deck_id")
-    if identifier is None:
-        identifier = DeckIdentifier()
-        ctx.state["deck_id"] = identifier
-    identifier.update(ctx.opp)
-    return None
 
 
 # --- Tier 1 — setup phase ----------------------------------------------------
@@ -858,8 +794,8 @@ def boss_orders_target(ctx: Ctx) -> list[int] | None:
     if not theirs:
         return None
     my_dmg = best_attack_damage(active_card(ctx.me))
-    archetype = ctx.state.get("archetype")
-    priority_names = TIER5_PRIORITY_TARGETS.get(archetype, []) if isinstance(archetype, str) else []
+    bucket = _matchup_bucket(ctx)
+    priority_names = TIER5_PRIORITY_TARGETS.get(bucket, []) if bucket else []
     chain_at_risk = _breaks_dragapult_chain(ctx)
 
     def score(item: tuple[int, dict]) -> tuple:
@@ -934,8 +870,8 @@ def bench_spread_target(ctx: Ctx) -> list[int] | None:
     if not candidates:
         return None
     need = ctx.select.get("maxCount") or 1
-    archetype = ctx.state.get("archetype")
-    priority_names = TIER5_PRIORITY_TARGETS.get(archetype, []) if isinstance(archetype, str) else []
+    bucket = _matchup_bucket(ctx)
+    priority_names = TIER5_PRIORITY_TARGETS.get(bucket, []) if bucket else []
 
     def _hp_tier(hp: int) -> int:
         # P1.3: a benched Pokemon at <=30 HP is one Adrena-Brain shift (up to

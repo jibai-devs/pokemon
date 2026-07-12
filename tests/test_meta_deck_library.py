@@ -1,7 +1,9 @@
-"""PKM-022: sanity checks on the built meta deck library.
+"""PKM-022/PKM-024: sanity checks on the built meta deck library.
 
 Run scripts/fetch_limitless_decks.py first to (re)generate
-data/meta_decks/library.json; these tests only validate the artifact.
+data/meta_decks/library.json, then scripts/extract_replay_decks.py to merge
+the replay-extracted bot archetypes (plan 011 Phase 1); these tests only
+validate the artifact, and pass on both the limitless-only and merged forms.
 """
 
 import json
@@ -33,11 +35,22 @@ def test_every_list_sums_to_60(library):
             assert total == 60, f"{name} / {lst['player']} sums to {total}"
 
 
-def test_archetype_lists_count_matches_meta_share(library):
-    total_lists = library["total_lists"]
-    for archetype in library["archetypes"].values():
-        expected_share = len(archetype["lists"]) / total_lists
-        assert archetype["meta_share"] == pytest.approx(expected_share)
+def test_meta_share_consistent(library):
+    sources = library.get("sources")
+    if sources is None:
+        # Pre-merge (limitless-only) form: meta_share is the plain list share.
+        total_lists = library["total_lists"]
+        for archetype in library["archetypes"].values():
+            expected_share = len(archetype["lists"]) / total_lists
+            assert archetype["meta_share"] == pytest.approx(expected_share)
+        return
+    # Merged form: meta_share = within-source share x that source's weight,
+    # and the shares form a proper prior (sum to 1 across the library).
+    for name, archetype in library["archetypes"].items():
+        weight = sources[archetype["source"]]["weight"]
+        assert archetype["meta_share"] == pytest.approx(archetype["source_share"] * weight), name
+    total = sum(a["meta_share"] for a in library["archetypes"].values())
+    assert total == pytest.approx(1.0, abs=0.01)
 
 
 def test_cores_non_empty_for_common_archetypes(library):
@@ -47,6 +60,26 @@ def test_cores_non_empty_for_common_archetypes(library):
 
 
 def test_top_archetype_is_dragapult(library):
-    top = max(library["archetypes"].items(), key=lambda kv: kv[1]["meta_share"])
+    """Dragapult is the #1 *human-tournament* archetype (PKM-022's headline
+    finding); in the merged library that means top among non-replay sources."""
+    human = {
+        name: arch
+        for name, arch in library["archetypes"].items()
+        if arch.get("source", "limitless_550") != "replays"
+    }
+    top = max(human.items(), key=lambda kv: kv[1]["meta_share"])
     assert top[0] == "Dragapult"
-    assert top[1]["meta_share"] > 0.3
+    share = top[1].get("source_share", top[1]["meta_share"])
+    assert share > 0.3
+
+
+def test_replay_archetypes_tagged_and_weighted(library):
+    """Merged form only: replay archetypes exist, are tagged, and carry the
+    dominant share of the prior (they are today's actual opponents)."""
+    sources = library.get("sources")
+    if sources is None or "replays" not in sources:
+        pytest.skip("library not yet merged with replay-extracted lists")
+    replay_archetypes = [a for a in library["archetypes"].values() if a["source"] == "replays"]
+    assert replay_archetypes
+    replay_mass = sum(a["meta_share"] for a in replay_archetypes)
+    assert replay_mass == pytest.approx(sources["replays"]["weight"], abs=0.01)

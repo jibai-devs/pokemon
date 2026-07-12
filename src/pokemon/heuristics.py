@@ -148,9 +148,11 @@ def all_pokemon(player: dict) -> list[dict]:
 
 
 def prizes_remaining(player: dict) -> int:
-    """How many of ``player``'s 6 prize cards are still untaken (``None``
-    entries are already-taken slots, per `docs/CABT.md`'s Player State)."""
-    return sum(1 for p in (player.get("prize") or []) if p is not None)
+    """How many of ``player``'s 6 prize cards are still untaken. Prize
+    contents are hidden (every entry is ``None`` even for the owner, until
+    taken) -- the array *shrinks* as prizes are taken, so its length is the
+    remaining count (PKM-021; contradicts docs/CABT.md's "None = taken")."""
+    return len(player.get("prize") or [])
 
 
 def _hand_card(ctx: Ctx, idx: int | None) -> dict | None:

@@ -3,6 +3,8 @@ using synthetic ``obs`` dicts — no engine/WSL required. Follows the pattern
 in ``test_heuristics.py``.
 """
 
+from pokemon.deck_id import DeckIdentifier
+from pokemon.dragapult_matchups import _matchup_bucket, archetype_latch
 from pokemon.heuristics import _build_ctx
 from pokemon.heuristics_dragapult import (
     BOSS_ORDERS,
@@ -22,7 +24,6 @@ from pokemon.heuristics_dragapult import (
     PSYCHIC_ENERGY,
     WATCHTOWER,
     active_replacement,
-    archetype_latch,
     attach_energy,
     attack_choice,
     bench_spread_target,
@@ -55,9 +56,10 @@ def _obs(
     prize: list | None = None,
     opp_prize: list | None = None,
 ):
-    # Default to a full, untaken 6-prize pile for both sides (per
-    # `docs/CABT.md`'s Player State) -- tests that care about
-    # `prizes_remaining` pass an explicit (shorter, i.e. partially-taken) list.
+    # Default to a full, untaken 6-prize pile for both sides. Real obs data
+    # has every prize entry ``None`` (contents hidden even from the owner);
+    # the array shrinks as prizes are taken (PKM-021) -- tests that care
+    # about `prizes_remaining` pass an explicit shorter list.
     return {
         "select": select,
         "current": {
@@ -70,14 +72,14 @@ def _obs(
                     "active": active or [],
                     "bench": bench or [],
                     "discard": discard or [],
-                    "prize": prize if prize is not None else [1] * 6,
+                    "prize": prize if prize is not None else [None] * 6,
                 },
                 {
                     "hand": None,
                     "active": opp_active or [],
                     "bench": opp_bench or [],
                     "discard": opp_discard or [],
-                    "prize": opp_prize if opp_prize is not None else [1] * 6,
+                    "prize": opp_prize if opp_prize is not None else [None] * 6,
                 },
             ],
         },
@@ -475,7 +477,7 @@ def test_supporter_tiebreak_still_plays_boss_when_it_wins_the_game():
         hand=hand,
         active=[active],
         opp_bench=[{"id": 1, "name": "Staryu", "hp": 60, "maxHp": 60}],
-        prize=[1],  # my last prize -- this KO wins the game
+        prize=[None],  # my last prize -- this KO wins the game
     )
     assert supporter_tiebreak(ctx) == [0]  # Boss's Orders
 
@@ -552,6 +554,107 @@ def test_bench_spread_target_prefers_30hp_over_60hp_tier():
     }
     ctx = _ctx(select, opp_bench=opp_bench)
     assert bench_spread_target(ctx) == [1]  # the 25 HP target, not merely the 55 HP one
+
+
+# --- plan 011 Phase 2: deck-id belief feeding Tier 5 targeting ---------------
+#
+# Synthetic two-archetype library over real catalog ids (742 Kadabra /
+# 66 Dudunsparce carry the "alakazam" TIER5 signature names; 119 Dreepy
+# carries none; 9 Boomerang Energy is inert filler), mirroring the fixture
+# style in test_deck_id.py. Two lists in "Bot Alakazam" keep a single Kadabra
+# reveal at level 2 (no unique exact list) so the core+flex classification
+# path is what's exercised.
+
+_BUCKET_LIBRARY = {
+    "total_lists": 3,
+    "archetypes": {
+        "Bot Alakazam": {
+            "meta_share": 2 / 3,
+            "core": {"742": 2, "66": 3},
+            "flex": {"1182": {"count_range": [0, 2], "lists_with": 1}},
+            "lists": [
+                {"player": "a1", "title": "Bot Alakazam", "cards": {"742": 2, "66": 3, "1182": 2, "9": 53}},
+                {"player": "a2", "title": "Bot Alakazam", "cards": {"742": 2, "66": 3, "9": 55}},
+            ],
+        },
+        "Bot Dreepy": {
+            "meta_share": 1 / 3,
+            "core": {"119": 4},
+            "flex": {},
+            "lists": [
+                {"player": "b1", "title": "Bot Dreepy", "cards": {"119": 4, "9": 56}},
+            ],
+        },
+    },
+}
+
+_NOOP_SELECT = {"type": 0, "context": 0, "maxCount": 1, "option": []}
+
+
+def _bucket_identifier(*reveal_ids: int) -> DeckIdentifier:
+    ident = DeckIdentifier(library=_BUCKET_LIBRARY)
+    if reveal_ids:
+        ident.update(
+            {
+                "active": [],
+                "bench": [{"id": cid} for cid in reveal_ids],
+                "discard": [],
+                "hand": None,
+                "handCount": 5,
+                "deckCount": 40,
+            }
+        )
+    return ident
+
+
+def test_matchup_bucket_prefers_deck_belief_over_latch():
+    """A concentrated belief (Kadabra reveal eliminates "Bot Dreepy") is
+    classified through TIER5_SIGNATURES and outranks a contradicting latch."""
+    ident = _bucket_identifier(742)  # Kadabra
+    ctx = _ctx(_NOOP_SELECT, state={"deck_id": ident, "archetype": "mega_lucario"})
+    assert _matchup_bucket(ctx) == "alakazam"
+
+
+def test_matchup_bucket_falls_back_to_latch_when_belief_unresolved():
+    """No reveals -> level 3 -> the board-observation latch still decides."""
+    ident = _bucket_identifier()
+    ctx = _ctx(_NOOP_SELECT, state={"deck_id": ident, "archetype": "raging_bolt"})
+    assert _matchup_bucket(ctx) == "raging_bolt"
+
+
+def test_matchup_bucket_falls_back_when_believed_archetype_has_no_signature():
+    """"Bot Dreepy" (identified exactly after a 4-Dreepy reveal) carries no
+    TIER5 signature name -- the belief abstains and the latch decides."""
+    ident = _bucket_identifier(119, 119, 119, 119)
+    assert ident.identified_list() is not None
+    ctx = _ctx(_NOOP_SELECT, state={"deck_id": ident, "archetype": "grimmsnarl"})
+    assert _matchup_bucket(ctx) == "grimmsnarl"
+
+
+def test_matchup_bucket_none_without_belief_or_latch():
+    ctx = _ctx(_NOOP_SELECT, state={})
+    assert _matchup_bucket(ctx) is None
+
+
+def test_bench_spread_target_uses_belief_priority_before_any_signature_seen():
+    """Integration: with the belief concentrated on the alakazam bucket and
+    NO latch (no signature Pokemon on the board yet), bench_spread_target
+    pulls the bucket's priority target (Dudunsparce) over a lower-HP one."""
+    opp_bench = [
+        {"id": 1, "name": "Something", "hp": 25, "maxHp": 100},
+        {"id": 66, "name": "Dudunsparce", "hp": 90, "maxHp": 90},
+    ]
+    select = {
+        "type": 1,
+        "context": 14,  # DAMAGE_COUNTER_ANY
+        "maxCount": 1,
+        "option": [
+            {"type": 3, "area": 5, "index": 0, "playerIndex": 1},
+            {"type": 3, "area": 5, "index": 1, "playerIndex": 1},
+        ],
+    }
+    ctx = _ctx(select, opp_bench=opp_bench, state={"deck_id": _bucket_identifier(742)})
+    assert bench_spread_target(ctx) == [1]  # priority target, not the 25 HP one
 
 
 def test_munkidori_defensive_heal_saves_endangered_attacker():

@@ -3,69 +3,58 @@
 This is the canonical source for deck lists. The numbered artifacts under
 ``deck/`` (decklist md, gameplay md) document a deck; the importable definition
 lives here.
+
+Add a new deck by defining a ``list[int]`` of 60 card ids, asserting its
+length, and registering it in ``DECKS`` below.
 """
 
 import hashlib
 from collections import Counter
 
 from pokemon.catalog import card_name
+from pokemon.types import Deck
 
-# 000 Fire Deck — Gouging Fire ex + Magcargo ex (60 cards).
-FIRE_DECK = (
-    [46] * 2  # Gouging Fire ex
-    + [76] * 4  # Slugma
-    + [30] * 4  # Magcargo ex
-    + [1092]  # Secret Box
-    + [1121] * 2  # Ultra Ball
-    + [1145] * 2  # Mega Signal
-    + [1163] * 2  # Powerglass
-    + [1219] * 4  # Team Rocket's Petrel
-    + [1227] * 4  # Lillie's Determination
-    + [1245] * 2  # Festival Grounds
-    + [2] * 33  # Basic Fire Energy
-)
-
-assert len(FIRE_DECK) == 60, f"FIRE_DECK has {len(FIRE_DECK)} cards, expected 60"
-
-# 001 Psychic Toolbox — Slowking + Mega Kangaskhan ex (60 cards).
-# Psychic-type control/toolbox: Slowking sets up, Mega Kangaskhan ex is the main
-# attacker, backed by Latias ex / Kyurem / Metagross tech and a heavy draw engine.
-PSYCHIC_DECK = (
-    # Pokemon (20)
-    [162] * 4  # Slowpoke (Psychic, evolves into Slowking)
-    + [163] * 3  # Slowking
-    + [756] * 3  # Mega Kangaskhan ex
-    + [184] * 2  # Latias ex
-    + [144] * 2  # Kyurem
-    + [276] * 2  # Metagross
-    + [1071]  # Meowth ex
-    + [956]  # Zeraora
-    + [272]  # Lillie's Clefairy ex
+# 002 Dragapult Deck — Dragapult ex ("Pult Noir") Phantom Dive engine (60 cards).
+# Source: dragapult_deck_explanation.md, Section 1.
+DRAGAPULT_DECK = (
+    [119] * 4  # Dreepy
+    + [120] * 4  # Drakloak
+    + [121] * 3  # Dragapult ex
+    + [112] * 2  # Munkidori
+    + [235] * 2  # Budew
+    + [791]  # Moltres
     + [140]  # Fezandipiti ex
-    # Trainers (29)
+    + [1071]  # Meowth ex
     + [1227] * 4  # Lillie's Determination
-    + [1188] * 4  # Ciphermaniac's Codebreaking
-    + [1152] * 4  # Poké Pad
+    + [1198] * 3  # Crispin
+    + [1182] * 3  # Boss's Orders
+    + [1213]  # Judge
+    + [1120] * 4  # Crushing Hammer
+    + [1086] * 4  # Buddy-Buddy Poffin
+    + [1152] * 4  # Poke Pad
     + [1121] * 4  # Ultra Ball
-    + [1146] * 3  # Wondrous Patch
     + [1097] * 2  # Night Stretcher
-    + [1092]  # Secret Box (ACE SPEC)
-    + [1123]  # Switch
-    + [1175]  # Brave Bangle
-    + [1156]  # Lucky Helmet
-    + [1248] * 4  # Academy at Night
-    # Energy (11)
-    + [19] * 4  # Telepath Psychic Energy
-    + [5] * 4  # Basic Psychic Energy
-    + [9] * 3  # Boomerang Energy
+    + [1080]  # Unfair Stamp (ACE SPEC)
+    + [1260]  # Risky Ruins
+    + [1256]  # Team Rocket's Watchtower
+    + [1197]  # Xerosic's Machinations
+    + [2] * 4  # Fire Energy
+    + [5] * 3  # Psychic Energy
+    + [7] * 2  # Darkness Energy
 )
 
-assert len(PSYCHIC_DECK) == 60, f"PSYCHIC_DECK has {len(PSYCHIC_DECK)} cards, expected 60"
+assert len(DRAGAPULT_DECK) == 60, f"DRAGAPULT_DECK has {len(DRAGAPULT_DECK)} cards, expected 60"
 
-DEFAULT_DECK = PSYCHIC_DECK
+# Central deck registry. Add a deck here once its card list is non-empty and
+# sums to 60; everything else (CLI, deck.csv export, agent) reads from this.
+DECKS: dict[str, Deck] = {"dragapult": DRAGAPULT_DECK}
+
+# The deck used by default when nothing else is specified.
+ACTIVE_DECK_NAME: str = "dragapult"
+ACTIVE_DECK: Deck = DECKS[ACTIVE_DECK_NAME]
 
 
-def deck_summary(deck: list[int]) -> tuple[list[str], str]:
+def deck_summary(deck: Deck) -> tuple[list[str], str]:
     """Return (per-card breakdown lines, checksum) for a deck list.
 
     The checksum is a canonical fingerprint: ids are sorted first, so the same

@@ -1,0 +1,16 @@
+=== Deck identifier offline eval: 1500 replays (0 skipped/unparseable) ===
+Perspectives evaluated: 3000 (2 per parseable replay)
+
+Final level distribution:
+  Level 1: 1190 (40%)
+  Level 2: 1556 (52%)
+  Level 3: 254 (8%)
+
+Turn first reaching level 2: mean=2.1, n=2914
+Turn first reaching level 1: mean=7.3, n=1190
+
+Accuracy vs actual submitted list (final level only):
+  core_miss: 251 (8%)
+  core_subset: 1305 (44%)
+  exact_match: 1190 (40%)
+  n/a: 254 (8%)

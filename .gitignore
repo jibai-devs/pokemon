@@ -9,6 +9,7 @@ dist/
 build/
 data/*.parquet
 data/replays/
+data/meta_decks/raw/
 data/col_audit.json
 !data/.gitkeep
 .direnv/
@@ -19,3 +20,7 @@ errors.txt
 errors_dl.log
 infodump.txt
 pokemon-tcg-index.txt
+heuristic_loop/logs/
+heuristic_loop/inbox/*
+!heuristic_loop/inbox/.gitkeep
+ptcgProgram 22/

@@ -1,0 +1,41 @@
+=== Core-Pokemon archetype classification (full-info, post-hoc): 1500 replays (0 skipped), 137 unique lists, 3000 deck instances ===
+Archetypes in tournament_archetype_cores.md: 29
+
+By unique 60-card list:
+  matched (exactly one archetype): 132 (96%)
+  ambiguous (multiple archetype cores present): 3 (2%)
+  unmatched (no archetype core present): 2 (1%)
+
+By game-instance (frequency-weighted, i.e. how much of the ladder this covers):
+  matched: 2935 (98%)
+  ambiguous: 57 (2%)
+  unmatched: 8 (0%)
+
+Per-archetype hit counts (unique lists / game instances):
+  Starmie Dusknoir               lists=   5  instances=  742 (24.7%)
+  Alakazam Dudunsparce           lists=  31  instances=  477 (15.9%)
+  Archaludon                     lists=   4  instances=  409 (13.6%)
+  Hop's Phantump                 lists=  18  instances=  361 (12.0%)
+  Mega Lucario                   lists=  16  instances=  280 (9.3%)
+  Dragapult                      lists=   5  instances=  230 (7.7%)
+  Crustle                        lists=  21  instances=  105 (3.5%)
+  Iono's Bellibolt               lists=   1  instances=   76 (2.5%)
+  Spheal Walrein                 lists=   2  instances=   60 (2.0%)
+  Mega Abomasnow                 lists=   7  instances=   54 (1.8%)
+  Comfey                         lists=   1  instances=   46 (1.5%)
+  Grimmsnarl Froslass            lists=   3  instances=   36 (1.2%)
+  Rocket's Mewtwo                lists=   3  instances=   15 (0.5%)
+  Ethan's Cyndaquil              lists=   3  instances=   13 (0.4%)
+  Festival Lead                  lists=   6  instances=   12 (0.4%)
+  Okidogi Barbaracle             lists=   2  instances=    7 (0.2%)
+  Cynthia's Garchomp             lists=   2  instances=    7 (0.2%)
+  Rocket's Honchkrow             lists=   2  instances=    5 (0.2%)
+
+Ambiguous examples (top 3 by frequency):
+  x  46  matches=['Crustle', "Ethan's Cyndaquil"]  top_pokemon=Crustlex4 / Dwebblex4 / Ethan's Cyndaquilx4
+  x  10  matches=['Crustle', "Ethan's Cyndaquil"]  top_pokemon=Crustlex4 / Dwebblex4 / Ethan's Cyndaquilx4
+  x   1  matches=['Clefairy Ogerpon', "Hop's Phantump"]  top_pokemon=Hop's Phantumpx4 / Hop's Trevenantx4 / Hop's Snorlaxx2
+
+Unmatched examples (top 2 by frequency):
+  x   5  top_pokemon=Mega Heracross exx4 / Teal Mask Ogerpon exx4
+  x   3  top_pokemon=Cubchoox4 / Cornerstone Mask Ogerpon exx1 / Team Rocket's Articunox1

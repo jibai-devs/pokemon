@@ -4,9 +4,12 @@ Source: engine/Types.h — verified against the actual engine source.
 """
 
 from enum import IntEnum
+from typing import TypeVar
+
+EnumT = TypeVar("EnumT", bound=IntEnum)
 
 
-def safe[EnumT: IntEnum](cls: type[EnumT], value: int | None) -> EnumT | int | None:
+def safe(cls: type[EnumT], value: int | None) -> EnumT | int | None:  # noqa: UP047
     """Return the enum member for ``value``, or the raw int if unknown."""
     if value is None:
         return None

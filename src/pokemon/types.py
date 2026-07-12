@@ -5,15 +5,17 @@ current selection and card location.  These types describe the stable shared
 shape without pretending every optional engine field is always present.
 """
 
-from collections.abc import Callable
-from typing import Required, TypedDict
+from __future__ import annotations
 
-type CardId = int
-type AttackId = int
-type PlayerIndex = int
-type OptionIndex = int
-type Action = list[OptionIndex]
-type Deck = list[CardId]
+from collections.abc import Callable
+from typing import Required, TypeAlias, TypedDict
+
+CardId: TypeAlias = int  # noqa: UP040 - Kaggle runs Python 3.11.
+AttackId: TypeAlias = int  # noqa: UP040
+PlayerIndex: TypeAlias = int  # noqa: UP040
+OptionIndex: TypeAlias = int  # noqa: UP040
+Action: TypeAlias = list[OptionIndex]  # noqa: UP040
+Deck: TypeAlias = list[CardId]  # noqa: UP040
 
 
 class CardState(TypedDict, total=False):
@@ -123,5 +125,5 @@ class SearchStartConfig(TypedDict):
     enemyActive: list[CardId]
 
 
-type Agent = Callable[[Observation], Action]
-type HeuristicState = dict[str, object]
+Agent: TypeAlias = Callable[[Observation], Action]  # noqa: UP040
+HeuristicState: TypeAlias = dict[str, object]  # noqa: UP040

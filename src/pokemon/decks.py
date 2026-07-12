@@ -12,6 +12,7 @@ import hashlib
 from collections import Counter
 
 from pokemon.catalog import card_name
+from pokemon.types import Deck
 
 # 002 Dragapult Deck — Dragapult ex ("Pult Noir") Phantom Dive engine (60 cards).
 # Source: dragapult_deck_explanation.md, Section 1.
@@ -46,14 +47,14 @@ assert len(DRAGAPULT_DECK) == 60, f"DRAGAPULT_DECK has {len(DRAGAPULT_DECK)} car
 
 # Central deck registry. Add a deck here once its card list is non-empty and
 # sums to 60; everything else (CLI, deck.csv export, agent) reads from this.
-DECKS: dict[str, list[int]] = {"dragapult": DRAGAPULT_DECK}
+DECKS: dict[str, Deck] = {"dragapult": DRAGAPULT_DECK}
 
 # The deck used by default when nothing else is specified.
 ACTIVE_DECK_NAME: str = "dragapult"
-ACTIVE_DECK: list[int] = DECKS[ACTIVE_DECK_NAME]
+ACTIVE_DECK: Deck = DECKS[ACTIVE_DECK_NAME]
 
 
-def deck_summary(deck: list[int]) -> tuple[list[str], str]:
+def deck_summary(deck: Deck) -> tuple[list[str], str]:
     """Return (per-card breakdown lines, checksum) for a deck list.
 
     The checksum is a canonical fingerprint: ids are sorted first, so the same

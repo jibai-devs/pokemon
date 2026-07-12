@@ -7,6 +7,40 @@ hand-picked override map for nicer display names.
 
 import json
 from pathlib import Path
+from typing import Required, TypedDict, cast
+
+from pokemon.types import AttackId, CardId, CardState, Option
+
+
+class CardCatalogEntry(TypedDict, total=False):
+    cardId: Required[CardId]
+    name: Required[str]
+    cardType: int
+    pokemonType: int
+    evolutionType: int
+    retreatCost: int
+    hp: int
+    weakness: int | None
+    resistance: int | None
+    energyType: int
+    basic: bool
+    stage1: bool
+    stage2: bool
+    ex: bool
+    megaEx: bool
+    tera: bool
+    aceSpec: bool
+    evolvesFrom: CardId | None
+    skills: list[int]
+    attacks: list[AttackId]
+
+
+class AttackCatalogEntry(TypedDict):
+    attackId: AttackId
+    name: str
+    text: str
+    damage: int
+    energies: list[int]
 
 # Catalogs live at the repo root, outside the installed package:
 # src/pokemon/catalog.py -> parents[2] == repo root.
@@ -60,20 +94,33 @@ ATK_NAMES = {
 }
 
 
-def _load_catalog() -> tuple[dict[int, str], dict[int, dict], dict[int, list[int]], dict[int, dict]]:
+def _load_catalog() -> tuple[
+    dict[CardId, str],
+    dict[AttackId, AttackCatalogEntry],
+    dict[CardId, list[AttackId]],
+    dict[CardId, CardCatalogEntry],
+]:
     cards: dict[int, str] = {}
-    attacks: dict[int, dict] = {}
+    attacks: dict[AttackId, AttackCatalogEntry] = {}
     card_attacks: dict[int, list[int]] = {}
-    card_raw: dict[int, dict] = {}
+    card_raw: dict[CardId, CardCatalogEntry] = {}
     try:
-        for c in json.loads((_DATA_DIR / "all_cards.json").read_text()):
+        raw_cards = cast(
+            list[CardCatalogEntry],
+            json.loads((_DATA_DIR / "all_cards.json").read_text()),
+        )
+        for c in raw_cards:
             cards[c["cardId"]] = c["name"]
             card_attacks[c["cardId"]] = c.get("attacks") or []
             card_raw[c["cardId"]] = c
     except OSError:
         pass
     try:
-        for a in json.loads((_DATA_DIR / "all_attacks.json").read_text()):
+        raw_attacks = cast(
+            list[AttackCatalogEntry],
+            json.loads((_DATA_DIR / "all_attacks.json").read_text()),
+        )
+        for a in raw_attacks:
             attacks[a["attackId"]] = a
     except OSError:
         pass
@@ -83,7 +130,7 @@ def _load_catalog() -> tuple[dict[int, str], dict[int, dict], dict[int, list[int
 _CARD_CATALOG, _ATK_CATALOG, _CARD_ATTACKS, _CARD_RAW = _load_catalog()
 
 
-def card_info(card_id: int | None) -> dict | None:
+def card_info(card_id: CardId | None) -> CardCatalogEntry | None:
     """Raw catalog entry for a card (hp, basic/ex/stage flags, evolvesFrom,
     attacks, weakness/resistance), or ``None`` if not in the catalog."""
     if card_id is None:
@@ -91,7 +138,7 @@ def card_info(card_id: int | None) -> dict | None:
     return _CARD_RAW.get(card_id)
 
 
-def attack_info(attack_id: int | None) -> dict | None:
+def attack_info(attack_id: AttackId | None) -> AttackCatalogEntry | None:
     """Raw catalog entry for an attack (damage, energies cost list), or
     ``None`` if not in the catalog."""
     if attack_id is None:
@@ -132,7 +179,7 @@ def min_attack_energy_cost(card_id: int) -> int | None:
     return min(costs) if costs else None
 
 
-def format_option(opt: dict, hand: list) -> str:
+def format_option(opt: Option, hand: list[CardState]) -> str:
     """Human-readable label for an option dict (OptionType enum from engine docs).
 
     KNOWN ISSUE (see PKM-017): types 3 and 7 always index into ``hand``

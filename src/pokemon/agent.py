@@ -6,10 +6,10 @@ deck; ``default_agent`` is bound to ``pokemon.decks.ACTIVE_DECK``.
 """
 
 import random
-from collections.abc import Callable
 
 from pokemon.catalog import card_name, format_option
 from pokemon.decks import ACTIVE_DECK, deck_summary
+from pokemon.types import Agent, Deck, Observation
 
 _verbose = False
 _game_num = 0
@@ -30,10 +30,10 @@ def _log(msg: str) -> None:
         print(msg)
 
 
-def make_agent(deck: list[int]) -> Callable[[dict], list[int]]:
+def make_agent(deck: Deck) -> Agent:
     """Build an agent function bound to a specific deck."""
 
-    def play(obs: dict) -> list[int]:
+    def play(obs: Observation) -> list[int]:
         if obs["select"] is None:
             lines, checksum = deck_summary(deck)
             _log(f"\n{'=' * 60}")
@@ -57,8 +57,8 @@ def make_agent(deck: list[int]) -> Callable[[dict], list[int]]:
         turn = current.get("turn", 0)
 
         if _verbose:
-            if active and active[0]:
-                a = active[0]
+            a = active[0] if active else None
+            if a:
                 a_name = card_name(a.get("id", -1))
                 a_hp = a.get("hp", "?")
                 a_max = a.get("maxHp", "?")

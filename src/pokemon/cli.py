@@ -7,11 +7,12 @@ from kaggle_environments.envs.cabt.cabt import random_agent
 from pokemon import agent as agent_module
 from pokemon import heuristics as heuristics_module
 from pokemon.decks import ACTIVE_DECK_NAME, DECKS
+from pokemon.types import Deck
 
 app = typer.Typer()
 
 
-def _resolve_deck(deck: str) -> list[int]:
+def _resolve_deck(deck: str) -> Deck:
     if deck not in DECKS:
         typer.echo(f"Unknown deck '{deck}'. Available: {', '.join(DECKS)}")
         raise typer.Exit(1)
@@ -28,7 +29,7 @@ def play(
     agent: str = typer.Option(
         "random", "--agent", "-a", help="Agent to play with: random or heuristic"
     ),
-):
+) -> None:
     """Play a deck against the built-in random agent and watch it."""
     cards = _resolve_deck(deck)
 
@@ -91,7 +92,7 @@ def export_deck(
         ACTIVE_DECK_NAME, "--deck", "-d", help=f"Deck to export ({', '.join(DECKS)})"
     ),
     out: str = typer.Option("deck.csv", "--out", "-o", help="Output CSV path"),
-):
+) -> None:
     """Write a deck's card ids to a CSV file (one id per line) for Kaggle submission."""
     cards = _resolve_deck(deck)
     with open(out, "w") as f:

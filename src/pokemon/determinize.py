@@ -33,11 +33,18 @@ hidden zone `SearchStartConfig` needs:
 
 import random
 from collections import Counter
+from collections.abc import Sequence
 
-CardId = int
+from pokemon.types import (
+    CardId,
+    CardState,
+    GameplayObservation,
+    PlayerState,
+    SearchStartConfig,
+)
 
 
-def _card_ids(card: dict) -> list[CardId]:
+def _card_ids(card: CardState) -> list[CardId]:
     """A visible card dict plus everything attached/underneath it: the card
     itself, any attached energy cards, attached tools, and pre-evolution
     cards stacked beneath it (each of those occupied its own deck slot)."""
@@ -47,7 +54,7 @@ def _card_ids(card: dict) -> list[CardId]:
     return ids
 
 
-def _zone_ids(player: dict) -> list[CardId]:
+def _zone_ids(player: PlayerState) -> list[CardId]:
     """Every card id currently visible for `player`: hand, discard, and
     active/bench including attachments and pre-evolutions. Deliberately
     excludes `prize` (always hidden, even for the prize owner) and `deck`
@@ -63,7 +70,7 @@ def _zone_ids(player: dict) -> list[CardId]:
     return ids
 
 
-def _active_visible(player: dict) -> bool:
+def _active_visible(player: PlayerState) -> bool:
     """Whether `player`'s active slot already holds a known Pokemon.
     `active` can be `[]` (setup not resolved) or `[None]` (KO'd, not yet
     replaced) — both count as hidden/empty, not "visible", so a guess is
@@ -72,7 +79,7 @@ def _active_visible(player: dict) -> bool:
 
 
 def _split_unseen(
-    unseen: Counter, prize_count: int, rng: random.Random
+    unseen: Counter[CardId], prize_count: int, rng: random.Random
 ) -> tuple[list[CardId], list[CardId]]:
     """Expand `unseen` into a flat list, shuffle, and split into
     (prize, deck) of sizes (prize_count, remainder)."""
@@ -83,7 +90,7 @@ def _split_unseen(
 
 
 def _own_determinization(
-    player: dict, full_deck: list[CardId], rng: random.Random
+    player: PlayerState, full_deck: Sequence[CardId], rng: random.Random
 ) -> tuple[list[CardId], list[CardId]]:
     """(prize, deck) guess for a player whose full 60-card composition we
     know (ourselves). Clips at zero per-id so transient off-by-one noise in
@@ -103,7 +110,7 @@ _DEFAULT_FILLER: CardId = 2  # Fire Energy — always a legal, inert card id.
 
 
 def _opponent_determinization(
-    player: dict, rng: random.Random
+    player: PlayerState, rng: random.Random
 ) -> tuple[list[CardId], list[CardId], list[CardId], list[CardId]]:
     """(prize, deck, hand, active) guess for the opponent, whose true 60-card
     composition we don't know. Placeholder strategy: resample (with
@@ -129,8 +136,8 @@ def _opponent_determinization(
 
 
 def sample_determinization(
-    obs: dict, my_deck: list[CardId], rng: random.Random | None = None
-) -> dict:
+    obs: GameplayObservation, my_deck: Sequence[CardId], rng: random.Random | None = None
+) -> SearchStartConfig:
     """Build one `SearchStartConfig`-shaped dict (see `Search.h:19`) from a
     live `obs`, guessing every zone the native search API doesn't already
     know.
@@ -149,7 +156,9 @@ def sample_determinization(
     rng = rng or random.Random()
     current = obs["current"]
     my_idx = current.get("yourIndex", 0)
-    players = current["players"]
+    players = current.get("players")
+    if players is None:
+        raise KeyError("players")
     me = players[my_idx]
     opp = players[1 - my_idx]
 

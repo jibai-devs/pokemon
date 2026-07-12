@@ -43,6 +43,7 @@ from pokemon.heuristics import (
     prizes_remaining,
     remaining_hp,
 )
+from pokemon.types import CardState, Option
 
 # --- Card ids (pokemon.decks.DRAGAPULT_DECK) --------------------------------
 
@@ -103,7 +104,7 @@ def prize_value(card_id: int | None) -> int:
     return 1
 
 
-def attached_energy_types(card: dict | None) -> list[EnergyType]:
+def attached_energy_types(card: CardState | None) -> list[EnergyType]:
     types: list[EnergyType] = []
     for e in energy_cards(card):
         cid = e.get("id")
@@ -125,7 +126,7 @@ def can_pay_cost(attached: list[EnergyType], cost: list[int]) -> bool:
     return sum(v for v in have.values() if v > 0) >= n_colorless
 
 
-def can_attack_now(card: dict | None) -> bool:
+def can_attack_now(card: CardState | None) -> bool:
     """Whether ``card`` has enough attached energy to pay for at least one
     of its own attacks right now."""
     if not card:
@@ -141,7 +142,7 @@ def can_attack_now(card: dict | None) -> bool:
     return False
 
 
-def best_attack_damage(card: dict | None) -> int:
+def best_attack_damage(card: CardState | None) -> int:
     """Highest damage among attacks ``card`` can currently pay for, 0 if none."""
     if not card:
         return 0
@@ -157,7 +158,7 @@ def best_attack_damage(card: dict | None) -> int:
     return best
 
 
-def _hand_option_card_id(ctx: Ctx, opt: dict) -> int | None:
+def _hand_option_card_id(ctx: Ctx, opt: Option) -> int | None:
     """Card id for a PLAY(7)/DISCARD(11)-shaped option, both of which index
     into hand (per `AGENTS.md`'s OptionType table) rather than the
     CARD/TOOL_CARD/ENERGY_CARD shapes `_option_card_id` handles — that
@@ -172,7 +173,7 @@ def _hand_option_card_id(ctx: Ctx, opt: dict) -> int | None:
     return card.get("id") if card else None
 
 
-def _resolve_side_card(ctx: Ctx, opt: dict) -> tuple[dict | None, bool]:
+def _resolve_side_card(ctx: Ctx, opt: Option) -> tuple[CardState | None, bool]:
     """Resolve a CARD-shaped option's target card, returning ``(card, is_mine)``.
 
     Real replays show each such option carries an explicit ``playerIndex``
@@ -256,14 +257,14 @@ def archetype_latch(ctx: Ctx) -> list[int] | None:
         return None
     seen_names: set[str] = set()
     for c in all_pokemon(ctx.opp):
-        if c.get("name"):
-            seen_names.add(c["name"])
+        if name := c.get("name"):
+            seen_names.add(name)
     for c in ctx.opp.get("discard") or []:
-        if c.get("name"):
-            seen_names.add(c["name"])
+        if name := c.get("name"):
+            seen_names.add(name)
     for c in ctx.current.get("stadium") or []:
-        if c.get("name"):
-            seen_names.add(c["name"])
+        if name := c.get("name"):
+            seen_names.add(name)
     for archetype, sigs in TIER5_SIGNATURES.items():
         if any(s in seen_names for s in sigs):
             ctx.state["archetype"] = archetype
@@ -283,7 +284,7 @@ def deck_belief_update(ctx: Ctx) -> list[int] | None:
     separate work) and a win-rate parity check before the hard latch above
     is replaced, not just supplemented."""
     identifier = ctx.state.get("deck_id")
-    if identifier is None:
+    if not isinstance(identifier, DeckIdentifier):
         identifier = DeckIdentifier()
         ctx.state["deck_id"] = identifier
     identifier.update(ctx.opp)
@@ -319,7 +320,7 @@ def mulligan(ctx: Ctx) -> list[int] | None:
     return None
 
 
-def _own_board_tier(ctx: Ctx, card: dict) -> int:
+def _own_board_tier(ctx: Ctx, card: CardState) -> int:
     """A2: priority order when choosing among OUR OWN board for a switch --
     best-ready attacker first, then the Drakloak line, then a Darkness-loaded
     Munkidori, then any non-ex, ex last. Shared by ``active_replacement``
@@ -378,7 +379,7 @@ _FUEL_TARGETS = (DREEPY, DRAKLOAK, DRAGAPULT_EX, MUNKIDORI, BUDEW)
 _PHANTOM_DIVE_ID = 154
 
 
-def _dragapult_fully_fueled(card: dict) -> bool:
+def _dragapult_fully_fueled(card: CardState) -> bool:
     """P2.7: "fully fueled" means this Dragapult ex can already pay Phantom
     Dive's specific Fire+Psychic cost -- not merely ``energy_count >= 2``,
     which a prior version conflated with readiness (2 Fire energies satisfy
@@ -393,7 +394,7 @@ def _dragapult_fully_fueled(card: dict) -> bool:
     return can_pay_cost(attached_energy_types(card), atk.get("energies") or [])
 
 
-def _stranded_energy_risk(card: dict) -> int:
+def _stranded_energy_risk(card: CardState) -> int:
     """P2.6: a critically-damaged Pokemon is likely to be knocked out (or, if
     on our Bench, gusted into Active and knocked out) before it ever gets to
     spend this turn's energy -- a closed-form proxy for docs/plans/008a_review_brief.md's "strands
@@ -403,7 +404,7 @@ def _stranded_energy_risk(card: dict) -> int:
     return 1 if hp is not None and hp <= 30 else 0
 
 
-def _fuel_priority(card: dict, active: dict | None) -> tuple:
+def _fuel_priority(card: CardState, active: CardState | None) -> tuple[int, int, int, int]:
     """Shared ordering for "which of our Pokemon should get this energy" --
     used by both ``attach_energy``'s own fuel routing and Crispin's
     direct-attach destination step (``crispin_energy_routing``), since
@@ -425,7 +426,7 @@ def attach_energy(ctx: Ctx) -> list[int] | None:
     bench = bench_cards(ctx.me)
     active = active_card(ctx.me)
 
-    def target_card(opt: dict) -> dict | None:
+    def target_card(opt: Option) -> CardState | None:
         area, idx = opt.get("inPlayArea"), opt.get("inPlayIndex")
         if area == AreaType.ACTIVE:
             return active
@@ -433,7 +434,7 @@ def attach_energy(ctx: Ctx) -> list[int] | None:
             return bench[idx]
         return None
 
-    def energy_id(opt: dict) -> int | None:
+    def energy_id(opt: Option) -> int | None:
         card = _hand_card(ctx, opt.get("index"))
         return card.get("id") if card else None
 
@@ -510,7 +511,7 @@ def crispin_energy_routing(ctx: Ctx) -> list[int] | None:
         candidates = [(i, cid) for i, cid in candidates if cid in _ENERGY_CARD_TYPE]
         if not candidates:
             return None
-        counts: Counter = Counter()
+        counts: Counter[EnergyType] = Counter()
         for c in all_pokemon(ctx.me):
             for t in attached_energy_types(c):
                 counts[t] += 1
@@ -690,7 +691,7 @@ def play_crushing_hammer(ctx: Ctx) -> list[int] | None:
     return [ids[CRUSHING_HAMMER]]
 
 
-def _discard_energy_strip_tier(card: dict) -> int:
+def _discard_energy_strip_tier(card: CardState) -> int:
     """Prefer a Crushing Hammer target we can fully strip (denies that
     Pokemon's next attack outright) over a partial hit that still leaves it
     able to pay its cost."""
@@ -712,8 +713,8 @@ def discard_energy_target(ctx: Ctx) -> list[int] | None:
     if ctx.sel_context != SelectContext.DISCARD_ENERGY:
         return None
     my_idx = ctx.current.get("yourIndex", 0)
-    mine: list[tuple[int, dict, dict | None]] = []
-    theirs: list[tuple[int, dict, dict | None]] = []
+    mine: list[tuple[int, CardState, CardState | None]] = []
+    theirs: list[tuple[int, CardState, CardState | None]] = []
     for i, opt in enumerate(ctx.options):
         if opt.get("type") != OptionType.ENERGY:
             continue
@@ -862,7 +863,7 @@ def boss_orders_target(ctx: Ctx) -> list[int] | None:
     priority_names = TIER5_PRIORITY_TARGETS.get(archetype, []) if isinstance(archetype, str) else []
     chain_at_risk = _breaks_dragapult_chain(ctx)
 
-    def score(item: tuple[int, dict]) -> tuple:
+    def score(item: tuple[int, CardState]) -> tuple[int, int, int, int, int]:
         _, card = item
         hp = remaining_hp(card)
         max_hp_ = max_hp(card)
@@ -948,7 +949,7 @@ def bench_spread_target(ctx: Ctx) -> list[int] | None:
             return 1
         return 2
 
-    def score(item: tuple[int, dict]) -> tuple:
+    def score(item: tuple[int, CardState]) -> tuple[int, int, int]:
         _, card = item
         hp = remaining_hp(card) or 9999
         name = card.get("name")

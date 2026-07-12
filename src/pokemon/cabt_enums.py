@@ -6,7 +6,7 @@ Source: engine/Types.h — verified against the actual engine source.
 from enum import IntEnum
 
 
-def safe(cls: type[IntEnum], value: int | None) -> IntEnum | int | None:
+def safe[EnumT: IntEnum](cls: type[EnumT], value: int | None) -> EnumT | int | None:
     """Return the enum member for ``value``, or the raw int if unknown."""
     if value is None:
         return None

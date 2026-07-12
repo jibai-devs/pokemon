@@ -19,11 +19,21 @@ apply" (returning ``None``) rather than guessing wrong.
 import random
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
 
 from pokemon.cabt_enums import AreaType, OptionType
 from pokemon.catalog import format_option
 from pokemon.decks import deck_summary
+from pokemon.types import (
+    Agent,
+    CardState,
+    CurrentState,
+    Deck,
+    HeuristicState,
+    Observation,
+    Option,
+    PlayerState,
+    SelectData,
+)
 
 _verbose = False
 _game_num = 0
@@ -60,28 +70,29 @@ class Ctx:
     Heuristics that don't need memory can ignore it entirely.
     """
 
-    obs: dict
-    select: dict
-    options: list[dict]
+    obs: Observation
+    select: SelectData
+    options: list[Option]
     sel_type: int | None
     sel_context: int | None
-    hand: list[dict]
-    me: dict
-    opp: dict
-    current: dict
+    hand: list[CardState]
+    me: PlayerState
+    opp: PlayerState
+    current: CurrentState
     turn: int | None
     going_first: bool | None
-    state: dict
+    state: HeuristicState
 
 
-def _build_ctx(obs: dict, state: dict) -> Ctx:
+def _build_ctx(obs: Observation, state: HeuristicState) -> Ctx:
     select = obs["select"]
+    assert select is not None
     current = obs.get("current", {})
     my_idx = current.get("yourIndex", 0)
     players = current.get("players", [])
-    me = players[my_idx] if my_idx < len(players) else {}
+    me: PlayerState = players[my_idx] if my_idx < len(players) else {}
     opp_idx = 1 - my_idx if len(players) > 1 else None
-    opp = players[opp_idx] if opp_idx is not None and opp_idx < len(players) else {}
+    opp: PlayerState = players[opp_idx] if opp_idx is not None and opp_idx < len(players) else {}
     first_player = current.get("firstPlayer")
     going_first = (first_player == my_idx) if first_player is not None else None
     return Ctx(
@@ -110,61 +121,61 @@ def _build_ctx(obs: dict, state: dict) -> Ctx:
 # by ``_option_card_id``.
 
 
-def remaining_hp(card: dict | None) -> int | None:
+def remaining_hp(card: CardState | None) -> int | None:
     if not card:
         return None
     return card.get("hp")
 
 
-def max_hp(card: dict | None) -> int | None:
+def max_hp(card: CardState | None) -> int | None:
     if not card:
         return None
     return card.get("maxHp")
 
 
-def energy_cards(card: dict | None) -> list[dict]:
+def energy_cards(card: CardState | None) -> list[CardState]:
     if not card:
         return []
     return card.get("energyCards") or []
 
 
-def energy_count(card: dict | None) -> int:
+def energy_count(card: CardState | None) -> int:
     return len(energy_cards(card))
 
 
-def bench_cards(player: dict) -> list[dict]:
+def bench_cards(player: PlayerState) -> list[CardState]:
     return player.get("bench") or []
 
 
-def active_card(player: dict) -> dict | None:
+def active_card(player: PlayerState) -> CardState | None:
     active = player.get("active") or []
     return active[0] if active else None
 
 
-def all_pokemon(player: dict) -> list[dict]:
+def all_pokemon(player: PlayerState) -> list[CardState]:
     """Every one of ``player``'s Pokemon currently in play (active + bench)."""
     a = active_card(player)
     return ([a] if a else []) + bench_cards(player)
 
 
-def prizes_remaining(player: dict) -> int:
+def prizes_remaining(player: PlayerState) -> int:
     """How many of ``player``'s 6 prize cards are still untaken (``None``
     entries are already-taken slots, per `docs/CABT.md`'s Player State)."""
     return sum(1 for p in (player.get("prize") or []) if p is not None)
 
 
-def _hand_card(ctx: Ctx, idx: int | None) -> dict | None:
+def _hand_card(ctx: Ctx, idx: int | None) -> CardState | None:
     if idx is None or not (0 <= idx < len(ctx.hand)):
         return None
     return ctx.hand[idx]
 
 
-def _active_card(ctx: Ctx) -> dict | None:
+def _active_card(ctx: Ctx) -> CardState | None:
     active = ctx.me.get("active") or []
     return active[0] if active else None
 
 
-def _board_card(ctx: Ctx, area: int | None, idx: int | None) -> dict | None:
+def _board_card(ctx: Ctx, area: int | None, idx: int | None) -> CardState | None:
     if area is None or idx is None:
         return None
     if area == AreaType.ACTIVE:
@@ -175,7 +186,7 @@ def _board_card(ctx: Ctx, area: int | None, idx: int | None) -> dict | None:
     return None
 
 
-def _option_card_id(ctx: Ctx, opt: dict) -> int | None:
+def _option_card_id(ctx: Ctx, opt: Option) -> int | None:
     """Best-effort lookup of the card a CARD-shaped option refers to.
 
     Always resolves hand-area options directly (``area``/``index`` on the
@@ -255,14 +266,14 @@ HEURISTIC_SETS["dragapult"] = DRAGAPULT_HEURISTICS
 
 
 def make_heuristic_agent(
-    deck: list[int], heuristics: list[Heuristic] | None = None
-) -> Callable[[dict], list[int]]:
+    deck: Deck, heuristics: list[Heuristic] | None = None
+) -> Agent:
     """Build an agent that applies ``heuristics`` in order, falling back to a
     random legal choice when none of them apply to the current decision."""
     rules = heuristics if heuristics is not None else DEFAULT_HEURISTICS
-    state: dict = {}
+    state: HeuristicState = {}
 
-    def play(obs: dict) -> list[int]:
+    def play(obs: Observation) -> list[int]:
         if obs["select"] is None:
             state.clear()  # new game starting — cross-turn memory doesn't carry over
             lines, checksum = deck_summary(deck)
@@ -281,7 +292,7 @@ def make_heuristic_agent(
 
         for rule in rules:
             try:
-                chosen: Any = rule(ctx)
+                chosen = rule(ctx)
             except Exception as exc:  # a bad heuristic must never crash a game
                 _log(f"  [heuristic {rule.__name__} raised {exc!r}, skipping]")
                 continue

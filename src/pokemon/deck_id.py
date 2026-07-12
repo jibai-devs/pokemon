@@ -26,11 +26,35 @@ import json
 import math
 from collections import Counter
 from pathlib import Path
+from typing import Required, TypedDict, cast
 
 from pokemon.cabt_enums import CardType
 from pokemon.catalog import card_info
+from pokemon.types import CardId, CardState, PlayerState
 
-CardId = int
+
+class FlexEntry(TypedDict):
+    count_range: list[int]
+    lists_with: int
+
+
+class DeckListEntry(TypedDict, total=False):
+    cards: Required[dict[str, int]]
+    player: str
+    placing: str
+    title: str
+
+
+class ArchetypeEntry(TypedDict, total=False):
+    meta_share: float
+    core: dict[str, int]
+    flex: dict[str, FlexEntry]
+    lists: list[DeckListEntry]
+
+
+class MetaDeckLibrary(TypedDict, total=False):
+    archetypes: Required[dict[str, ArchetypeEntry]]
+    total_lists: int
 
 LIBRARY_PATH = Path(__file__).resolve().parents[2] / "data" / "meta_decks" / "library.json"
 
@@ -64,17 +88,17 @@ def _card_weight(card_id: CardId) -> float:
 
 
 @functools.lru_cache(maxsize=4)
-def _load_library_cached(path: str) -> dict:
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+def _load_library_cached(path: str) -> MetaDeckLibrary:
+    return cast(MetaDeckLibrary, json.loads(Path(path).read_text(encoding="utf-8")))
 
 
-def load_library(path: Path | str | None = None) -> dict:
+def load_library(path: Path | str | None = None) -> MetaDeckLibrary:
     """Load (and cache) `library.json`. Pass an explicit path in tests to
     avoid the module-level default and its cache colliding with fixtures."""
     return _load_library_cached(str(path or LIBRARY_PATH))
 
 
-def _card_ids(card: dict) -> list[CardId]:
+def _card_ids(card: CardState) -> list[CardId]:
     """A visible opponent card plus its attachments/pre-evolutions -- each
     occupied its own deck slot, mirroring `determinize._card_ids`."""
     ids = [card["id"]]
@@ -83,7 +107,7 @@ def _card_ids(card: dict) -> list[CardId]:
     return ids
 
 
-def _visible_ids(opp: dict) -> list[CardId]:
+def _visible_ids(opp: PlayerState) -> list[CardId]:
     """Every opponent card id currently visible to us: discard, hand (only
     populated by the engine when actually revealed), and active/bench
     including attachments/pre-evolutions."""
@@ -106,13 +130,13 @@ class DeckIdentifier:
     per game by ``make_heuristic_agent``) and call ``update`` every decision.
     """
 
-    def __init__(self, library: dict | None = None):
+    def __init__(self, library: MetaDeckLibrary | None = None):
         self._library = library if library is not None else load_library()
         self.reveals: Counter[CardId] = Counter()
         self._opp_hand_count = 0
         self._opp_deck_count = 0
 
-    def update(self, opp: dict) -> None:
+    def update(self, opp: PlayerState) -> None:
         """Fold in this decision's opponent state. Reveal counts are the
         running max of "how many copies of card X have we simultaneously
         seen" -- a card moving between zones (discard -> hand via Night
@@ -125,13 +149,13 @@ class DeckIdentifier:
         self._opp_hand_count = opp.get("handCount") or 0
         self._opp_deck_count = opp.get("deckCount") or 0
 
-    def archetypes(self) -> dict:
+    def archetypes(self) -> dict[str, ArchetypeEntry]:
         return self._library.get("archetypes", {})
 
-    def _list_consistent(self, cards: dict) -> bool:
+    def _list_consistent(self, cards: dict[str, int]) -> bool:
         return all(cards.get(str(cid), 0) >= n for cid, n in self.reveals.items())
 
-    def _core_consistent(self, archetype: dict) -> bool:
+    def _core_consistent(self, archetype: ArchetypeEntry) -> bool:
         """Weighted-penalty consistency (see module-level weight constants):
         accumulates ``excess * weight`` for every reveal beyond the
         archetype's core/flex cap, and survives while that total stays under
@@ -155,7 +179,7 @@ class DeckIdentifier:
                     return False
         return True
 
-    def _surviving_lists(self) -> list[tuple[str, dict]]:
+    def _surviving_lists(self) -> list[tuple[str, DeckListEntry]]:
         return [
             (name, lst)
             for name, arch in self.archetypes().items()
@@ -202,7 +226,7 @@ class DeckIdentifier:
         belief = self.archetype_belief()
         if not belief:
             return None
-        name = max(belief, key=belief.get)
+        name = max(belief, key=lambda candidate: belief[candidate])
         if belief[name] < _LEVEL2_CONCENTRATION:
             return None
         return name, belief[name]

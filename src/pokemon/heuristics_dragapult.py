@@ -798,7 +798,7 @@ def play_search_for_dreepy(ctx: Ctx) -> list[int] | None:
 def search_for_dreepy(ctx: Ctx) -> list[int] | None:
     """The ToHand search-target decision that follows PLAY Poke Pad (deck
     search, AreaType.DECK options) or Night Stretcher (discard retrieval,
-    AreaType.DISCARD options): pick Dreepy when it's offered and the line is
+    AreaType.TRASH options): pick Dreepy when it's offered and the line is
     stalled. Gated to these two effects specifically (via ``select.effect``)
     rather than any ToHand/DECK search, since other search effects in this
     deck may have different priorities this heuristic isn't confident about."""
@@ -818,7 +818,7 @@ def search_for_dreepy(ctx: Ctx) -> list[int] | None:
             continue
         if area == AreaType.DECK:
             cid = _option_card_id(ctx, opt)
-        elif area == AreaType.DISCARD:
+        elif area == AreaType.TRASH:
             card = discard[idx] if 0 <= idx < len(discard) else None
             cid = card.get("id") if card else None
         else:

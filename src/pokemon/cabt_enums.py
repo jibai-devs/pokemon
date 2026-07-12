@@ -1,9 +1,6 @@
 """IntEnum transcription of the CABT engine's real enums.
 
-Source: upstream cabt engine API docs, transcribed in
-``docs/plans/000_plan_engine_enum_extraction.md``. Not yet empirically verified
-against the live engine (that doc's Phase 2) — treat these as the best
-available spec, not ground truth confirmed by observation.
+Source: engine/Types.h — verified against the actual engine source.
 """
 
 from enum import IntEnum
@@ -106,9 +103,10 @@ class SelectContext(IntEnum):
 
 
 class AreaType(IntEnum):
+    ALL = 0
     DECK = 1
     HAND = 2
-    DISCARD = 3
+    TRASH = 3
     ACTIVE = 4
     BENCH = 5
     PRIZE = 6
@@ -118,6 +116,18 @@ class AreaType(IntEnum):
     PRE_EVOLUTION = 10
     PLAYER = 11
     LOOKING = 12
+    PLAYING = 13
+    DECK_BOTTOM = 14
+    ME = 15
+    EFFECTED = 16
+    EFFECTED_PRE_TARGET = 17
+    SELECTED_LIST = 18
+    TRIGGER_SUBJECT = 19
+    TRIGGER_OBJECT = 20
+    ATTACH = 21
+    TURN_PLAY = 22
+    ATTACK_PRE_MY_TURN = 23
+    TEMPORARY = 24
 
 
 class EnergyType(IntEnum):
@@ -133,6 +143,7 @@ class EnergyType(IntEnum):
     DRAGON = 9
     RAINBOW = 10
     TEAM_ROCKET = 11
+    PSYCHIC_DARKNESS = 12
 
 
 class CardType(IntEnum):
@@ -151,3 +162,168 @@ class SpecialConditionType(IntEnum):
     SLEEP = 2
     PARALYZE = 3
     CONFUSE = 4
+
+
+class BadStatusType(IntEnum):
+    NONE = 0
+    ASLEEP = 1
+    PARALYZED = 2
+    CONFUSED = 3
+
+
+class PokemonType(IntEnum):
+    NOT_POKEMON = 0
+    NORMAL = 1
+    POKEMON_ITEM = 2
+    EX = 3
+    MEGA_EX = 4
+
+
+class EvolutionType(IntEnum):
+    NO_EVOLUTION_TYPE = 0
+    BASIC = 1
+    STAGE1 = 2
+    STAGE2 = 3
+
+
+class TargetType(IntEnum):
+    ALL = 0
+    HP = 1
+    MAX_HP = 2
+    RETREAT_COST = 3
+    ENERGY_TYPE = 4
+    ENERGY_TYPE_2 = 5
+    RESISTANCE = 6
+    POKEMON_CARD = 7
+    BASIC_POKEMON = 8
+    EVOLVED_POKEMON = 9
+    STAGE1 = 10
+    STAGE2 = 11
+    BASIC_ENERGY = 12
+    SPECIAL_ENERGY = 13
+    ENERGY_CARD = 14
+    ITEM = 15
+    TOOL = 16
+    SUPPORTER = 17
+    STADIUM = 18
+    TRAINER = 19
+    CARD_ID = 20
+    POKEMON_OR_BASIC_ENERGY = 21
+    BASIC_POKEMON_OR_BASIC_ENERGY = 22
+    NOT_RULE_POKEMON_CARD_OR_BASIC_ENERGY = 23
+    ENERGY_TYPE_POKEMON_OR_STADIUM = 24
+    ITEM_OR_TOOL = 25
+    ENEMY_TOOL_OR_SPECIAL_ENERGY_OR_STADIUM = 26
+    ETHAN_POKEMON_OR_BASIC_FIRE_ENERGY = 27
+    HAS_ABILITY = 28
+    HAS_ABILITY_NAME = 29
+    HAS_ATTACK_NAME = 30
+    RULE_POKEMON = 31
+    NOT_RULE_POKEMON = 32
+    EX = 33
+    MEGA_EX = 34
+    TERASTAL = 35
+    ANCIENT = 36
+    FUTURE = 37
+    HOP = 38
+    LILLIE = 39
+    IONO = 40
+    N = 41
+    ETHAN = 42
+    CYNTHIA = 43
+    MISTY = 44
+    ARVEN = 45
+    STEVEN = 46
+    MARNIE = 47
+    ERIKA = 48
+    LARRY = 49
+    TEAM_ROCKET = 50
+    SILCOON_OR_CASCOON = 51
+    KOFFING_OR_WEEZING = 52
+    HONEDGE_OR_DOUBLADE_OR_AEGISLASH = 53
+    NAME = 54
+    NAME_CONTAINS = 55
+    CAN_EVOLVE = 56
+    CAN_EVOLVE_2 = 57
+    CAN_EVOLVE_ME = 58
+    CAN_EVOLVE_CONTEXT_CARD = 59
+    CAN_EVOLVES_TO_CONTEXT_CARD = 60
+    CAN_EVOLVE_FIELD = 61
+    CAN_EVOLVE_FIELD_NOT_APPEAR_THIS_TURN = 62
+    EVOLVED = 63
+    EVOLVED_THIS_TURN_NAME = 64
+    NOT_APPEAR_THIS_TURN = 65
+    HEAL_THIS_TURN = 66
+    ATTACHED_ME = 67
+    ATTACHED_EFFECTED = 68
+    ATTACHED_TRIGGER_SUBJECT = 69
+    ATTACHED_TRIGGER_OBJECT = 70
+    ATTACHED_CONTEXT_CARD = 71
+    ATTACHED_ACTIVE_POKEMON = 72
+    ATTACHED_BENCH_POKEMON = 73
+    IS_ATTACHED_ENERGY = 74
+    ATTACHED_ENERGY_COUNT = 75
+    IS_ATTACHED_SPECIAL_ENERGY = 76
+    IS_ATTACHED_ENERGY_TYPE = 77
+    IS_ATTACHED_ENERGY_2_TYPE = 78
+    IS_ATTACHED_ENERGY_NAME = 79
+    IS_ATTACHED_TOOL = 80
+    IS_ATTACHED_TOOL_NAME = 81
+    IS_ATTACHED_TOOL_OR_SPECIAL_ENERGY = 82
+    NOT_CONTEXT_CARD_ATTACHED_POKEMON = 83
+    NOT_SELECTED_LIST_ATTACHED_POKEMON = 84
+    ENERGY_TYPE_ATTACHED = 85
+    REVERSE = 86
+    AREA = 87
+    TRIGGER_SUBJECT = 88
+    TRIGGER_OBJECT = 89
+    DAMAGE_COUNTER = 90
+    MIN_HP = 91
+    SAME_TYPE_ENEMY = 92
+    SPECIAL_CONDITION = 93
+    SPECIAL_CONDITION_OR_DAMAGED = 94
+    POISON = 95
+    BURN = 96
+    CONFUSE = 97
+    POISON_OR_BURN = 98
+    BENCH_TO_ACTIVE_THIS_TURN = 99
+    SAME_NAME_ENEMY_FIELD = 100
+    NOT_CHECKED = 101
+
+
+class TriggerType(IntEnum):
+    NONE = 0
+    TURN_END = 1
+    POKEMON_CHECKUP = 2
+    HAND_TO_BENCH = 3
+    ACTIVE_TO_BENCH = 4
+    TO_BENCH_MY_TURN = 5
+    BENCH_TO_ACTIVE = 6
+    DECK_TO_TRASH_ENEMY_EFFECT = 7
+    EVOLVE_FROM_HAND = 8
+    ENERGY_ATTACH_FROM_HAND = 9
+    DAMAGED_ENEMY_ATTACK = 10
+    DAMAGED_ENEMY_ATTACK_ACTIVE = 11
+    PRE_KO = 12
+    PRE_KO_FULL = 13
+    PRE_KO_FULL_ENEMY = 14
+    KO = 15
+    KO_ENEMY_ATTACK_DAMAGE = 16
+    KO_ENEMY_EX_ATTACK_DAMAGE = 17
+    KO_ENEMY_ATTACK_DAMAGE_ACTIVE = 18
+    PRE_RETREAT = 19
+    ATTACH = 20
+
+
+class EffectSelectType(IntEnum):
+    ALL = 0
+    CARD_COUNT = 1
+    MAX_CARD_COUNT = 2
+    CARD_UNTIL = 3
+    MAX_CARD_UNTIL = 4
+    ENERGY = 5
+    MAX_ENERGY_CARD = 6
+    TOOL_CARD = 7
+    CARD_OR_ATTACHED_CARD_COUNT = 8
+    EVOLVE = 9
+    EVOLVE_2 = 10

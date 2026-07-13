@@ -1076,26 +1076,25 @@ def test_print_prize_check_advances_only_on_a_new_turn():
     assert state.prize_check_printed_turn == 6
 
 
-def test_print_prize_check_does_not_crash_before_prize_check_has_run():
+def test_print_prize_check_prints_a_placeholder_before_prize_check_has_run():
+    """Prints every turn even before ``prize_check`` has completed --
+    deliberately, so a real game's log shows this hook is firing every turn
+    regardless of whether the deduction itself has triggered yet."""
     select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
     ctx = _ctx(select, turn=1)
     assert print_prize_check(ctx) is None
     assert ctx.state.prize_check_printed_turn == 1
 
 
-def test_print_prize_check_stays_silent_before_prize_check_has_run():
-    """P1: only start printing from the turn ``prize_check`` completes on --
-    prize_check_printed_turn must not advance while prize_check_done is
-    still False, or the first real turn after it completes would be
-    skipped by the once-per-turn guard."""
+def test_print_prize_check_increments_decision_count_every_call():
+    """``decision_count`` tracks every call (every action submitted to
+    Kaggle), not just the once-per-turn prints."""
     select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
     state = DragapultState()
-    assert print_prize_check(_ctx(select, turn=1, state=state)) is None
-    assert state.prize_check_printed_turn is None
-
-    state.prize_check_done = True
-    assert print_prize_check(_ctx(select, turn=1, state=state)) is None
-    assert state.prize_check_printed_turn == 1
+    print_prize_check(_ctx(select, turn=1, state=state))
+    print_prize_check(_ctx(select, turn=1, state=state))  # same turn, still counts as a decision
+    print_prize_check(_ctx(select, turn=2, state=state))
+    assert state.decision_count == 3
 
 
 def test_track_prize_takes_first_call_only_snapshots():

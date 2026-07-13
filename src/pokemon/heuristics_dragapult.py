@@ -36,7 +36,6 @@ from pokemon.dragapult_matchups import (
 )
 from pokemon.heuristics import (
     Ctx,
-    Heuristic,
     _hand_card,
     _option_card_id,
     _rank_and_pick,
@@ -49,7 +48,7 @@ from pokemon.heuristics import (
     prizes_remaining,
     remaining_hp,
 )
-from pokemon.types import CardState, Option
+from pokemon.types import CardState, DecisionRule, Option
 
 # --- Card ids (pokemon.decks.DRAGAPULT_DECK) --------------------------------
 
@@ -946,7 +945,7 @@ def attack_choice(ctx: Ctx) -> list[int] | None:
 
 # --- Registration ------------------------------------------------------------
 
-DRAGAPULT_HEURISTICS: list[Heuristic] = [
+DRAGAPULT_HEURISTICS: list[DecisionRule] = [
     archetype_latch,
     deck_belief_update,
     mulligan,

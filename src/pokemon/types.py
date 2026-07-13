@@ -8,12 +8,17 @@ shape without pretending every optional engine field is always present.
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Required, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Required, TypeAlias, TypedDict
+
+if TYPE_CHECKING:
+    from pokemon.heuristics import Ctx
 
 CardId: TypeAlias = int  # noqa: UP040 - Kaggle runs Python 3.11.
 AttackId: TypeAlias = int  # noqa: UP040
 PlayerIndex: TypeAlias = int  # noqa: UP040
 OptionIndex: TypeAlias = int  # noqa: UP040
+# Indices into the current ``select["option"]`` list — the legal choices the
+# engine offered for this decision. Not card IDs.
 Action: TypeAlias = list[OptionIndex]  # noqa: UP040
 Deck: TypeAlias = list[CardId]  # noqa: UP040
 
@@ -127,3 +132,10 @@ class SearchStartConfig(TypedDict):
 
 Agent: TypeAlias = Callable[[Observation], Action]  # noqa: UP040
 HeuristicState: TypeAlias = dict[str, object]  # noqa: UP040
+
+# A single decision rule for the modular agent (see ``make_heuristic_agent``).
+# Given a decision context, return an ``Action`` (indices into ``ctx.options``)
+# to play, or ``None``/empty to defer to the next rule / random fallback.
+# First non-empty return that satisfies ``minCount``/``maxCount`` wins.
+# ``Ctx`` is quoted to avoid a runtime import cycle with ``pokemon.heuristics``.
+DecisionRule: TypeAlias = Callable[["Ctx"], Action | None]  # noqa: UP040

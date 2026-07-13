@@ -1,32 +1,33 @@
-"""Modular heuristic agent framework.
+"""Modular decision-rule agent framework.
 
-Each heuristic is a small, independent function: given the current decision
-context, return the chosen option index/indices, or ``None`` if it doesn't
-apply. ``make_heuristic_agent`` tries each heuristic in priority order and
+Each ``DecisionRule`` is a small, independent function: given the current
+decision context, return an ``Action`` (option indices), or ``None`` if it
+doesn't apply. ``make_heuristic_agent`` tries each rule in priority order and
 falls back to a random legal choice if none fire — so a bug or gap in one
-heuristic can never crash a game, only under-perform.
+rule can never crash a game, only under-perform.
 
-This module is deck-agnostic scaffolding. Deck-specific heuristics should be
+This module is deck-agnostic scaffolding. Deck-specific rules should be
 added as functions below (or in a separate module) and registered in
 ``HEURISTIC_SETS`` keyed by deck name (see ``pokemon.decks.DECKS``).
 
-Some heuristics may depend on ``select.deck`` / ``select.contextCard`` field
+Some rules may depend on ``select.deck`` / ``select.contextCard`` field
 shapes that `docs/plans/000_plan_engine_enum_extraction.md` hasn't empirically
 verified yet (its Phase 2) — best-effort, and should degrade to "doesn't
 apply" (returning ``None``) rather than guessing wrong.
 """
 
 import random
-from collections.abc import Callable
 from dataclasses import dataclass
 
 from pokemon.cabt_enums import AreaType, OptionType
 from pokemon.catalog import format_option
 from pokemon.decks import deck_summary
 from pokemon.types import (
+    Action,
     Agent,
     CardState,
     CurrentState,
+    DecisionRule,
     Deck,
     HeuristicState,
     Observation,
@@ -222,10 +223,7 @@ def _option_card_id(ctx: Ctx, opt: Option) -> int | None:
     return None
 
 
-Heuristic = Callable[[Ctx], list[int] | None]
-
-
-def _rank_and_pick(ctx: Ctx, targets: list[int]) -> list[int] | None:
+def _rank_and_pick(ctx: Ctx, targets: list[int]) -> Action | None:
     """Rank options whose resolved card is in ``targets`` (best-first, by
     position in ``targets``) and return the top ``maxCount`` of them, or
     ``None`` if there aren't enough confident picks to fill the required
@@ -257,8 +255,8 @@ def _rank_and_pick(ctx: Ctx, targets: list[int]) -> list[int] | None:
 # An empty list is a valid, safe default — the agent just falls back to
 # random legal moves for every decision.
 
-DEFAULT_HEURISTICS: list[Heuristic] = []
-HEURISTIC_SETS: dict[str, list[Heuristic]] = {}
+DEFAULT_HEURISTICS: list[DecisionRule] = []
+HEURISTIC_SETS: dict[str, list[DecisionRule]] = {}
 
 # Registered here (rather than at import time in each deck module) to avoid a
 # circular import — heuristics_dragapult imports Ctx/helpers from this module.
@@ -268,7 +266,7 @@ HEURISTIC_SETS["dragapult"] = DRAGAPULT_HEURISTICS
 
 
 def make_heuristic_agent(
-    deck: Deck, heuristics: list[Heuristic] | None = None
+    deck: Deck, heuristics: list[DecisionRule] | None = None
 ) -> Agent:
     """Build an agent that applies ``heuristics`` in order, falling back to a
     random legal choice when none of them apply to the current decision."""

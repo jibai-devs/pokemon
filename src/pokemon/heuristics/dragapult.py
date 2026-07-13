@@ -3,7 +3,7 @@
 Built against `docs/plans/007_heuristics_logic_plan.md` (v2) and
 `deck/dragapult_deck_explanation.md` (v3). Tiers below mirror the plan's
 Tier 1-5 ladder; the ordering in ``DRAGAPULT_HEURISTICS`` at the bottom *is*
-the priority order (first-match-wins, per ``make_heuristic_agent``).
+the priority order (first-match-wins, per ``admin.build_agent``).
 
 Several fields this module reads (``energyCards``, ``hp``/``maxHp``,
 ``inPlayArea``/``inPlayIndex`` on ATTACH options) come from the real Kaggle
@@ -15,27 +15,18 @@ plan's own convention.
 
 Tier 5 (matchup overrides) identification/classification -- the archetype-
 signature latch, the deck-id belief, and the per-archetype priority-target
-table they resolve to -- lives in ``pokemon.dragapult_matchups``, imported
-below and reused by the Tier 4 targeting rules here, rather than ten fully
-bespoke functions. This captures the concrete, codifiable part of Section 8
-(who to target first) without engine support for things like hand-content
-deduction (Judge) or full stadium-interaction awareness (Battle Cage) —
-those stay judgment calls left to the random fallback, as the plan intends
-for genuinely discretionary decisions.
+table they resolve to -- lives in ``pokemon.heuristics.dragapult_matchups``,
+imported below and reused by the Tier 4 targeting rules here, rather than ten
+fully bespoke functions. This captures the concrete, codifiable part of
+Section 8 (who to target first) without engine support for things like
+hand-content deduction (Judge) or full stadium-interaction awareness (Battle
+Cage) — those stay judgment calls left to the random fallback, as the plan
+intends for genuinely discretionary decisions.
 """
 
 from collections import Counter
 
-from pokemon.cabt_enums import AreaType, EnergyType, OptionType, SelectContext, SelectType
-from pokemon.catalog import attack_info, card_info
-from pokemon.dragapult_matchups import (
-    TIER5_PRIORITY_TARGETS,
-    _matchup_bucket,
-    archetype_latch,
-    deck_belief_update,
-)
-from pokemon.heuristics import (
-    Ctx,
+from pokemon.board import (
     Heuristic,
     _hand_card,
     _option_card_id,
@@ -48,6 +39,15 @@ from pokemon.heuristics import (
     max_hp,
     prizes_remaining,
     remaining_hp,
+)
+from pokemon.cabt_enums import AreaType, EnergyType, OptionType, SelectContext, SelectType
+from pokemon.catalog import attack_info, card_info, card_name
+from pokemon.heuristics.dragapult_matchups import (
+    TIER5_PRIORITY_TARGETS,
+    DragapultCtx,
+    _matchup_bucket,
+    archetype_latch,
+    deck_belief_update,
 )
 from pokemon.types import CardState, Option
 
@@ -164,7 +164,7 @@ def best_attack_damage(card: CardState | None) -> int:
     return best
 
 
-def _hand_option_card_id(ctx: Ctx, opt: Option) -> int | None:
+def _hand_option_card_id(ctx: DragapultCtx, opt: Option) -> int | None:
     """Card id for a PLAY(7)/DISCARD(11)-shaped option, both of which index
     into hand (per `AGENTS.md`'s OptionType table) rather than the
     CARD/TOOL_CARD/ENERGY_CARD shapes `_option_card_id` handles — that
@@ -179,7 +179,7 @@ def _hand_option_card_id(ctx: Ctx, opt: Option) -> int | None:
     return card.get("id") if card else None
 
 
-def _resolve_side_card(ctx: Ctx, opt: Option) -> tuple[CardState | None, bool]:
+def _resolve_side_card(ctx: DragapultCtx, opt: Option) -> tuple[CardState | None, bool]:
     """Resolve a CARD-shaped option's target card, returning ``(card, is_mine)``.
 
     Real replays show each such option carries an explicit ``playerIndex``
@@ -215,9 +215,9 @@ def _resolve_side_card(ctx: Ctx, opt: Option) -> tuple[CardState | None, bool]:
 #
 # Identification/classification (TIER5_SIGNATURES/TIER5_PRIORITY_TARGETS,
 # archetype_latch, deck_belief_update, _matchup_bucket) now lives in
-# pokemon.dragapult_matchups, imported above. This section keeps only the
-# small matchup fact that's consumed directly by a decision rule below
-# without going through the bucket mechanism.
+# pokemon.heuristics.dragapult_matchups, imported above. This section keeps
+# only the small matchup fact that's consumed directly by a decision rule
+# below without going through the bucket mechanism.
 
 # Section 8 (Crustle/Mega Kangaskhan ex): Mysterious Rock Inn blocks all
 # damage from Pokemon-ex attacks entirely.
@@ -227,13 +227,158 @@ EX_ATTACK_DENY_TARGETS = {"Crustle"}
 _EX_ATTACK_IDS = {154, 183}
 
 
+# --- Prize deduction, own deck bookkeeping -----------------------------------
+
+
+def _count_in_play(card: CardState | None, visible: Counter[int]) -> None:
+    """Recursively counts ``card`` and everything physically attached to or
+    stacked beneath it (energy, tools, evolved-from pre-evolutions) as
+    visible -- all of that is still a real, accounted-for copy of that card
+    id, not a missing one. Without walking ``preEvolution``, an evolved
+    Dreepy/Drakloak would look "missing" (and get wrongly marked prized)
+    the moment it evolves, since it no longer appears as its own top-level
+    board entry."""
+    if not card:
+        return
+    cid = card.get("id")
+    if cid is not None:
+        visible[cid] += 1
+    for e in energy_cards(card):
+        _count_in_play(e, visible)
+    for t in card.get("tools") or []:
+        _count_in_play(t, visible)
+    for pre in card.get("preEvolution") or []:
+        _count_in_play(pre, visible)
+
+
+def prize_check(ctx: DragapultCtx) -> list[int] | None:
+    """Side-effect-only hook -- always returns ``None``. The first time this
+    game a deck-search reveal happens (``select.deck`` populated -- same
+    field ``search_for_dreepy`` reads), deduces which of our own 60 cards
+    are prized: every copy currently visible (hand, everything in play with
+    its attachments/pre-evolutions, discard, and this decision's revealed
+    deck contents) is accounted for; whatever's left over per card id, up
+    to that id's total count in the decklist, must be sitting in one of our
+    6 prizes -- the only zone that's never visible to us (see
+    ``prizes_remaining``). Marks exactly that many of
+    ``ctx.state.deck_memory``'s matching entries ``prized`` -- fungible
+    within a card id, so which specific entry gets marked doesn't matter,
+    only how many.
+
+    Runs once per game (``prize_check_done``): assumes this decision's
+    ``select.deck`` reveals the *entire* remaining deck, which holds for a
+    full-deck search (Ultra Ball, Poke Pad) but would undercount if a
+    future card's search is type-filtered to only show a subset of the
+    deck -- ``select.deck``'s exact shape is unverified against the real
+    engine, see AGENTS.md's Known issues.
+    """
+    if ctx.state.prize_check_done:
+        return None
+    revealed_deck = ctx.select.get("deck")
+    if revealed_deck is None:
+        return None  # not a deck-search decision -- distinct from a search that reveals zero cards
+    ctx.state.prize_check_done = True
+
+    visible: Counter[int] = Counter()
+    for c in ctx.hand:
+        cid = c.get("id")
+        if cid is not None:
+            visible[cid] += 1
+    for c in ctx.me.get("discard") or []:
+        cid = c.get("id")
+        if cid is not None:
+            visible[cid] += 1
+    for c in revealed_deck:
+        cid = c.get("id")
+        if cid is not None:
+            visible[cid] += 1
+    for p in all_pokemon(ctx.me):
+        _count_in_play(p, visible)
+
+    for entry in ctx.state.deck_memory:
+        if visible[entry.id] > 0:
+            visible[entry.id] -= 1
+        else:
+            entry.prized = True
+    return None
+
+
+def track_prize_takes(ctx: DragapultCtx) -> list[int] | None:
+    """Side-effect-only hook -- always returns ``None``. Watches
+    ``prizes_remaining`` for a decrease (a prize card being taken) and, when
+    it drops, reconciles ``deck_memory``: whichever card id(s) newly appeared
+    in hand since the last decision -- and still have a ``prized=True``
+    entry -- get one such entry flipped back to ``prized=False``, since that
+    copy is now visible in hand rather than hidden in the prize pile.
+
+    Best-effort: a prize taken in the same window as a normal draw-for-turn
+    is indistinguishable from that draw by hand contents alone, so this can
+    misattribute if both land on the same decision and share a card id --
+    it degrades to leaving the flag as-is (via the ``break`` below) rather
+    than guessing which of several same-id copies is the real prize.
+    """
+    current_prize_count = prizes_remaining(ctx.me)
+    current_hand_counts: Counter[int] = Counter()
+    for c in ctx.hand:
+        cid = c.get("id")
+        if cid is not None:
+            current_hand_counts[cid] += 1
+
+    if ctx.state.last_prize_count is not None and current_prize_count < ctx.state.last_prize_count:
+        taken = ctx.state.last_prize_count - current_prize_count
+        for cid, n in current_hand_counts.items():
+            if taken <= 0:
+                break
+            gained = n - ctx.state.last_hand_counts.get(cid, 0)
+            for _ in range(gained):
+                if taken <= 0:
+                    break
+                matched = next((e for e in ctx.state.deck_memory if e.id == cid and e.prized), None)
+                if matched is None:
+                    break  # no prized entry left of this id -- nothing to reconcile
+                matched.prized = False
+                taken -= 1
+
+    ctx.state.last_prize_count = current_prize_count
+    ctx.state.last_hand_counts = dict(current_hand_counts)
+    return None
+
+
+def print_prize_check(ctx: DragapultCtx) -> list[int] | None:
+    """Side-effect-only hook -- always returns ``None``. Prints one line
+    every turn (guarded by ``prize_check_printed_turn`` so it's once per
+    turn, not once per decision), tagged with the turn number and
+    ``decision_count`` (how many decisions ``play()`` has handled this game
+    -- i.e. how many actions submitted to Kaggle so far).
+
+    Deliberately prints *before* ``prize_check`` has completed too (a
+    "not yet run" placeholder), rather than staying silent -- if this line
+    is missing from a real game's log entirely, dispatch itself isn't
+    reaching this hook; if it prints every turn but always says "not yet
+    run", ``prize_check``'s own trigger (``select['deck']`` populated) is
+    the thing not firing, not this hook. Unconditional ``print``, not
+    routed through the ``-v`` verbose gate.
+    """
+    ctx.state.decision_count += 1
+    if ctx.turn == ctx.state.prize_check_printed_turn:
+        return None
+    ctx.state.prize_check_printed_turn = ctx.turn
+    tag = f"[Turn {ctx.turn}, decision {ctx.state.decision_count}]"
+    if not ctx.state.prize_check_done:
+        print(f"{tag} Prize check: not yet run")
+        return None
+    prized_names = [card_name(e.id) for e in ctx.state.deck_memory if e.prized]
+    print(f"{tag} Prized cards: {prized_names}")
+    return None
+
+
 # --- Tier 1 — setup phase ----------------------------------------------------
 
 _PRIORITY_FIRST = [BUDEW, MUNKIDORI, DREEPY, FEZANDIPITI_EX, MEOWTH_EX]
 _PRIORITY_SECOND = [BUDEW, DREEPY, MUNKIDORI, FEZANDIPITI_EX, MEOWTH_EX]
 
 
-def setup_pokemon(ctx: Ctx) -> list[int] | None:
+def setup_pokemon(ctx: DragapultCtx) -> list[int] | None:
     """Section 4 opening-Pokemon priority for SETUP_ACTIVE/SETUP_BENCH selects."""
     if ctx.sel_context not in (SelectContext.SETUP_ACTIVE_POKEMON, SelectContext.SETUP_BENCH_POKEMON):
         return None
@@ -244,7 +389,7 @@ def setup_pokemon(ctx: Ctx) -> list[int] | None:
 # --- Tier 2 — forced/reactive, no discretion --------------------------------
 
 
-def mulligan(ctx: Ctx) -> list[int] | None:
+def mulligan(ctx: DragapultCtx) -> list[int] | None:
     """A1: mulligan iff hand has zero Basic Pokemon — deterministic, not strategic."""
     if ctx.sel_context != SelectContext.MULLIGAN or ctx.sel_type != SelectType.YES_NO:
         return None
@@ -256,7 +401,7 @@ def mulligan(ctx: Ctx) -> list[int] | None:
     return None
 
 
-def _own_board_tier(ctx: Ctx, card: CardState) -> int:
+def _own_board_tier(ctx: DragapultCtx, card: CardState) -> int:
     """A2: priority order when choosing among OUR OWN board for a switch --
     best-ready attacker first, then the Drakloak line, then a Darkness-loaded
     Munkidori, then any non-ex, ex last. Shared by ``active_replacement``
@@ -266,7 +411,7 @@ def _own_board_tier(ctx: Ctx, card: CardState) -> int:
     cid = card.get("id")
     if cid == DRAGAPULT_EX and can_attack_now(card):
         return 0
-    if cid == DRAKLOAK and not ctx.state.get(f"recon_used_{card.get('serial')}_{ctx.turn}"):
+    if cid == DRAKLOAK and f"{ctx.turn}_{card.get('serial')}" not in ctx.state.recon_used:
         return 1
     if cid == MUNKIDORI and EnergyType.DARKNESS in attached_energy_types(card):
         return 2
@@ -275,7 +420,7 @@ def _own_board_tier(ctx: Ctx, card: CardState) -> int:
     return 4
 
 
-def active_replacement(ctx: Ctx) -> list[int] | None:
+def active_replacement(ctx: DragapultCtx) -> list[int] | None:
     """A2: priority order over legal bench options after a forced KO switch."""
     if ctx.sel_context != SelectContext.TO_ACTIVE:
         return None
@@ -297,7 +442,7 @@ def active_replacement(ctx: Ctx) -> list[int] | None:
 # --- Tier 3 — resource management, fires almost every turn ------------------
 
 
-def watchtower_meowth_sequencing(ctx: Ctx) -> list[int] | None:
+def watchtower_meowth_sequencing(ctx: DragapultCtx) -> list[int] | None:
     """D1: never let Watchtower go down before Meowth ex's on-play search."""
     ids: dict[int, int] = {}
     for i, opt in enumerate(ctx.options):
@@ -354,7 +499,7 @@ def _fuel_priority(card: CardState, active: CardState | None) -> tuple[int, int,
     return (_stranded_energy_risk(card), priority, 0 if card is active else 1, -energy_count(card))
 
 
-def attach_energy(ctx: Ctx) -> list[int] | None:
+def attach_energy(ctx: DragapultCtx) -> list[int] | None:
     """Section B (Munkidori/Darkness routing) + Section 4's energy-attach default."""
     attach_opts = [(i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.ATTACH]
     if not attach_opts:
@@ -425,7 +570,7 @@ def attach_energy(ctx: Ctx) -> list[int] | None:
     return [unready[0][0]]
 
 
-def crispin_energy_routing(ctx: Ctx) -> list[int] | None:
+def crispin_energy_routing(ctx: DragapultCtx) -> list[int] | None:
     """PKM-019 batch 20260710, finding C: Crispin ("search up to 2 different
     Basic Energy, 1 to hand, attach the other directly to one of your
     Pokemon") poses two sub-decisions -- ``ATTACH_TO`` picks which of the two
@@ -490,7 +635,7 @@ def _discard_priority(card_id: int | None) -> int:
     return 40
 
 
-def discard_sequencing(ctx: Ctx) -> list[int] | None:
+def discard_sequencing(ctx: DragapultCtx) -> list[int] | None:
     """Options in a DISCARD-context select aren't reliably typed
     ``OptionType.DISCARD`` (observed as generic ``OptionType.CARD`` across
     every discard decision in three logged games, per PKM-019 batch
@@ -516,7 +661,7 @@ def discard_sequencing(ctx: Ctx) -> list[int] | None:
     return [i for _, i in scored[:need]]
 
 
-def _boss_orders_has_payoff(ctx: Ctx) -> bool:
+def _boss_orders_has_payoff(ctx: DragapultCtx) -> bool:
     dmg = best_attack_damage(active_card(ctx.me))
     for t in bench_cards(ctx.opp):
         hp = remaining_hp(t)
@@ -525,7 +670,7 @@ def _boss_orders_has_payoff(ctx: Ctx) -> bool:
     return False
 
 
-def _boss_orders_wins_game(ctx: Ctx) -> bool:
+def _boss_orders_wins_game(ctx: DragapultCtx) -> bool:
     """P1.4: cheap, menu-local approximation of a Lethal Finder -- does a
     benched-KO reachable via Boss's Orders this turn bring OUR OWN
     prizes_remaining to 0 (i.e. actually end the game), rather than merely
@@ -541,7 +686,7 @@ def _boss_orders_wins_game(ctx: Ctx) -> bool:
     return False
 
 
-def _energy_short(ctx: Ctx) -> bool:
+def _energy_short(ctx: DragapultCtx) -> bool:
     my_active = active_card(ctx.me)
     if my_active and my_active.get("id") == DRAGAPULT_EX and energy_count(my_active) < 2:
         return True
@@ -551,7 +696,7 @@ def _energy_short(ctx: Ctx) -> bool:
     )
 
 
-def _breaks_dragapult_chain(ctx: Ctx) -> bool:
+def _breaks_dragapult_chain(ctx: DragapultCtx) -> bool:
     """P1.1: true when this turn is chain-critical -- Crispin is in hand and
     still needed to fuel next turn's Phantom Dive (per ``_energy_short``), so
     spending this turn's one Supporter play on anything other than Crispin
@@ -564,7 +709,7 @@ def _breaks_dragapult_chain(ctx: Ctx) -> bool:
     return any(c.get("id") == CRISPIN for c in ctx.hand)
 
 
-def supporter_tiebreak(ctx: Ctx) -> list[int] | None:
+def supporter_tiebreak(ctx: DragapultCtx) -> list[int] | None:
     """A3: default ordering when a Supporter is legal (whether alongside
     other Supporters or alone next to e.g. an Attack option) and nothing
     matchup-specific applies. Never picks Judge (left to a dedicated
@@ -602,7 +747,7 @@ def supporter_tiebreak(ctx: Ctx) -> list[int] | None:
     return None
 
 
-def play_crushing_hammer(ctx: Ctx) -> list[int] | None:
+def play_crushing_hammer(ctx: DragapultCtx) -> list[int] | None:
     """PKM-019 batch 20260710, finding A (Item half): Crushing Hammer is a
     free coin-flip energy discard on the opponent -- playing it costs us
     nothing and doesn't consume the turn's Attack (Items don't end the
@@ -634,7 +779,7 @@ def _discard_energy_strip_tier(card: CardState) -> int:
     return 0 if energy_count(card) <= 1 else 1
 
 
-def discard_energy_target(ctx: Ctx) -> list[int] | None:
+def discard_energy_target(ctx: DragapultCtx) -> list[int] | None:
     """PKM-019 batch 20260710, finding D: ``SelectContext.DISCARD_ENERGY`` is
     used both for Crushing Hammer's opponent-energy discard and for our own
     retreat-cost energy discard, and had no heuristic either way -- fell to
@@ -683,7 +828,7 @@ def discard_energy_target(ctx: Ctx) -> list[int] | None:
 _LOW_VALUE_BENCH = [DREEPY, BUDEW, MUNKIDORI, MOLTRES]
 
 
-def bench_play_discretion(ctx: Ctx) -> list[int] | None:
+def bench_play_discretion(ctx: DragapultCtx) -> list[int] | None:
     """D2: don't bench Fezandipiti ex/Meowth ex when a lower-value basic is
     also a legal play this decision."""
     play_opts = [(i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.PLAY]
@@ -701,7 +846,7 @@ def bench_play_discretion(ctx: Ctx) -> list[int] | None:
     return [low[0][0]]
 
 
-def _dreepy_stalled(ctx: Ctx) -> bool:
+def _dreepy_stalled(ctx: DragapultCtx) -> bool:
     """No Dreepy in play or hand -- the deck's evolution line has nothing
     left to build on and needs a fresh one."""
     return not any(c.get("id") == DREEPY for c in all_pokemon(ctx.me)) and not any(
@@ -709,7 +854,7 @@ def _dreepy_stalled(ctx: Ctx) -> bool:
     )
 
 
-def play_search_for_dreepy(ctx: Ctx) -> list[int] | None:
+def play_search_for_dreepy(ctx: DragapultCtx) -> list[int] | None:
     """No prior heuristic ever valued playing Poke Pad or Night Stretcher, so
     this Main-phase decision fell to whatever else won by default (usually
     Attack/Attach) even when the Dreepy line was stalled and one of these
@@ -732,7 +877,7 @@ def play_search_for_dreepy(ctx: Ctx) -> list[int] | None:
     return None
 
 
-def search_for_dreepy(ctx: Ctx) -> list[int] | None:
+def search_for_dreepy(ctx: DragapultCtx) -> list[int] | None:
     """The ToHand search-target decision that follows PLAY Poke Pad (deck
     search, AreaType.DECK options) or Night Stretcher (discard retrieval,
     AreaType.TRASH options): pick Dreepy when it's offered and the line is
@@ -768,7 +913,7 @@ def search_for_dreepy(ctx: Ctx) -> list[int] | None:
 # --- Tier 4 — attack/targeting, archetype-agnostic --------------------------
 
 
-def boss_orders_target(ctx: Ctx) -> list[int] | None:
+def boss_orders_target(ctx: DragapultCtx) -> list[int] | None:
     """Default target for a SWITCH/TO_ACTIVE CARD-shaped decision. Splits by
     which side the options actually resolve to (see ``_resolve_side_card``):
     a decision that resolves to OUR OWN board (voluntary retreat, or a
@@ -824,7 +969,7 @@ def boss_orders_target(ctx: Ctx) -> list[int] | None:
     return [theirs[0][0]]
 
 
-def munkidori_defensive_heal(ctx: Ctx) -> list[int] | None:
+def munkidori_defensive_heal(ctx: DragapultCtx) -> list[int] | None:
     """P1.2: Adrena-Brain's "move damage FROM 1 of your Pokemon" source-select
     step (the same DAMAGE_COUNTER*/EFFECT_TARGET contexts ``bench_spread_target``
     handles for the opponent-facing target step, disambiguated the same way
@@ -855,7 +1000,7 @@ def munkidori_defensive_heal(ctx: Ctx) -> list[int] | None:
     return None
 
 
-def bench_spread_target(ctx: Ctx) -> list[int] | None:
+def bench_spread_target(ctx: DragapultCtx) -> list[int] | None:
     """Default Phantom Dive bench-spread target(s): matchup priority first,
     else whatever's already inside the 60-damage spread's KO range."""
     if ctx.sel_context not in (SelectContext.DAMAGE_COUNTER_ANY, SelectContext.DAMAGE_COUNTER, SelectContext.EFFECT_TARGET):
@@ -897,7 +1042,7 @@ def bench_spread_target(ctx: Ctx) -> list[int] | None:
     return chosen if len(chosen) >= need else None
 
 
-def evolve_choice(ctx: Ctx) -> list[int] | None:
+def evolve_choice(ctx: DragapultCtx) -> list[int] | None:
     """No prior heuristic ever selected an EVOLVE option, so ``attack_choice``
     always won the Main-phase menu when both were legal -- Dreepy/Drakloak
     never evolved into the deck's actual win condition (PKM-019, P1).
@@ -921,7 +1066,7 @@ def evolve_choice(ctx: Ctx) -> list[int] | None:
     return [evolve_opts[0][0]]
 
 
-def attack_choice(ctx: Ctx) -> list[int] | None:
+def attack_choice(ctx: DragapultCtx) -> list[int] | None:
     """Default attack: highest-damage legal attack, skipping our own ex
     attacks (Phantom Dive, Cruel Arrow) when the opposing Active blocks all
     ex-attack damage outright (Crustle's Mysterious Rock Inn)."""
@@ -949,6 +1094,9 @@ def attack_choice(ctx: Ctx) -> list[int] | None:
 DRAGAPULT_HEURISTICS: list[Heuristic] = [
     archetype_latch,
     deck_belief_update,
+    prize_check,
+    track_prize_takes,
+    print_prize_check,
     mulligan,
     active_replacement,
     setup_pokemon,

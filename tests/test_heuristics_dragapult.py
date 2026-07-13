@@ -3,10 +3,9 @@ using synthetic ``obs`` dicts — no engine/WSL required. Follows the pattern
 in ``test_heuristics.py``.
 """
 
+from pokemon.board import _build_ctx
 from pokemon.deck_id import DeckIdentifier
-from pokemon.dragapult_matchups import _matchup_bucket, archetype_latch
-from pokemon.heuristics import _build_ctx
-from pokemon.heuristics_dragapult import (
+from pokemon.heuristics.dragapult import (
     BOSS_ORDERS,
     BUDDY_BUDDY_POFFIN,
     BUDEW,
@@ -36,10 +35,15 @@ from pokemon.heuristics_dragapult import (
     munkidori_defensive_heal,
     play_crushing_hammer,
     play_search_for_dreepy,
+    print_prize_check,
+    prize_check,
     search_for_dreepy,
     supporter_tiebreak,
+    track_prize_takes,
     watchtower_meowth_sequencing,
 )
+from pokemon.heuristics.dragapult_matchups import _matchup_bucket, archetype_latch
+from pokemon.heuristics.dragapult_state import DragapultState
 
 
 def _obs(
@@ -87,7 +91,7 @@ def _obs(
 
 
 def _ctx(*args, state=None, **kwargs):
-    return _build_ctx(_obs(*args, **kwargs), state if state is not None else {})
+    return _build_ctx(_obs(*args, **kwargs), state if state is not None else DragapultState())
 
 
 def test_mulligan_yes_when_no_basics_in_hand():
@@ -239,10 +243,10 @@ def test_archetype_latch_and_boss_orders_targets_meganium_over_arboliva_ex():
             {"type": 3, "area": 5, "index": 1},
         ],
     }
-    state: dict = {}
+    state = DragapultState()
     ctx = _ctx(select, opp_bench=opp_bench, state=state)
     archetype_latch(ctx)
-    assert state["archetype"] == "arboliva"
+    assert state.archetype == "arboliva"
     assert boss_orders_target(ctx) == [1]  # Meganium, per Section 8's priority-target note
 
 
@@ -291,10 +295,10 @@ def test_boss_orders_target_still_targets_opponent_with_explicit_player_index():
             {"type": 3, "area": 5, "index": 1, "playerIndex": 1},
         ],
     }
-    state: dict = {}
+    state = DragapultState()
     ctx = _ctx(select, opp_bench=opp_bench, state=state)
     archetype_latch(ctx)
-    assert state["archetype"] == "arboliva"
+    assert state.archetype == "arboliva"
     assert boss_orders_target(ctx) == [1]  # Meganium, per Section 8's priority-target note
 
 
@@ -501,10 +505,10 @@ def test_boss_orders_target_prefers_ex_over_low_value_priority_target_when_chain
             {"type": 3, "area": 5, "index": 1},
         ],
     }
-    state: dict = {}
+    state = DragapultState()
     ctx = _ctx(select, active=[active], hand=[{"id": CRISPIN}], opp_bench=opp_bench, state=state)
     archetype_latch(ctx)
-    assert state["archetype"] == "arboliva"
+    assert state.archetype == "arboliva"
     assert boss_orders_target(ctx) == [0]  # Arboliva ex, not the (non-ex) matchup priority target
 
 
@@ -530,7 +534,7 @@ def test_boss_orders_target_uses_matchup_priority_when_chain_not_at_risk():
             {"type": 3, "area": 5, "index": 1},
         ],
     }
-    state: dict = {}
+    state = DragapultState()
     ctx = _ctx(select, active=[active], opp_bench=opp_bench, state=state)
     archetype_latch(ctx)
     assert boss_orders_target(ctx) == [1]  # Meganium, per Section 8's priority-target note
@@ -611,14 +615,14 @@ def test_matchup_bucket_prefers_deck_belief_over_latch():
     """A concentrated belief (Kadabra reveal eliminates "Bot Dreepy") is
     classified through TIER5_SIGNATURES and outranks a contradicting latch."""
     ident = _bucket_identifier(742)  # Kadabra
-    ctx = _ctx(_NOOP_SELECT, state={"deck_id": ident, "archetype": "mega_lucario"})
+    ctx = _ctx(_NOOP_SELECT, state=DragapultState(deck_id=ident, archetype="mega_lucario"))
     assert _matchup_bucket(ctx) == "alakazam"
 
 
 def test_matchup_bucket_falls_back_to_latch_when_belief_unresolved():
     """No reveals -> level 3 -> the board-observation latch still decides."""
     ident = _bucket_identifier()
-    ctx = _ctx(_NOOP_SELECT, state={"deck_id": ident, "archetype": "raging_bolt"})
+    ctx = _ctx(_NOOP_SELECT, state=DragapultState(deck_id=ident, archetype="raging_bolt"))
     assert _matchup_bucket(ctx) == "raging_bolt"
 
 
@@ -627,12 +631,12 @@ def test_matchup_bucket_falls_back_when_believed_archetype_has_no_signature():
     TIER5 signature name -- the belief abstains and the latch decides."""
     ident = _bucket_identifier(119, 119, 119, 119)
     assert ident.identified_list() is not None
-    ctx = _ctx(_NOOP_SELECT, state={"deck_id": ident, "archetype": "grimmsnarl"})
+    ctx = _ctx(_NOOP_SELECT, state=DragapultState(deck_id=ident, archetype="grimmsnarl"))
     assert _matchup_bucket(ctx) == "grimmsnarl"
 
 
 def test_matchup_bucket_none_without_belief_or_latch():
-    ctx = _ctx(_NOOP_SELECT, state={})
+    ctx = _ctx(_NOOP_SELECT, state=DragapultState())
     assert _matchup_bucket(ctx) is None
 
 
@@ -653,7 +657,7 @@ def test_bench_spread_target_uses_belief_priority_before_any_signature_seen():
             {"type": 3, "area": 5, "index": 1, "playerIndex": 1},
         ],
     }
-    ctx = _ctx(select, opp_bench=opp_bench, state={"deck_id": _bucket_identifier(742)})
+    ctx = _ctx(select, opp_bench=opp_bench, state=DragapultState(deck_id=_bucket_identifier(742)))
     assert bench_spread_target(ctx) == [1]  # priority target, not the 25 HP one
 
 
@@ -959,3 +963,175 @@ def test_crispin_attach_from_reuses_fuel_priority():
     }
     ctx = _ctx(select, active=[munkidori], bench=[drakloak])
     assert crispin_energy_routing(ctx) == [1]  # bench Drakloak, not the active Munkidori
+
+
+def test_prize_check_defers_without_a_deck_search():
+    """No ``select.deck`` on this decision -- not a deck-search reveal --
+    so the deduction doesn't run at all."""
+    select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
+    ctx = _ctx(select)
+    assert prize_check(ctx) is None
+    assert ctx.state.prize_check_done is False
+    assert all(not e.prized for e in ctx.state.deck_memory)
+
+
+def test_prize_check_marks_exactly_the_missing_copies_as_prized():
+    """DRAGAPULT_DECK has 4 Dreepy. 2 are in hand, 1 in the discard pile --
+    the 4th is nowhere visible (hand/board/discard/revealed deck), so
+    exactly 1 of its 4 deck_memory entries should end up marked prized."""
+    hand = [{"id": DREEPY}, {"id": DREEPY}]
+    discard = [{"id": DREEPY}]
+    select = {
+        "type": 1,
+        "context": 7,  # TO_HAND (a deck-search reveal)
+        "maxCount": 1,
+        "deck": [],  # nothing further of Dreepy left in the deck
+        "option": [{"type": 3, "area": 1, "index": 0}],
+    }
+    ctx = _ctx(select, hand=hand, discard=discard)
+    assert prize_check(ctx) is None
+    assert ctx.state.prize_check_done is True
+    dreepy_entries = [e for e in ctx.state.deck_memory if e.id == DREEPY]
+    assert len(dreepy_entries) == 4
+    assert sum(1 for e in dreepy_entries if e.prized) == 1
+
+
+def test_prize_check_accounts_for_evolved_and_attached_cards():
+    """A bench Drakloak with a preEvolution-nested Dreepy, plus an active
+    Dragapult ex carrying a Fire Energy attachment, must not make the
+    evolved-from Dreepy or the attached Fire Energy look "missing" --
+    both are still real, in-play copies, not prized ones."""
+    drakloak = {
+        "id": DRAKLOAK,
+        "hp": 90,
+        "maxHp": 90,
+        "energyCards": [],
+        "preEvolution": [{"id": DREEPY}],
+    }
+    dragapult = {
+        "id": DRAGAPULT_EX,
+        "hp": 320,
+        "maxHp": 320,
+        "energyCards": [{"id": FIRE_ENERGY}],
+        "preEvolution": [{"id": DRAKLOAK}, {"id": DREEPY}],
+    }
+    select = {
+        "type": 1,
+        "context": 7,
+        "maxCount": 1,
+        "deck": [],
+        "option": [{"type": 3, "area": 1, "index": 0}],
+    }
+    ctx = _ctx(select, active=[dragapult], bench=[drakloak])
+    assert prize_check(ctx) is None
+    dreepy_entries = [e for e in ctx.state.deck_memory if e.id == DREEPY]
+    drakloak_entries = [e for e in ctx.state.deck_memory if e.id == DRAKLOAK]
+    fire_entries = [e for e in ctx.state.deck_memory if e.id == FIRE_ENERGY]
+    # 2 Dreepy accounted for (one per preEvolution chain) out of 4 -> 2 prized
+    assert sum(1 for e in dreepy_entries if e.prized) == 2
+    # 1 Drakloak accounted for (in play) + 1 (nested under the Dragapult ex) out of 4 -> 2 prized
+    assert sum(1 for e in drakloak_entries if e.prized) == 2
+    # the attached Fire Energy is accounted for, not prized
+    assert sum(1 for e in fire_entries if e.prized) == 3  # 4 total, 1 attached
+
+
+def test_prize_check_runs_only_once_per_game():
+    """A second deck-search reveal later in the game must not re-run the
+    deduction -- ``deck_memory`` from the first pass is left alone."""
+    hand = [{"id": DREEPY}, {"id": DREEPY}]
+    discard = [{"id": DREEPY}]
+    select = {
+        "type": 1,
+        "context": 7,
+        "maxCount": 1,
+        "deck": [],
+        "option": [{"type": 3, "area": 1, "index": 0}],
+    }
+    state = DragapultState()
+    ctx = _ctx(select, hand=hand, discard=discard, state=state)
+    prize_check(ctx)
+    first_pass = [(e.id, e.prized) for e in state.deck_memory]
+
+    # A wildly different board on the "second" call -- if this re-ran, the
+    # Dreepy math above would change.
+    ctx2 = _ctx(select, hand=[], discard=[], state=state)
+    assert prize_check(ctx2) is None
+    assert [(e.id, e.prized) for e in state.deck_memory] == first_pass
+
+
+def test_print_prize_check_advances_only_on_a_new_turn():
+    select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
+    state = DragapultState()
+    state.prize_check_done = True
+
+    assert print_prize_check(_ctx(select, turn=5, state=state)) is None
+    assert state.prize_check_printed_turn == 5
+
+    # Same turn again -- a second decision within the same turn -- no change.
+    assert print_prize_check(_ctx(select, turn=5, state=state)) is None
+    assert state.prize_check_printed_turn == 5
+
+    # New turn -- the guard advances.
+    assert print_prize_check(_ctx(select, turn=6, state=state)) is None
+    assert state.prize_check_printed_turn == 6
+
+
+def test_print_prize_check_does_not_crash_before_prize_check_has_run():
+    select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
+    ctx = _ctx(select, turn=1)
+    assert print_prize_check(ctx) is None
+    assert ctx.state.prize_check_printed_turn == 1
+
+
+def test_print_prize_check_stays_silent_before_prize_check_has_run():
+    """P1: only start printing from the turn ``prize_check`` completes on --
+    prize_check_printed_turn must not advance while prize_check_done is
+    still False, or the first real turn after it completes would be
+    skipped by the once-per-turn guard."""
+    select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
+    state = DragapultState()
+    assert print_prize_check(_ctx(select, turn=1, state=state)) is None
+    assert state.prize_check_printed_turn is None
+
+    state.prize_check_done = True
+    assert print_prize_check(_ctx(select, turn=1, state=state)) is None
+    assert state.prize_check_printed_turn == 1
+
+
+def test_track_prize_takes_first_call_only_snapshots():
+    select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
+    ctx = _ctx(select, hand=[{"id": DREEPY}], prize=[None] * 6)
+    assert track_prize_takes(ctx) is None
+    assert ctx.state.last_prize_count == 6
+    assert ctx.state.last_hand_counts == {DREEPY: 1}
+
+
+def test_track_prize_takes_unprizes_the_newly_revealed_card():
+    """Prize count drops 6 -> 5 and Boss's Orders newly appears in hand --
+    that must be the taken prize, so its deck_memory entry un-prizes."""
+    state = DragapultState()
+    next(e for e in state.deck_memory if e.id == BOSS_ORDERS).prized = True
+    state.last_prize_count = 6
+    state.last_hand_counts = {}
+
+    select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
+    ctx = _ctx(select, hand=[{"id": BOSS_ORDERS}], prize=[None] * 5, state=state)
+    assert track_prize_takes(ctx) is None
+    boss_entries = [e for e in state.deck_memory if e.id == BOSS_ORDERS]
+    assert sum(1 for e in boss_entries if e.prized) == 0
+    assert state.last_prize_count == 5
+
+
+def test_track_prize_takes_ignores_hand_growth_without_a_prize_taken():
+    """Hand grows (a normal draw) but the prize count is unchanged -- no
+    prize was taken, so deck_memory must be left alone."""
+    state = DragapultState()
+    next(e for e in state.deck_memory if e.id == BOSS_ORDERS).prized = True
+    state.last_prize_count = 6
+    state.last_hand_counts = {}
+
+    select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
+    ctx = _ctx(select, hand=[{"id": BOSS_ORDERS}], prize=[None] * 6, state=state)
+    assert track_prize_takes(ctx) is None
+    boss_entries = [e for e in state.deck_memory if e.id == BOSS_ORDERS]
+    assert sum(1 for e in boss_entries if e.prized) == 1

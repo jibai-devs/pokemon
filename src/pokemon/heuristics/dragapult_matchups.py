@@ -13,12 +13,17 @@ in other decks too).
 
 This module is purely about *identification* — "who is my opponent." The
 decision rules that consume its output (``boss_orders_target``,
-``bench_spread_target`` in ``heuristics_dragapult.py``) live separately.
+``bench_spread_target`` in ``dragapult.py``) live separately.
 """
 
+from typing import TypeAlias
+
+from pokemon.board import Ctx, all_pokemon
 from pokemon.catalog import card_name
 from pokemon.deck_id import DeckIdentifier
-from pokemon.heuristics import Ctx, all_pokemon
+from pokemon.heuristics.dragapult_state import DragapultState
+
+DragapultCtx: TypeAlias = Ctx[DragapultState]
 
 TIER5_SIGNATURES: dict[str, list[str]] = {
     "arboliva": ["Arboliva ex", "Dolliv", "Smoliv"],
@@ -51,10 +56,10 @@ TIER5_PRIORITY_TARGETS: dict[str, list[str]] = {
 }
 
 
-def archetype_latch(ctx: Ctx) -> list[int] | None:
+def archetype_latch(ctx: DragapultCtx) -> list[int] | None:
     """Side-effect-only hook (Tier 5 detection) — always returns ``None``.
-    Run first every decision so later rules can read ``ctx.state["archetype"]``."""
-    if ctx.state.get("archetype"):
+    Run first every decision so later rules can read ``ctx.state.archetype``."""
+    if ctx.state.archetype:
         return None
     seen_names: set[str] = set()
     for c in all_pokemon(ctx.opp):
@@ -68,23 +73,23 @@ def archetype_latch(ctx: Ctx) -> list[int] | None:
             seen_names.add(c["name"])
     for archetype, sigs in TIER5_SIGNATURES.items():
         if any(s in seen_names for s in sigs):
-            ctx.state["archetype"] = archetype
+            ctx.state.archetype = archetype
             break
     return None
 
 
-def deck_belief_update(ctx: Ctx) -> list[int] | None:
+def deck_belief_update(ctx: DragapultCtx) -> list[int] | None:
     """Side-effect-only hook (PKM-023) -- always returns ``None``. Folds this
     decision's opponent-visible state into a per-game ``DeckIdentifier``
-    (``ctx.state["deck_id"]``) so any heuristic can read
+    (``ctx.state.deck_id``) so any heuristic can read
     ``archetype_belief()``/``opp_remaining()``/``p_in_hand()``/
     ``identified_list()`` off it. Consumed by ``_matchup_bucket`` below
     (plan 011 Phase 2), which the Tier 4 targeting rules prefer over the
     ``archetype_latch`` hard read."""
-    identifier = ctx.state.get("deck_id")
+    identifier = ctx.state.deck_id
     if identifier is None:
         identifier = DeckIdentifier()
-        ctx.state["deck_id"] = identifier
+        ctx.state.deck_id = identifier
     identifier.update(ctx.opp)
     return None
 
@@ -101,7 +106,7 @@ def _tier5_bucket_from_names(names: set[str]) -> str | None:
     return None
 
 
-def _matchup_bucket(ctx: Ctx) -> str | None:
+def _matchup_bucket(ctx: DragapultCtx) -> str | None:
     """Which ``TIER5_PRIORITY_TARGETS`` bucket targeting rules should use
     (plan 011 Phase 2). Prefers the deck-id belief -- classifying the
     identified exact list (level 1) or the best archetype's core+flex
@@ -109,7 +114,7 @@ def _matchup_bucket(ctx: Ctx) -> str | None:
     concentrates by ~turn 2, before the signature Pokemon is physically on
     the board. Falls back to ``archetype_latch``'s board-observation read
     (level 3, or a believed archetype with no signature overlap)."""
-    ident = ctx.state.get("deck_id")
+    ident = ctx.state.deck_id
     if isinstance(ident, DeckIdentifier):
         exact = ident.identified_list()
         if exact is not None:
@@ -119,12 +124,11 @@ def _matchup_bucket(ctx: Ctx) -> str | None:
         else:
             best = ident.best_archetype()
             if best is not None:
-                cache = ctx.state.setdefault("matchup_bucket_cache", {})
+                cache = ctx.state.matchup_bucket_cache
                 if best[0] not in cache:
                     arch = ident.archetypes().get(best[0], {})
                     ids = set(arch.get("core", {})) | set(arch.get("flex", {}))
                     cache[best[0]] = _tier5_bucket_from_names({card_name(int(cid)) for cid in ids})
                 if cache[best[0]] is not None:
                     return cache[best[0]]
-    latched = ctx.state.get("archetype")
-    return latched if isinstance(latched, str) else None
+    return ctx.state.archetype

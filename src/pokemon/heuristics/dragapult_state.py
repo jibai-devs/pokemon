@@ -56,10 +56,6 @@ class DragapultState:
     ``prize_check_done``: guards ``prize_check`` to run its deduction only
     once per game (the first deck-search reveal), not every one.
 
-    ``prize_check_printed_turn``: the last turn ``print_prize_check`` already
-    logged a ``deck_memory`` readout for, so it prints once per turn (a turn
-    spans many decisions) rather than once per decision.
-
     ``last_prize_count``/``last_hand_counts``: the previous decision's
     ``prizes_remaining`` count and hand-card-id multiset, both maintained by
     ``track_prize_takes`` so it can notice a prize being taken (the count
@@ -68,8 +64,9 @@ class DragapultState:
 
     ``decision_count``: how many decisions ``play()`` has handled so far
     this game -- i.e. how many times the agent has submitted an action to
-    Kaggle. Incremented by ``print_prize_check`` for its own log line;
-    not used anywhere else yet.
+    Kaggle. Incremented by ``print_prize_check`` for its own log line, and
+    tagged onto every one of them (it prints every decision, not once per
+    turn).
     """
 
     archetype: str | None = None
@@ -78,7 +75,6 @@ class DragapultState:
     recon_used: set[str] = field(default_factory=set)
     deck_memory: list[DeckMemoryEntry] = field(default_factory=_build_deck_memory)
     prize_check_done: bool = False
-    prize_check_printed_turn: int | None = None
     last_prize_count: int | None = None
     last_hand_counts: dict[int, int] = field(default_factory=dict)
     decision_count: int = 0

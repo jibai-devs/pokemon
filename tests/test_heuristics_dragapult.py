@@ -1059,36 +1059,37 @@ def test_prize_check_runs_only_once_per_game():
     assert [(e.id, e.prized) for e in state.deck_memory] == first_pass
 
 
-def test_print_prize_check_advances_only_on_a_new_turn():
+def test_print_prize_check_prints_every_decision_not_just_once_per_turn():
+    """Two decisions within the same turn must each bump ``decision_count``
+    -- there's no once-per-turn guard, the print fires every decision."""
     select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
     state = DragapultState()
     state.prize_check_done = True
 
     assert print_prize_check(_ctx(select, turn=5, state=state)) is None
-    assert state.prize_check_printed_turn == 5
+    assert state.decision_count == 1
 
-    # Same turn again -- a second decision within the same turn -- no change.
+    # Same turn again -- a second decision within the same turn -- still counts.
     assert print_prize_check(_ctx(select, turn=5, state=state)) is None
-    assert state.prize_check_printed_turn == 5
+    assert state.decision_count == 2
 
-    # New turn -- the guard advances.
     assert print_prize_check(_ctx(select, turn=6, state=state)) is None
-    assert state.prize_check_printed_turn == 6
+    assert state.decision_count == 3
 
 
 def test_print_prize_check_prints_a_placeholder_before_prize_check_has_run():
-    """Prints every turn even before ``prize_check`` has completed --
-    deliberately, so a real game's log shows this hook is firing every turn
-    regardless of whether the deduction itself has triggered yet."""
+    """Prints every decision even before ``prize_check`` has completed --
+    deliberately, so a real game's log shows this hook is firing regardless
+    of whether the deduction itself has triggered yet."""
     select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
     ctx = _ctx(select, turn=1)
     assert print_prize_check(ctx) is None
-    assert ctx.state.prize_check_printed_turn == 1
+    assert ctx.state.decision_count == 1
 
 
 def test_print_prize_check_increments_decision_count_every_call():
     """``decision_count`` tracks every call (every action submitted to
-    Kaggle), not just the once-per-turn prints."""
+    Kaggle)."""
     select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}]}
     state = DragapultState()
     print_prize_check(_ctx(select, turn=1, state=state))

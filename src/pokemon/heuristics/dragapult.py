@@ -346,23 +346,19 @@ def track_prize_takes(ctx: DragapultCtx) -> list[int] | None:
 
 def print_prize_check(ctx: DragapultCtx) -> list[int] | None:
     """Side-effect-only hook -- always returns ``None``. Prints one line
-    every turn (guarded by ``prize_check_printed_turn`` so it's once per
-    turn, not once per decision), tagged with the turn number and
-    ``decision_count`` (how many decisions ``play()`` has handled this game
-    -- i.e. how many actions submitted to Kaggle so far).
+    every decision, tagged with the turn number and ``decision_count`` (how
+    many decisions ``play()`` has handled this game -- i.e. how many
+    actions submitted to Kaggle so far).
 
     Deliberately prints *before* ``prize_check`` has completed too (a
     "not yet run" placeholder), rather than staying silent -- if this line
     is missing from a real game's log entirely, dispatch itself isn't
-    reaching this hook; if it prints every turn but always says "not yet
-    run", ``prize_check``'s own trigger (``select['deck']`` populated) is
-    the thing not firing, not this hook. Unconditional ``print``, not
+    reaching this hook; if it prints every decision but always says "not
+    yet run", ``prize_check``'s own trigger (``select['deck']`` populated)
+    is the thing not firing, not this hook. Unconditional ``print``, not
     routed through the ``-v`` verbose gate.
     """
     ctx.state.decision_count += 1
-    if ctx.turn == ctx.state.prize_check_printed_turn:
-        return None
-    ctx.state.prize_check_printed_turn = ctx.turn
     tag = f"[Turn {ctx.turn}, decision {ctx.state.decision_count}]"
     if not ctx.state.prize_check_done:
         print(f"{tag} Prize check: not yet run")

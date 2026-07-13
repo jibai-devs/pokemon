@@ -29,8 +29,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import kaggle_environments as kaggle
 from kaggle_environments.envs.cabt.cabt import random_agent
 
+from pokemon import admin as admin_module
 from pokemon import agent as agent_module
-from pokemon import heuristics as heuristics_module
 from pokemon.decks import ACTIVE_DECK_NAME, DECKS
 
 
@@ -44,8 +44,7 @@ def _build_agent(agent_name: str, cards: list[int], deck_name: str):
     if agent_name == "random":
         return agent_module.make_agent(cards), agent_module.set_game_num
     if agent_name == "heuristic":
-        rules = heuristics_module.HEURISTIC_SETS.get(deck_name)
-        return heuristics_module.make_heuristic_agent(cards, rules), heuristics_module.set_game_num
+        return admin_module.build_agent(cards, deck_name), admin_module.set_game_num
     raise SystemExit(f"Unknown agent '{agent_name}'. Available: random, heuristic")
 
 

@@ -1,13 +1,18 @@
 """Unit tests for the heuristic-agent framework, using synthetic ``obs``
 dicts — without needing the real engine (WSL/libcg.so).
 
+``_build_ctx`` lives in ``pokemon.board``; the dispatch loop that runs a
+ruleset's rules and falls back to random lives in ``pokemon.admin``.
+
 Deck-specific heuristics should get their own tests alongside their
-functions in ``pokemon.heuristics``, following the pattern below: build a
-minimal ``obs`` via ``_obs``, run it through ``_build_ctx``, and assert the
-heuristic returns the expected option indices (or ``None``).
+functions in ``pokemon.heuristics.dragapult``, following the pattern below:
+build a minimal ``obs`` via ``_obs``, run it through ``_build_ctx``, and
+assert the heuristic returns the expected option indices (or ``None``).
 """
 
-from pokemon.heuristics import _build_ctx, make_heuristic_agent
+from pokemon.admin import _build_agent_for_ruleset
+from pokemon.board import _build_ctx
+from pokemon.heuristics import Ruleset
 
 
 def _obs(select: dict, hand: list | None = None, active: list | None = None, bench: list | None = None):
@@ -23,6 +28,10 @@ def _obs(select: dict, hand: list | None = None, active: list | None = None, ben
     }
 
 
+def _empty_ruleset() -> Ruleset:
+    return Ruleset(rules=[], init_state=dict)
+
+
 def test_build_ctx_resolves_hand_and_active():
     hand = [{"id": 1}]
     active = [{"id": 2}]
@@ -32,14 +41,14 @@ def test_build_ctx_resolves_hand_and_active():
     assert ctx.me["active"] == active
 
 
-def test_make_heuristic_agent_falls_back_to_random_with_no_heuristics():
+def test_build_agent_falls_back_to_random_with_no_heuristics():
     select = {"type": 0, "context": 0, "maxCount": 1, "option": [{"type": 14}, {"type": 12}]}
-    agent = make_heuristic_agent(deck=[], heuristics=[])
+    agent = _build_agent_for_ruleset(deck=[], ruleset=_empty_ruleset())
     chosen = agent(_obs(select))
     assert chosen and 0 <= chosen[0] < 2
 
 
-def test_make_heuristic_agent_submits_deck_on_setup():
+def test_build_agent_submits_deck_on_setup():
     deck = [1, 2, 3]
-    agent = make_heuristic_agent(deck=deck, heuristics=[])
+    agent = _build_agent_for_ruleset(deck=deck, ruleset=_empty_ruleset())
     assert agent({"select": None}) == deck

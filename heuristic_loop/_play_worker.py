@@ -2,9 +2,10 @@
 
 Plays N games with `pokemon` imported from a given `src/` directory and
 prints a one-line JSON summary to stdout. Isolated into its own process
-because comparing two versions of `heuristics.py` in a single Python process
-would collide on the `pokemon.heuristics` module cache — subprocess per
-version sidesteps that entirely.
+because comparing two versions of the heuristics code in a single Python
+process would collide on Python's module cache (`pokemon.admin`,
+`pokemon.heuristics.dragapult`, etc.) — subprocess per version sidesteps
+that entirely.
 """
 
 from __future__ import annotations
@@ -28,8 +29,8 @@ def main() -> None:
     import kaggle_environments as kaggle
     from kaggle_environments.envs.cabt.cabt import random_agent
 
+    from pokemon import admin as admin_module
     from pokemon import agent as agent_module
-    from pokemon import heuristics as heuristics_module
     from pokemon.decks import DECKS
 
     cards = DECKS[args.deck]
@@ -37,9 +38,8 @@ def main() -> None:
         my_agent = agent_module.make_agent(cards)
         set_game_num = agent_module.set_game_num
     else:
-        rules = heuristics_module.HEURISTIC_SETS.get(args.deck)
-        my_agent = heuristics_module.make_heuristic_agent(cards, rules)
-        set_game_num = heuristics_module.set_game_num
+        my_agent = admin_module.build_agent(cards, args.deck)
+        set_game_num = admin_module.set_game_num
 
     wins = losses = draws = 0
     for i in range(args.games):

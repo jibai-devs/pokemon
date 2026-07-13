@@ -126,4 +126,3 @@ class SearchStartConfig(TypedDict):
 
 
 Agent: TypeAlias = Callable[[Observation], Action]  # noqa: UP040
-HeuristicState: TypeAlias = dict[str, object]  # noqa: UP040

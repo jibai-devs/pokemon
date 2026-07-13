@@ -10,7 +10,7 @@ calls for).
 
 This script does not judge anything — no "was this a mistake" logic lives
 here. That judgment is the agent step: hand the bundle this produces, plus
-`src/pokemon/heuristics_dragapult.py` and `docs/plans/007_heuristics_logic_plan.md`,
+`src/pokemon/heuristics/dragapult.py` and `docs/plans/007_heuristics_logic_plan.md`,
 to an agent (see heuristic_loop/README.md) and ask it to find recurring
 patterns with cited evidence, same evidence bar as PKM-017/PKM-019.
 

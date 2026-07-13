@@ -16,7 +16,7 @@ with open(_deck_path) as f:
 
 assert len(DECK) == 60, f"deck.csv has {len(DECK)} cards, expected 60"
 
+from pokemon.admin import build_agent  # noqa: E402
 from pokemon.decks import ACTIVE_DECK_NAME  # noqa: E402
-from pokemon.heuristics import HEURISTIC_SETS, make_heuristic_agent  # noqa: E402
 
-agent = make_heuristic_agent(DECK, HEURISTIC_SETS.get(ACTIVE_DECK_NAME))
+agent = build_agent(DECK, ACTIVE_DECK_NAME)

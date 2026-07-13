@@ -107,6 +107,8 @@ def _own_determinization(
 
 
 _DEFAULT_FILLER: CardId = 2  # Fire Energy — always a legal, inert card id.
+# SearchBegin rejects non-Pokémon enemyActive ids (Export/Search.h error 2).
+_DEFAULT_ACTIVE_FILLER: CardId = 119  # Dreepy — Basic Pokémon always in CardTable.
 
 
 def _opponent_determinization(
@@ -119,6 +121,12 @@ def _opponent_determinization(
     revealed. Not a real belief model — see module docstring."""
     revealed = _zone_ids(player)
     pool = revealed or [_DEFAULT_FILLER]
+    # Prefer revealed board PEKEmon for a hidden active; never use Energy.
+    board_ids = []
+    for c in (player.get("active") or []) + (player.get("bench") or []):
+        if c is not None:
+            board_ids.append(c["id"])
+    active_pool = board_ids or [_DEFAULT_ACTIVE_FILLER]
 
     def sample(n: int) -> list[CardId]:
         return [rng.choice(pool) for _ in range(n)]
@@ -131,7 +139,7 @@ def _opponent_determinization(
     prize = sample(prize_count)
     deck = sample(deck_count)
     hand = sample(hand_count) if player.get("hand") is None else []
-    active = sample(1) if active_hidden else []
+    active = [rng.choice(active_pool)] if active_hidden else []
     return prize, deck, hand, active
 
 

@@ -276,6 +276,7 @@ def make_heuristic_agent(
     def play(obs: Observation) -> list[int]:
         if obs["select"] is None:
             state.clear()  # new game starting — cross-turn memory doesn't carry over
+            state["my_deck"] = list(deck)
             lines, checksum = deck_summary(deck)
             _log(f"\n{'=' * 60}")
             _log(f"GAME {_game_num}: Submitting deck ({len(deck)} cards, sha256:{checksum}) [heuristic]")

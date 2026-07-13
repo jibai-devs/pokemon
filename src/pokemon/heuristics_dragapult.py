@@ -28,6 +28,7 @@ from collections import Counter
 
 from pokemon.cabt_enums import AreaType, EnergyType, OptionType, SelectContext, SelectType
 from pokemon.catalog import attack_info, card_info
+from pokemon.decks import DRAGAPULT_DECK
 from pokemon.dragapult_matchups import (
     TIER5_PRIORITY_TARGETS,
     _matchup_bucket,
@@ -48,7 +49,13 @@ from pokemon.heuristics import (
     prizes_remaining,
     remaining_hp,
 )
+from pokemon.turn_search import expand_end_of_turn, first_action_of_best_line, root_player_index
 from pokemon.types import CardState, DecisionRule, Option
+
+# BFS budget for ``turn_bfs_search`` — hard caps, not lethal-gated.
+_TURN_BFS_MAX_NODES = 800
+_TURN_BFS_MAX_DEPTH = 20
+_TURN_BFS_BEAM = 48
 
 # --- Card ids (pokemon.decks.DRAGAPULT_DECK) --------------------------------
 
@@ -230,6 +237,48 @@ _EX_ATTACK_IDS = {154, 183}
 
 _PRIORITY_FIRST = [BUDEW, MUNKIDORI, DREEPY, FEZANDIPITI_EX, MEOWTH_EX]
 _PRIORITY_SECOND = [BUDEW, DREEPY, MUNKIDORI, FEZANDIPITI_EX, MEOWTH_EX]
+
+
+def _search_time_ok(ctx: Ctx) -> bool:
+    """Bail out of native search when the episode overage budget is tight."""
+    remaining = ctx.obs.get("remainingOverageTime")
+    if remaining is None:
+        return True
+    try:
+        return float(remaining) > 30.0
+    except (TypeError, ValueError):
+        return True
+
+
+def turn_bfs_search(ctx: Ctx) -> list[int] | None:
+    """Budgeted BFS over end-of-turn states via native search.
+
+    Runs on Main when ``search_begin_input`` is present and overage time allows.
+    No lethal precondition — explores under node/depth/beam caps with the
+    tactical candidate policy, scores every leaf, and returns the first action
+    of the best line. Soft-fails (``None``) if the engine binding is unavailable
+    or every line is empty/error, so lower heuristics still apply.
+    """
+    if ctx.sel_type not in (SelectType.MAIN, 0):
+        return None
+    if not ctx.obs.get("search_begin_input"):
+        return None
+    if not _search_time_ok(ctx):
+        return None
+    deck = ctx.state.get("my_deck")
+    if not isinstance(deck, list) or len(deck) != 60:
+        deck = list(DRAGAPULT_DECK)
+    lines = expand_end_of_turn(
+        ctx.obs,
+        deck,  # type: ignore[arg-type]
+        policy="tactical",
+        max_nodes=_TURN_BFS_MAX_NODES,
+        max_depth=_TURN_BFS_MAX_DEPTH,
+        beam=_TURN_BFS_BEAM,
+    )
+    if not lines:
+        return None
+    return first_action_of_best_line(lines, root_player_index(ctx.obs))
 
 
 def setup_pokemon(ctx: Ctx) -> list[int] | None:
@@ -948,6 +997,7 @@ def attack_choice(ctx: Ctx) -> list[int] | None:
 DRAGAPULT_HEURISTICS: list[DecisionRule] = [
     archetype_latch,
     deck_belief_update,
+    turn_bfs_search,
     mulligan,
     active_replacement,
     setup_pokemon,

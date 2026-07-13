@@ -1,4 +1,11 @@
-"""Budgeted end-of-turn expansion over the native search API (plan 009 Phase 3).
+"""Budgeted end-of-turn BFS over the native search API (plan 009 Phase 3).
+
+Owns the full turn-search stack used by the agent:
+
+- ``expand_end_of_turn`` — engine-backed BFS under node/depth/beam caps
+- ``score_line`` / ``first_action_of_best_line`` — rank leaves
+- ``turn_bfs_search`` — DecisionRule that runs BFS on Main and returns the
+  first action of the best line (``play -v`` dumps ranked end states)
 
 Given a live ``obs`` (must include ``search_begin_input``), fork the state via
 ``SearchBegin``, walk legal option sequences, and collect terminal nodes where
@@ -15,12 +22,17 @@ import random
 from collections import deque
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from pokemon.cabt_enums import OptionType, SelectType
+from pokemon.catalog import format_option
 from pokemon.determinize import sample_determinization
 from pokemon.native_search import SearchResult, SearchSession
 from pokemon.types import CardId, Observation, Option, SearchStartConfig
+
+if TYPE_CHECKING:
+    from pokemon.heuristics import Ctx
+
 
 TerminalKind = Literal["eot", "win", "loss", "draw", "budget", "opp_choice", "error", "depth"]
 
@@ -96,8 +108,9 @@ def classify_terminal(root_player: int, obs: Observation) -> TerminalKind | None
 
 def _option_card_id_from_obs(obs: Observation, opt: Option) -> int | None:
     """Best-effort card id for a PLAY/ATTACH/etc. option (hand area)."""
-    if opt.get("cardId") is not None:
-        return int(opt["cardId"])
+    card_id = opt.get("cardId")
+    if card_id is not None:
+        return int(card_id)
     idx = opt.get("index")
     area = opt.get("area")
     current = obs.get("current") or {}
@@ -429,3 +442,147 @@ def first_action_of_best_line(
         return None
     ranked = sorted(usable, key=lambda line: score_line(line, root_player), reverse=True)
     return ranked[0].actions[0]
+
+
+def _end_state_summary(line: TurnLine, root_player: int) -> str:
+    """One-line human summary of a leaf's end observation."""
+    if line.end_obs is None:
+        return "no-obs"
+    current = line.end_obs.get("current") or {}
+    players = current.get("players") or []
+    my_p = opp_p = "?"
+    my_active = opp_active = "?"
+    if len(players) > root_player:
+        me = players[root_player]
+        my_p = str(len(me.get("prize") or []))
+        active = me.get("active") or []
+        if active and active[0] is not None:
+            c = active[0]
+            my_active = f"{c.get('name', c.get('id'))} {c.get('hp')}/{c.get('maxHp')}"
+    opp_idx = 1 - root_player
+    if len(players) > opp_idx:
+        opp = players[opp_idx]
+        opp_p = str(len(opp.get("prize") or []))
+        active = opp.get("active") or []
+        if active and active[0] is not None:
+            c = active[0]
+            opp_active = f"{c.get('name', c.get('id'))} {c.get('hp')}/{c.get('maxHp')}"
+    result = current.get("result", -1)
+    turn = current.get("turn", "?")
+    return (
+        f"turn={turn} result={result} prizes={my_p}/{opp_p} "
+        f"active={my_active} vs {opp_active}"
+    )
+
+
+def format_turn_lines(
+    lines: list[TurnLine],
+    root_player: int,
+    *,
+    max_lines: int = 40,
+) -> list[str]:
+    """Human-readable dump of BFS end states, best-first."""
+    if not lines:
+        return ["  (no end states)"]
+    ranked = sorted(lines, key=lambda line: score_line(line, root_player), reverse=True)
+    out: list[str] = [
+        f"  turn_bfs: {len(lines)} end state(s) (showing top {min(len(ranked), max_lines)})"
+    ]
+    for i, line in enumerate(ranked[:max_lines]):
+        score = score_line(line, root_player)
+        acts = " > ".join(str(a) for a in line.actions) if line.actions else "(no actions)"
+        out.append(
+            f"  [{i}] {line.terminal:8s} score={score} actions={acts} | "
+            f"{_end_state_summary(line, root_player)}"
+        )
+    if len(ranked) > max_lines:
+        out.append(f"  ... +{len(ranked) - max_lines} more")
+    return out
+
+
+# --- Agent-facing DecisionRule -----------------------------------------------
+
+# Hard caps for ``turn_bfs_search`` (not lethal-gated).
+TURN_BFS_MAX_NODES = 800
+TURN_BFS_MAX_DEPTH = 20
+TURN_BFS_BEAM = 48
+TURN_BFS_MIN_OVERAGE_TIME = 30.0
+
+
+def _heuristic_log(msg: str) -> None:
+    """Deferred import avoids a circular import with ``heuristics`` at load time."""
+    from pokemon.heuristics import _log
+
+    _log(msg)
+
+
+def search_time_ok(obs: Observation, min_overage: float = TURN_BFS_MIN_OVERAGE_TIME) -> bool:
+    """Bail out of native search when the episode overage budget is tight."""
+    remaining = obs.get("remainingOverageTime")
+    if remaining is None:
+        return True
+    try:
+        return float(remaining) > min_overage
+    except (TypeError, ValueError):
+        return True
+
+
+def turn_bfs_search(ctx: Ctx) -> list[int] | None:
+    """Budgeted BFS over end-of-turn states via native search.
+
+    Runs on Main when ``search_begin_input`` is present and overage time allows.
+    Explores under node/depth/beam caps with the tactical candidate policy,
+    scores every leaf, and returns the first action of the best line.
+    Soft-fails (``None``) if the engine binding is unavailable or every line
+    is empty/error, so lower heuristics still apply.
+
+    With ``play -v``, dumps the ranked list of end states after each search.
+
+    Deck composition is taken from ``ctx.state["my_deck"]`` (set by
+    ``make_heuristic_agent`` on deck submission). If missing, search is
+    skipped rather than guessing a list.
+    """
+    if ctx.sel_type not in (SelectType.MAIN, 0):
+        return None
+    if not ctx.obs.get("search_begin_input"):
+        return None
+    if not search_time_ok(ctx.obs):
+        return None
+    deck = ctx.state.get("my_deck")
+    if not isinstance(deck, list) or len(deck) != 60:
+        _heuristic_log(f"\n--- Turn {ctx.turn} BFS: no my_deck on state, skip ---")
+        return None
+
+    lines = expand_end_of_turn(
+        ctx.obs,
+        deck,  # type: ignore[arg-type]
+        policy="tactical",
+        max_nodes=TURN_BFS_MAX_NODES,
+        max_depth=TURN_BFS_MAX_DEPTH,
+        beam=TURN_BFS_BEAM,
+    )
+    root = root_player_index(ctx.obs)
+    if not lines:
+        _heuristic_log(f"\n--- Turn {ctx.turn} BFS: no end states ---")
+        return None
+
+    for msg in format_turn_lines(lines, root):
+        _heuristic_log(msg)
+
+    best = first_action_of_best_line(lines, root)
+    usable = [line for line in lines if line.actions and line.terminal != "error"]
+    if usable and best is not None:
+        top = max(usable, key=lambda line: score_line(line, root))
+        first_labels = []
+        for idx in best:
+            if 0 <= idx < len(ctx.options):
+                first_labels.append(format_option(ctx.options[idx], ctx.hand))
+            else:
+                first_labels.append(f"opt[{idx}]")
+        _heuristic_log(
+            f"  pick first action of best line "
+            f"({top.terminal}, score={score_line(top, root)}): "
+            f"{', '.join(first_labels) or best}"
+        )
+    return best
+

@@ -28,7 +28,6 @@ from collections import Counter
 
 from pokemon.cabt_enums import AreaType, EnergyType, OptionType, SelectContext, SelectType
 from pokemon.catalog import attack_info, card_info
-from pokemon.decks import DRAGAPULT_DECK
 from pokemon.dragapult_matchups import (
     TIER5_PRIORITY_TARGETS,
     _matchup_bucket,
@@ -49,13 +48,8 @@ from pokemon.heuristics import (
     prizes_remaining,
     remaining_hp,
 )
-from pokemon.turn_search import expand_end_of_turn, first_action_of_best_line, root_player_index
+from pokemon.turn_search import turn_bfs_search
 from pokemon.types import CardState, DecisionRule, Option
-
-# BFS budget for ``turn_bfs_search`` — hard caps, not lethal-gated.
-_TURN_BFS_MAX_NODES = 800
-_TURN_BFS_MAX_DEPTH = 20
-_TURN_BFS_BEAM = 48
 
 # --- Card ids (pokemon.decks.DRAGAPULT_DECK) --------------------------------
 
@@ -239,51 +233,12 @@ _PRIORITY_FIRST = [BUDEW, MUNKIDORI, DREEPY, FEZANDIPITI_EX, MEOWTH_EX]
 _PRIORITY_SECOND = [BUDEW, DREEPY, MUNKIDORI, FEZANDIPITI_EX, MEOWTH_EX]
 
 
-def _search_time_ok(ctx: Ctx) -> bool:
-    """Bail out of native search when the episode overage budget is tight."""
-    remaining = ctx.obs.get("remainingOverageTime")
-    if remaining is None:
-        return True
-    try:
-        return float(remaining) > 30.0
-    except (TypeError, ValueError):
-        return True
-
-
-def turn_bfs_search(ctx: Ctx) -> list[int] | None:
-    """Budgeted BFS over end-of-turn states via native search.
-
-    Runs on Main when ``search_begin_input`` is present and overage time allows.
-    No lethal precondition — explores under node/depth/beam caps with the
-    tactical candidate policy, scores every leaf, and returns the first action
-    of the best line. Soft-fails (``None``) if the engine binding is unavailable
-    or every line is empty/error, so lower heuristics still apply.
-    """
-    if ctx.sel_type not in (SelectType.MAIN, 0):
-        return None
-    if not ctx.obs.get("search_begin_input"):
-        return None
-    if not _search_time_ok(ctx):
-        return None
-    deck = ctx.state.get("my_deck")
-    if not isinstance(deck, list) or len(deck) != 60:
-        deck = list(DRAGAPULT_DECK)
-    lines = expand_end_of_turn(
-        ctx.obs,
-        deck,  # type: ignore[arg-type]
-        policy="tactical",
-        max_nodes=_TURN_BFS_MAX_NODES,
-        max_depth=_TURN_BFS_MAX_DEPTH,
-        beam=_TURN_BFS_BEAM,
-    )
-    if not lines:
-        return None
-    return first_action_of_best_line(lines, root_player_index(ctx.obs))
-
-
 def setup_pokemon(ctx: Ctx) -> list[int] | None:
     """Section 4 opening-Pokemon priority for SETUP_ACTIVE/SETUP_BENCH selects."""
-    if ctx.sel_context not in (SelectContext.SETUP_ACTIVE_POKEMON, SelectContext.SETUP_BENCH_POKEMON):
+    if ctx.sel_context not in (
+        SelectContext.SETUP_ACTIVE_POKEMON,
+        SelectContext.SETUP_BENCH_POKEMON,
+    ):
         return None
     priority = _PRIORITY_FIRST if ctx.going_first is not False else _PRIORITY_SECOND
     return _rank_and_pick(ctx, priority)
@@ -404,7 +359,9 @@ def _fuel_priority(card: CardState, active: CardState | None) -> tuple[int, int,
 
 def attach_energy(ctx: Ctx) -> list[int] | None:
     """Section B (Munkidori/Darkness routing) + Section 4's energy-attach default."""
-    attach_opts = [(i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.ATTACH]
+    attach_opts = [
+        (i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.ATTACH
+    ]
     if not attach_opts:
         return None
     bench = bench_cards(ctx.me)
@@ -422,15 +379,21 @@ def attach_energy(ctx: Ctx) -> list[int] | None:
         card = _hand_card(ctx, opt.get("index"))
         return card.get("id") if card else None
 
-    darkness = [(i, target_card(opt)) for i, opt in attach_opts if energy_id(opt) == DARKNESS_ENERGY]
+    darkness = [
+        (i, target_card(opt)) for i, opt in attach_opts if energy_id(opt) == DARKNESS_ENERGY
+    ]
     darkness = [(i, c) for i, c in darkness if c is not None]
     if darkness:
         munkidoris = [(i, c) for i, c in darkness if c.get("id") == MUNKIDORI]
         if not munkidoris:
             return None
-        opp_damaged = [t for t in all_pokemon(ctx.opp) if 0 < (remaining_hp(t) or 0) < (max_hp(t) or 0)]
+        opp_damaged = [
+            t for t in all_pokemon(ctx.opp) if 0 < (remaining_hp(t) or 0) < (max_hp(t) or 0)
+        ]
         if not opp_damaged:
-            return None  # B1: no near-term Adrena-Brain payoff, defer rather than attach speculatively
+            return (
+                None  # B1: no near-term Adrena-Brain payoff, defer rather than attach speculatively
+            )
         if len(munkidoris) == 1:
             return [munkidoris[0][0]]
         has_payoff = any(0 < (remaining_hp(t) or 999) <= 30 for t in opp_damaged)
@@ -441,11 +404,17 @@ def attach_energy(ctx: Ctx) -> list[int] | None:
                 return [i]
         return [munkidoris[0][0]]
 
-    fuel = [(i, target_card(opt)) for i, opt in attach_opts if energy_id(opt) in (FIRE_ENERGY, PSYCHIC_ENERGY)]
+    fuel = [
+        (i, target_card(opt))
+        for i, opt in attach_opts
+        if energy_id(opt) in (FIRE_ENERGY, PSYCHIC_ENERGY)
+    ]
     fuel = [(i, c) for i, c in fuel if c is not None and c.get("id") in _FUEL_TARGETS]
     if not fuel:
         return None
-    unready = [(i, c) for i, c in fuel if not (c.get("id") == DRAGAPULT_EX and _dragapult_fully_fueled(c))]
+    unready = [
+        (i, c) for i, c in fuel if not (c.get("id") == DRAGAPULT_EX and _dragapult_fully_fueled(c))
+    ]
     if not unready:
         return [fuel[0][0]]
     # PKM-019 batch 20260710, finding B: an unconditional "prefer active"
@@ -628,7 +597,9 @@ def supporter_tiebreak(ctx: Ctx) -> list[int] | None:
     check, chain-preservation, energy-short check), so evaluating a single
     candidate is exactly as safe as evaluating a tied pair.
     """
-    play_opts = [(i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.PLAY]
+    play_opts = [
+        (i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.PLAY
+    ]
     ids: dict[int, int] = {}
     for i, opt in play_opts:
         cid = _hand_option_card_id(ctx, opt)
@@ -720,7 +691,9 @@ def discard_energy_target(ctx: Ctx) -> list[int] | None:
 
     if theirs:
         opp_active = active_card(ctx.opp)
-        theirs.sort(key=lambda ice: (_discard_energy_strip_tier(ice[1]), 0 if ice[1] is opp_active else 1))
+        theirs.sort(
+            key=lambda ice: (_discard_energy_strip_tier(ice[1]), 0 if ice[1] is opp_active else 1)
+        )
         return [theirs[0][0]]
     if mine:
         mine.sort(key=lambda ice: _discard_priority(ice[2].get("id") if ice[2] else None))
@@ -734,7 +707,9 @@ _LOW_VALUE_BENCH = [DREEPY, BUDEW, MUNKIDORI, MOLTRES]
 def bench_play_discretion(ctx: Ctx) -> list[int] | None:
     """D2: don't bench Fezandipiti ex/Meowth ex when a lower-value basic is
     also a legal play this decision."""
-    play_opts = [(i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.PLAY]
+    play_opts = [
+        (i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.PLAY
+    ]
     candidates = []
     for i, opt in play_opts:
         cid = _hand_option_card_id(ctx, opt)
@@ -866,7 +841,13 @@ def boss_orders_target(ctx: Ctx) -> list[int] | None:
         # better pull than an already-damaged one-prizer just because it's
         # worth more prizes if/when it eventually dies.
         damaged_ex = ex and hp is not None and max_hp_ is not None and 0 < hp < max_hp_
-        return (0 if lethal else 1, chain_risk, pref, 0 if damaged_ex else 1, hp if hp is not None else 9999)
+        return (
+            0 if lethal else 1,
+            chain_risk,
+            pref,
+            0 if damaged_ex else 1,
+            hp if hp is not None else 9999,
+        )
 
     theirs.sort(key=score)
     return [theirs[0][0]]
@@ -882,7 +863,11 @@ def munkidori_defensive_heal(ctx: Ctx) -> list[int] | None:
     my only/best-ready attacker is a single shift (<=3 damage counters, 30 HP)
     away from surviving the opponent's current best attack next turn, healing
     it here outranks any offensive Munkidori use this turn."""
-    if ctx.sel_context not in (SelectContext.DAMAGE_COUNTER_ANY, SelectContext.DAMAGE_COUNTER, SelectContext.EFFECT_TARGET):
+    if ctx.sel_context not in (
+        SelectContext.DAMAGE_COUNTER_ANY,
+        SelectContext.DAMAGE_COUNTER,
+        SelectContext.EFFECT_TARGET,
+    ):
         return None
     candidates = []
     for i, opt in enumerate(ctx.options):
@@ -906,7 +891,11 @@ def munkidori_defensive_heal(ctx: Ctx) -> list[int] | None:
 def bench_spread_target(ctx: Ctx) -> list[int] | None:
     """Default Phantom Dive bench-spread target(s): matchup priority first,
     else whatever's already inside the 60-damage spread's KO range."""
-    if ctx.sel_context not in (SelectContext.DAMAGE_COUNTER_ANY, SelectContext.DAMAGE_COUNTER, SelectContext.EFFECT_TARGET):
+    if ctx.sel_context not in (
+        SelectContext.DAMAGE_COUNTER_ANY,
+        SelectContext.DAMAGE_COUNTER,
+        SelectContext.EFFECT_TARGET,
+    ):
         return None
     opp_bench = bench_cards(ctx.opp)
     candidates = []
@@ -952,7 +941,9 @@ def evolve_choice(ctx: Ctx) -> list[int] | None:
     Evolves whenever doing so wouldn't forgo a lethal attack this turn
     (evolving the active Pokemon costs its attack for the turn, so only a
     lethal attack is worth trading away)."""
-    evolve_opts = [(i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.EVOLVE]
+    evolve_opts = [
+        (i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.EVOLVE
+    ]
     if not evolve_opts:
         return None
     attack_opts = [opt for opt in ctx.options if opt.get("type") == OptionType.ATTACK]
@@ -973,7 +964,9 @@ def attack_choice(ctx: Ctx) -> list[int] | None:
     """Default attack: highest-damage legal attack, skipping our own ex
     attacks (Phantom Dive, Cruel Arrow) when the opposing Active blocks all
     ex-attack damage outright (Crustle's Mysterious Rock Inn)."""
-    attack_opts = [(i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.ATTACK]
+    attack_opts = [
+        (i, opt) for i, opt in enumerate(ctx.options) if opt.get("type") == OptionType.ATTACK
+    ]
     if not attack_opts:
         return None
     opp_active = active_card(ctx.opp)
@@ -997,7 +990,6 @@ def attack_choice(ctx: Ctx) -> list[int] | None:
 DRAGAPULT_HEURISTICS: list[DecisionRule] = [
     archetype_latch,
     deck_belief_update,
-    turn_bfs_search,
     mulligan,
     active_replacement,
     setup_pokemon,
@@ -1016,4 +1008,5 @@ DRAGAPULT_HEURISTICS: list[DecisionRule] = [
     bench_spread_target,
     evolve_choice,
     attack_choice,
+    turn_bfs_search,
 ]

@@ -58,14 +58,17 @@ def archetype_latch(ctx: Ctx) -> list[int] | None:
         return None
     seen_names: set[str] = set()
     for c in all_pokemon(ctx.opp):
-        if c.get("name"):
-            seen_names.add(c["name"])
+        name = c.get("name")
+        if name:
+            seen_names.add(name)
     for c in ctx.opp.get("discard") or []:
-        if c.get("name"):
-            seen_names.add(c["name"])
+        name = c.get("name")
+        if name:
+            seen_names.add(name)
     for c in ctx.current.get("stadium") or []:
-        if c.get("name"):
-            seen_names.add(c["name"])
+        name = c.get("name")
+        if name:
+            seen_names.add(name)
     for archetype, sigs in TIER5_SIGNATURES.items():
         if any(s in seen_names for s in sigs):
             ctx.state["archetype"] = archetype
@@ -82,7 +85,7 @@ def deck_belief_update(ctx: Ctx) -> list[int] | None:
     (plan 011 Phase 2), which the Tier 4 targeting rules prefer over the
     ``archetype_latch`` hard read."""
     identifier = ctx.state.get("deck_id")
-    if identifier is None:
+    if not isinstance(identifier, DeckIdentifier):
         identifier = DeckIdentifier()
         ctx.state["deck_id"] = identifier
     identifier.update(ctx.opp)
@@ -119,12 +122,16 @@ def _matchup_bucket(ctx: Ctx) -> str | None:
         else:
             best = ident.best_archetype()
             if best is not None:
-                cache = ctx.state.setdefault("matchup_bucket_cache", {})
+                cache = ctx.state.get("matchup_bucket_cache")
+                if not isinstance(cache, dict):
+                    cache = {}
+                    ctx.state["matchup_bucket_cache"] = cache
                 if best[0] not in cache:
                     arch = ident.archetypes().get(best[0], {})
                     ids = set(arch.get("core", {})) | set(arch.get("flex", {}))
                     cache[best[0]] = _tier5_bucket_from_names({card_name(int(cid)) for cid in ids})
-                if cache[best[0]] is not None:
-                    return cache[best[0]]
+                bucket = cache[best[0]]
+                if isinstance(bucket, str):
+                    return bucket
     latched = ctx.state.get("archetype")
     return latched if isinstance(latched, str) else None

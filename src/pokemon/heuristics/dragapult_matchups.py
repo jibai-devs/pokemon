@@ -89,13 +89,8 @@ def deck_belief_update(ctx: DragapultCtx) -> list[int] | None:
     ``identified_list()`` off it. Consumed by ``_matchup_bucket`` below
     (plan 011 Phase 2), which the Tier 4 targeting rules prefer over the
     ``archetype_latch`` hard read."""
-<<<<<<< HEAD:src/pokemon/dragapult_matchups.py
     identifier = ctx.state.get("deck_id")
     if not isinstance(identifier, DeckIdentifier):
-=======
-    identifier = ctx.state.deck_id
-    if identifier is None:
->>>>>>> 61de1b83724b682aa90ad1dc9e0c371abf41d002:src/pokemon/heuristics/dragapult_matchups.py
         identifier = DeckIdentifier()
         ctx.state.deck_id = identifier
     identifier.update(ctx.opp)
@@ -132,26 +127,16 @@ def _matchup_bucket(ctx: DragapultCtx) -> str | None:
         else:
             best = ident.best_archetype()
             if best is not None:
-<<<<<<< HEAD:src/pokemon/dragapult_matchups.py
                 cache = ctx.state.get("matchup_bucket_cache")
                 if not isinstance(cache, dict):
                     cache = {}
                     ctx.state["matchup_bucket_cache"] = cache
-=======
-                cache = ctx.state.matchup_bucket_cache
->>>>>>> 61de1b83724b682aa90ad1dc9e0c371abf41d002:src/pokemon/heuristics/dragapult_matchups.py
                 if best[0] not in cache:
                     arch = ident.archetypes().get(best[0], {})
                     ids = set(arch.get("core", {})) | set(arch.get("flex", {}))
                     cache[best[0]] = _tier5_bucket_from_names({card_name(int(cid)) for cid in ids})
-<<<<<<< HEAD:src/pokemon/dragapult_matchups.py
                 bucket = cache[best[0]]
                 if isinstance(bucket, str):
                     return bucket
     latched = ctx.state.get("archetype")
     return latched if isinstance(latched, str) else None
-=======
-                if cache[best[0]] is not None:
-                    return cache[best[0]]
-    return ctx.state.archetype
->>>>>>> 61de1b83724b682aa90ad1dc9e0c371abf41d002:src/pokemon/heuristics/dragapult_matchups.py

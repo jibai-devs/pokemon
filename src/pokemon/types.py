@@ -131,7 +131,6 @@ class SearchStartConfig(TypedDict):
 
 
 Agent: TypeAlias = Callable[[Observation], Action]  # noqa: UP040
-<<<<<<< HEAD
 HeuristicState: TypeAlias = dict[str, object]  # noqa: UP040
 
 # A single decision rule for the modular agent (see ``make_heuristic_agent``).
@@ -140,5 +139,3 @@ HeuristicState: TypeAlias = dict[str, object]  # noqa: UP040
 # First non-empty return that satisfies ``minCount``/``maxCount`` wins.
 # ``Ctx`` is quoted to avoid a runtime import cycle with ``pokemon.heuristics``.
 DecisionRule: TypeAlias = Callable[["Ctx"], Action | None]  # noqa: UP040
-=======
->>>>>>> 61de1b83724b682aa90ad1dc9e0c371abf41d002

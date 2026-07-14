@@ -8,7 +8,7 @@ is to have a record of *why* a heuristic looks the way it does, so we don't flip
 stack up over time.
 
 Newest entries first. Don't edit past entries except to fix typos — if a kept
-change later turns out to be wrong, add a new entry that supersedes it and link
+change later turns out to be dwrong, add a new entry that supersedes it and link
 back, rather than rewriting history.
 
 ## Entry template

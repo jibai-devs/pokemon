@@ -10,7 +10,9 @@ build a minimal ``obs`` via ``_obs``, run it through ``_build_ctx``, and
 assert the heuristic returns the expected option indices (or ``None``).
 """
 
-from pokemon.admin import _build_agent_for_ruleset
+from dataclasses import dataclass
+
+from pokemon.admin import _build_agent_for_ruleset, _init_state
 from pokemon.board import _build_ctx
 from pokemon.heuristics import Ruleset
 
@@ -52,3 +54,22 @@ def test_build_agent_submits_deck_on_setup():
     deck = [1, 2, 3]
     agent = _build_agent_for_ruleset(deck=deck, ruleset=_empty_ruleset())
     assert agent({"select": None}) == deck
+
+
+@dataclass
+class _StateWithDeck:
+    my_deck: list[int] | None = None
+
+
+def test_init_state_seeds_my_deck_when_state_supports_it():
+    ruleset = Ruleset(rules=[], init_state=_StateWithDeck)
+    state = _init_state(ruleset, deck=[1, 2, 3])
+    assert state.my_deck == [1, 2, 3]
+
+
+def test_init_state_ignores_deck_when_state_has_no_my_deck_field():
+    """A plain dict (no attributes) must not crash -- ``_init_state`` uses
+    ``hasattr`` so it's a no-op for any ruleset whose state doesn't declare
+    ``my_deck``, not just ``DragapultState``."""
+    state = _init_state(_empty_ruleset(), deck=[1, 2, 3])
+    assert state == {}

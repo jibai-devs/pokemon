@@ -67,6 +67,15 @@ class DragapultState:
     Kaggle. Incremented by ``print_prize_check`` for its own log line, and
     tagged onto every one of them (it prints every decision, not once per
     turn).
+
+    ``my_deck``: our own full 60-card list, populated by ``admin._init_state``
+    when it builds this state (it has ``deck`` in scope; nothing in this
+    module does). Consumed by ``pokemon.search_function.turn_search``'s
+    ``turn_bfs_search`` -- the engine-backed search needs the real decklist
+    to build a consistent hidden-zone determinization (``sample_determinization``),
+    the same composition problem ``deck_memory`` above solves for prize
+    deduction, but this one needs the *whole* list rather than a running
+    prized/not-prized read.
     """
 
     archetype: str | None = None
@@ -78,6 +87,7 @@ class DragapultState:
     last_prize_count: int | None = None
     last_hand_counts: dict[int, int] = field(default_factory=dict)
     decision_count: int = 0
+    my_deck: list[int] | None = None
 
 
 def init_state() -> DragapultState:

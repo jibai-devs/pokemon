@@ -1,0 +1,32 @@
+PHANTOM DIVE THIS TURN? (attack-or-hold-back decision tree)
+
+Goal: decide whether to attack with Phantom Dive at the end of this turn, or
+stay in setup phase (hold back / keep developing instead).
+
+1. Can I Phantom Dive at the end of this turn?
+   - No  -> STAY IN SETUP PHASE
+   - Yes -> go to 2
+
+2. If I PD, will I win the game?
+   - Yes -> AIM TO PHANTOM DIVE AT END OF TURN
+   - No  -> go to 3
+
+3. If I PD, will the Dragapult I attached energy to (the one attacking)
+   die (e.g. get knocked out on the opponent's following turn)?
+   - No  -> AIM TO PHANTOM DIVE AT END OF TURN
+   - Yes -> go to 4
+
+4. Will I still be able to Phantom Dive next turn even after this Dragapult
+   dies? For example, if I...
+     a. have a Drakloak with 1 energy on bench + can find another
+        Dragapult ex + 1 more energy, or
+     b. have a Drakloak + can find and use Crispin (e.g. via Meowth ex) +
+        Psychic and Fire energy present in deck
+   - Yes -> AIM TO PHANTOM DIVE AT END OF TURN
+   - No  -> STAY IN SETUP PHASE
+
+Terminal outcomes: "aim to Phantom Dive at end of turn" or
+"stay in setup phase" -- i.e. attack now if it's lethal, or if attacking
+doesn't actually cost you your attacker for nothing (it wasn't surviving
+anyway, or you can rebuild the attack next turn even after this Dragapult
+dies); otherwise hold back and keep developing instead.

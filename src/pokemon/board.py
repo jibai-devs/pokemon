@@ -7,6 +7,11 @@ its own alias (e.g. ``DragapultCtx = Ctx[DragapultState]``, see
 instead of a stringly-keyed dict. Building/owning that state's lifecycle
 across a whole game is ``admin.py``'s job, not this module's -- this module
 only knows how to build one decision's ``Ctx`` from ``obs``.
+
+Some rules may depend on ``select.deck`` / ``select.contextCard`` field
+shapes that `docs/plans/000_plan_engine_enum_extraction.md` hasn't empirically
+verified yet (its Phase 2) — best-effort, and should degrade to "doesn't
+apply" (returning ``None``) rather than guessing wrong.
 """
 
 from collections.abc import Callable

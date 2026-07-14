@@ -1,0 +1,105 @@
+STARTING FIRST
+
+starting priority in descending order  = [BUDEW, MUNKIDORI, DREEPY, FEZANDIPITI_EX, MOLTRES,  MEOWTH_EX]
+
+First search item usage: do a prize check
+
+Overall goal: put as many dreepys as you can on the bench, up  to 3,  but also make sure  that you are able to have a good 2nd turn
+
+First: place down dreepies in hand to bench
+
+item usage priority : buddy buddy poffin > pokepad > ultra ball
+
+buddy buddy poffin first, find as many dreepy as possible, till you have 3 in play.
+
+then, pokepad. If no dreepy in play, search for dreepy and play it. If 1 or more dreepy in play, if <GOOD SECOND TURN IF I DO CURRENT ACTION> == true,  search for dreepy and play it.   if <GOOD SECOND TURN IF I DO CURRENT ACTION> == false, look for drakloak
+
+Then, Ultra ball:  If no dreepy in play, search for dreepy. else, dont use.
+
+
+
+Energy attach priority if dreepy in active: fire/psychic energy to benched dreepy > fire/psychic energy to active dreepy > no attachment
+
+Everything else: fire/psychic energy to benched dreepy > Dark/psychic energy to active munkidori > no attachment
+
+
+last check: if only budew or dreepy in active with no pokemon on bench, put another pokemon on bench. if not, end turn
+
+
+how to evaluate  <GOOD SECOND TURN IF I DO CURRENT ACTION>:
+Can i evolve a dreepy to drakloak next turn? (can i search a drakloak with an item? do i already have it in my hand? if not, do i have a lillies determination, judge, or a way to find meowth (which in turn, can find lillies determination for me) . If yes, evaluate to true
+Will i be put in a dead end (no cards in hand, 2 cards in hand without being able to evolve to drakloak. If next turn, can use lillies determination or judge to redraw cards, it might be ok). If put in a losing position, evaluate to false
+
+
+
+
+
+STARTING SECOND
+
+starting priority in descending order = [BUDEW, DREEPY, MUNKIDORI, MOLTRES, FEZANDIPITI_EX, MEOWTH_EX]
+
+
+Overall goal:
+Once you have at least 2 dreepy, try to get budew in active to use itchy pollen. If you have 2 dreepy while also being able to itchy pollen with budew,  can look for 3rd dreepy. but also make sure that you are able to have a good 2nd turn. 
+
+First search item usage: do a prize check
+
+
+if starting budew: place down dreepies in hand to bench. 
+
+if starting anything else: if have energy in hand, place down both dreepies AND budews if  <CAN ITCHY POLLEN> evalutes true. else, only put down dreepys
+
+
+item usage priority : buddy buddy poffin > pokepad > ultra ball
+
+buddy buddy poffin first. if no dreepy in play, look for 2 dreepy. if 1 to 3 dreepy in play, look for 1 dreepy and 1 budew 
+
+then, pokepad. If no dreepy in play, search for dreepy. If 1 to 2 dreepy in play, if <GOOD SECOND TURN IF I DO CURRENT ACTION> == true,  search for dreepy. if <CAN ITCHY POLLEN> would evalutate true if budew was on the bench, adn there are no budews on bench currently, search for budew and put it on the bench.
+
+Then, Ultra ball:  If no dreepy in play, search for dreepy.  If GOOD SECOND TURN IF I DO CURRENT ACTION> == true AND there is at least 2 dreepy in play, search for and put budew on bench instead if <CAN ITCHY POLLEN> evaluates true
+
+if budew is on the bench but not in active, do our decided ITCHY POLLEN ROUTE to get budew in active.
+
+if we didnt need to use crispin to find energy to let another pokemon retreat to switch budew into active, we can consider playing another supporter.
+
+Once we play the items we want to play, play a supporter if possible, following the supporter priority
+
+ if we played ultra ball ONLY BECAUSE we thought we could use lillie’s determination afterwards, play lillie’s determination
+  if <GOOD SECOND TURN IF I DO CURRENT ACTION> evaluates to false (put action as “none) , play judge
+ if have 2 dreepy, use crispin to aattach different energy to both dreepy
+ if the opponent has 6 or more cards, use xerosics
+
+once play supporter,  go back to the following algorithm
+
+First: place down dreepies in hand to bench up to 3 dreepies on bench
+
+item usage priority : buddy buddy poffin > pokepad > ultra ball
+
+buddy buddy poffin first, find as many dreepy as possible, till you have 3 in play.
+
+then, pokepad. If no dreepy in play, search for dreepy and play it. If 1 or more dreepy in play, if <GOOD SECOND TURN IF I DO CURRENT ACTION> == true, search for dreepy and play it. if <GOOD SECOND TURN IF I DO CURRENT ACTION> == false, look for drakloak
+
+Then, Ultra ball: If no dreepy in play, search for dreepy. If GOOD SECOND TURN IF I DO CURRENT ACTION> == true AND there is at least 2 dreepy in play, search for and put budew on bench instead if <CAN ITCHY POLLEN> evaluates true
+
+Energy attach priority if dreepy in active: fire/psychic energy to benched dreepy > fire/psychic energy to active dreepy > no attachment
+
+Everything else: fire/psychic energy to benched dreepy > Dark/psychic energy to active munkidori > no attachment
+
+Last check: if only budew or dreepy in active with no pokemon on bench, put another pokemon on bench. if not, if budew in active, use itchy pollen. else, just end turn
+
+how to evaluate  <GOOD SECOND TURN IF I DO CURRENT ACTION>:
+Do i have lillies determination in my hand to help me get more cards this turn? if yes, evaluate true
+Can i evolve a dreepy to drakloak next turn? (can i search a drakloak with an item? do i already have it in my hand? if not, do i have a lillies determination, judge, or a way to find meowth (which in turn, can find lillies determination for me) . If yes, evaluate to true
+Will i be put in a dead end (no cards in hand, 2 cards in hand without being able to evolve to drakloak. If next turn, can use lillies determination or judge to redraw cards, it might be ok). If put in a losing position, evaluate to false
+
+
+how to evaluate <CAN ITCHY POLLEN>
+if budew is in active spot, can use itchy pollen
+if buidew is not in active spot, if have energy in hand to attach to the pokemon in the active spot for it to retreat to swap budew into the active spot
+if buidew is not in active spot, if no energy in hand to attach, if able to play crispin with <GOOD SECOND TURN IF I DO CURRENT ACTION> == true  to give the active pokemon energy to retreat into budew 
+if any of the aove conditions are true, <CAN ITCHY POLLEN> evaluates to true. it will also be our ITCHY POLLEN ROUTE
+
+
+
+
+

@@ -14,6 +14,8 @@ CardId: TypeAlias = int  # noqa: UP040 - Kaggle runs Python 3.11.
 AttackId: TypeAlias = int  # noqa: UP040
 PlayerIndex: TypeAlias = int  # noqa: UP040
 OptionIndex: TypeAlias = int  # noqa: UP040
+# Indices into the current ``select["option"]`` list — the legal choices the
+# engine offered for this decision. Not card IDs.
 Action: TypeAlias = list[OptionIndex]  # noqa: UP040
 Deck: TypeAlias = list[CardId]  # noqa: UP040
 

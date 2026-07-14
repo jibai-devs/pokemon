@@ -15,8 +15,8 @@ heuristic (see AGENTS.md "Known issues", the same class of bug that once
 shipped a submission.tar.gz missing that data).
 
 Each version's games run in its own subprocess (`_play_worker.py`) to avoid
-Python module-cache collisions between two different `pokemon.heuristics`
-modules.
+Python module-cache collisions between two different versions of the
+`pokemon` package's heuristics modules.
 
 Usage (run under WSL — the engine, `libcg.so`, is Linux-only):
     uv run python heuristic_loop/eval_heuristic_change.py -g 20

@@ -4,8 +4,8 @@ import kaggle_environments as kaggle
 import typer
 from kaggle_environments.envs.cabt.cabt import random_agent
 
+from pokemon import admin as admin_module
 from pokemon import agent as agent_module
-from pokemon import heuristics as heuristics_module
 from pokemon.decks import ACTIVE_DECK_NAME, DECKS
 from pokemon.types import Deck
 
@@ -38,10 +38,9 @@ def play(
         agent_module.set_verbose(verbose)
         set_game_num = agent_module.set_game_num
     elif agent == "heuristic":
-        rules = heuristics_module.HEURISTIC_SETS.get(deck)
-        my_agent = heuristics_module.make_heuristic_agent(cards, rules)
-        heuristics_module.set_verbose(verbose)
-        set_game_num = heuristics_module.set_game_num
+        my_agent = admin_module.build_agent(cards, deck)
+        admin_module.set_verbose(verbose)
+        set_game_num = admin_module.set_game_num
     else:
         typer.echo(f"Unknown agent '{agent}'. Available: random, heuristic")
         raise typer.Exit(1)

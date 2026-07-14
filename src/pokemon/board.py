@@ -1,52 +1,40 @@
-"""Modular heuristic agent framework.
+"""Deck-agnostic board-reading helpers and the per-decision ``Ctx`` builder.
 
-Each heuristic is a small, independent function: given the current decision
-context, return the chosen option index/indices, or ``None`` if it doesn't
-apply. ``make_heuristic_agent`` tries each heuristic in priority order and
-falls back to a random legal choice if none fire — so a bug or gap in one
-heuristic can never crash a game, only under-perform.
-
-This module is deck-agnostic scaffolding. Deck-specific heuristics should be
-added as functions below (or in a separate module) and registered in
-``HEURISTIC_SETS`` keyed by deck name (see ``pokemon.decks.DECKS``).
-
-Some heuristics may depend on ``select.deck`` / ``select.contextCard`` field
-shapes that `docs/plans/000_plan_engine_enum_extraction.md` hasn't empirically
-verified yet (its Phase 2) — best-effort, and should degrade to "doesn't
-apply" (returning ``None``) rather than guessing wrong.
+``Ctx`` is the read-only view of one decision handed to every heuristic. It's
+generic over its ``state`` field's type so each ruleset module can declare
+its own alias (e.g. ``DragapultCtx = Ctx[DragapultState]``, see
+``dragapult_state.py``) and get real attribute-level typing on ``ctx.state``
+instead of a stringly-keyed dict. Building/owning that state's lifecycle
+across a whole game is ``admin.py``'s job, not this module's -- this module
+only knows how to build one decision's ``Ctx`` from ``obs``.
 """
 
-import random
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any, Generic, TypeAlias, TypeVar
 
 from pokemon.cabt_enums import AreaType, OptionType
-from pokemon.catalog import format_option
-from pokemon.decks import deck_summary
 from pokemon.types import (
-    Agent,
     CardState,
     CurrentState,
-    Deck,
-    HeuristicState,
     Observation,
     Option,
     PlayerState,
     SelectData,
 )
 
+S = TypeVar("S")
+
+# Shared verbosity flag: lives here (rather than in admin.py) so any rule
+# module can log through it too -- e.g. a ruleset's own hook wants to print
+# a running readout to stdout -- without creating a cycle back through
+# admin.py (which itself depends on the heuristics package).
 _verbose = False
-_game_num = 0
 
 
 def set_verbose(value: bool) -> None:
     global _verbose
     _verbose = value
-
-
-def set_game_num(value: int) -> None:
-    global _game_num
-    _game_num = value
 
 
 def _log(msg: str) -> None:
@@ -55,19 +43,18 @@ def _log(msg: str) -> None:
 
 
 @dataclass
-class Ctx:
+class Ctx(Generic[S]):
     """Decision context passed to every heuristic.
 
     ``sel_type`` (the SelectType of the whole select block) is carried
     through for heuristics that need it, alongside ``sel_context`` (the
     actual disambiguator per the engine's enum reference).
 
-    ``state`` is a mutable dict that persists across every decision within
-    one game (owned by the agent's closure in ``make_heuristic_agent``, reset
-    whenever a new deck-submission phase starts) — for heuristics that need
-    to remember something across turns (e.g. "has this Munkidori's Darkness
-    Energy already secured a KO", "has Meowth ex's search resolved yet").
-    Heuristics that don't need memory can ignore it entirely.
+    ``state`` is the active ruleset's persistent-state object -- its shape is
+    declared by whichever ruleset module built it via that module's own
+    ``init_state`` factory (see ``admin.py``). It persists across every
+    decision within one game, reset whenever a new deck-submission phase
+    starts. Rulesets that don't need memory can ignore it entirely.
     """
 
     obs: Observation
@@ -81,10 +68,10 @@ class Ctx:
     current: CurrentState
     turn: int | None
     going_first: bool | None
-    state: HeuristicState
+    state: S
 
 
-def _build_ctx(obs: Observation, state: HeuristicState) -> Ctx:
+def _build_ctx(obs: Observation, state: S) -> Ctx[S]:
     select = obs["select"]
     assert select is not None
     current = obs.get("current", {})
@@ -111,6 +98,16 @@ def _build_ctx(obs: Observation, state: HeuristicState) -> Ctx:
     )
 
 
+# A ruleset's rule function: given a decision, return the chosen option
+# index/indices, or ``None`` if it doesn't apply. Parameterized over
+# ``Ctx[Any]`` (rather than a specific ruleset's ``Ctx[SomeState]``) so a
+# single ruleset's list of rules -- each actually typed against its own
+# state, e.g. ``DragapultCtx = Ctx[DragapultState]`` -- can be declared as
+# ``list[Heuristic]`` without a variance error: ``Any`` is what makes a
+# ``Callable[[DragapultCtx], ...]`` assignable here.
+Heuristic: TypeAlias = Callable[["Ctx[Any]"], list[int] | None]
+
+
 # --- Board-state helpers, deck-agnostic ------------------------------------
 #
 # Best-effort readers over the card-dict shapes observed in real Kaggle
@@ -118,7 +115,8 @@ def _build_ctx(obs: Observation, state: HeuristicState) -> Ctx:
 # a card is ``{id, name, hp, maxHp, energies, energyCards, tools, ...}``.
 # These degrade to ``None``/``[]``/``False`` rather than raising if a field
 # is missing, per the "fail safe, don't guess wrong" convention already used
-# by ``_option_card_id``.
+# by ``_option_card_id``. None of these touch ``ctx.state``, so they accept
+# any ruleset's ``Ctx`` specialization (``Ctx[Any]``).
 
 
 def remaining_hp(card: CardState | None) -> int | None:
@@ -166,18 +164,18 @@ def prizes_remaining(player: PlayerState) -> int:
     return len(player.get("prize") or [])
 
 
-def _hand_card(ctx: Ctx, idx: int | None) -> CardState | None:
+def _hand_card(ctx: "Ctx[Any]", idx: int | None) -> CardState | None:
     if idx is None or not (0 <= idx < len(ctx.hand)):
         return None
     return ctx.hand[idx]
 
 
-def _active_card(ctx: Ctx) -> CardState | None:
+def _active_card(ctx: "Ctx[Any]") -> CardState | None:
     active = ctx.me.get("active") or []
     return active[0] if active else None
 
 
-def _board_card(ctx: Ctx, area: int | None, idx: int | None) -> CardState | None:
+def _board_card(ctx: "Ctx[Any]", area: int | None, idx: int | None) -> CardState | None:
     if area is None or idx is None:
         return None
     if area == AreaType.ACTIVE:
@@ -188,7 +186,7 @@ def _board_card(ctx: Ctx, area: int | None, idx: int | None) -> CardState | None
     return None
 
 
-def _option_card_id(ctx: Ctx, opt: Option) -> int | None:
+def _option_card_id(ctx: "Ctx[Any]", opt: Option) -> int | None:
     """Best-effort lookup of the card a CARD-shaped option refers to.
 
     Always resolves hand-area options directly (``area``/``index`` on the
@@ -222,10 +220,7 @@ def _option_card_id(ctx: Ctx, opt: Option) -> int | None:
     return None
 
 
-Heuristic = Callable[[Ctx], list[int] | None]
-
-
-def _rank_and_pick(ctx: Ctx, targets: list[int]) -> list[int] | None:
+def _rank_and_pick(ctx: "Ctx[Any]", targets: list[int]) -> list[int] | None:
     """Rank options whose resolved card is in ``targets`` (best-first, by
     position in ``targets``) and return the top ``maxCount`` of them, or
     ``None`` if there aren't enough confident picks to fill the required
@@ -248,74 +243,3 @@ def _rank_and_pick(ctx: Ctx, targets: list[int]) -> list[int] | None:
         return None
     ranked.sort()
     return [i for _, i in ranked[:need]]
-
-
-# --- Deck-specific heuristic sets -------------------------------------------
-#
-# Add heuristic functions above (or in their own module) and register a
-# priority-ordered list per deck name here, mirroring pokemon.decks.DECKS.
-# An empty list is a valid, safe default — the agent just falls back to
-# random legal moves for every decision.
-
-DEFAULT_HEURISTICS: list[Heuristic] = []
-HEURISTIC_SETS: dict[str, list[Heuristic]] = {}
-
-# Registered here (rather than at import time in each deck module) to avoid a
-# circular import — heuristics_dragapult imports Ctx/helpers from this module.
-from pokemon.heuristics_dragapult import DRAGAPULT_HEURISTICS  # noqa: E402
-
-HEURISTIC_SETS["dragapult"] = DRAGAPULT_HEURISTICS
-
-
-def make_heuristic_agent(
-    deck: Deck, heuristics: list[Heuristic] | None = None
-) -> Agent:
-    """Build an agent that applies ``heuristics`` in order, falling back to a
-    random legal choice when none of them apply to the current decision."""
-    rules = heuristics if heuristics is not None else DEFAULT_HEURISTICS
-    state: HeuristicState = {}
-
-    def play(obs: Observation) -> list[int]:
-        if obs["select"] is None:
-            state.clear()  # new game starting — cross-turn memory doesn't carry over
-            lines, checksum = deck_summary(deck)
-            _log(f"\n{'=' * 60}")
-            _log(f"GAME {_game_num}: Submitting deck ({len(deck)} cards, sha256:{checksum}) [heuristic]")
-            _log(f"{'=' * 60}")
-            if _game_num <= 1:
-                for line in lines:
-                    _log(line)
-            return deck
-
-        ctx = _build_ctx(obs, state)
-        options = ctx.options
-        max_count = ctx.select["maxCount"]
-        min_count = ctx.select.get("minCount") or 0
-
-        for rule in rules:
-            try:
-                chosen = rule(ctx)
-            except Exception as exc:  # a bad heuristic must never crash a game
-                _log(f"  [heuristic {rule.__name__} raised {exc!r}, skipping]")
-                continue
-            if not chosen:
-                continue
-            chosen = [i for i in chosen if 0 <= i < len(options)][:max_count]
-            # A selection with fewer than minCount indices is invalid — a real
-            # playtest showed the engine silently ending the episode as a draw
-            # (no exception) the first time a heuristic under-counted a
-            # multi-select. Treat that as "this heuristic doesn't apply"
-            # rather than submit it.
-            if len(chosen) >= min_count and chosen:
-                if _verbose:
-                    picked = [format_option(options[i], ctx.hand) for i in chosen]
-                    _log(f"  -> {rule.__name__}: {', '.join(picked)}")
-                return chosen
-
-        chosen = random.sample(range(len(options)), min(max_count, len(options)))
-        if _verbose:
-            picked = [format_option(options[i], ctx.hand) for i in chosen]
-            _log(f"  -> fallback random: {', '.join(picked)}")
-        return chosen
-
-    return play

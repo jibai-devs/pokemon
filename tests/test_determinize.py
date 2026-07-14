@@ -76,6 +76,70 @@ def test_own_split_clips_negative_counts_from_transient_overcounts():
     assert Counter(cfg["myDeck"] + cfg["myPrize"]) == Counter([2, 3])
 
 
+def test_own_split_uses_known_prize_ids_when_given():
+    """A ruleset's own prize deduction (e.g. prize_check's deck_memory)
+    should land those specific ids in myPrize instead of an arbitrary
+    random split."""
+    deck = [1, 1, 2, 3]
+    me = {"hand": [], "discard": [], "active": [], "bench": []}
+    opp = {
+        "deckCount": 0,
+        "prize": [],
+        "handCount": 0,
+        "hand": None,
+        "discard": [],
+        "active": [],
+        "bench": [],
+    }
+    obs = _obs(me, opp, deck_count=3, prize_len=1)
+    cfg = sample_determinization(obs, deck, rng=RNG, known_prize_ids=[2])
+    assert cfg["myPrize"] == [2]
+    assert Counter(cfg["myDeck"]) == Counter([1, 1, 3])
+
+
+def test_own_split_pads_incomplete_known_prize_ids_with_a_random_guess():
+    """Only 1 of 2 remaining prizes deduced -- the rest still needs to be
+    filled in, just from whatever's left over after removing the known one."""
+    deck = [1, 1, 2, 3]
+    me = {"hand": [], "discard": [], "active": [], "bench": []}
+    opp = {
+        "deckCount": 0,
+        "prize": [],
+        "handCount": 0,
+        "hand": None,
+        "discard": [],
+        "active": [],
+        "bench": [],
+    }
+    obs = _obs(me, opp, deck_count=2, prize_len=2)
+    cfg = sample_determinization(obs, deck, rng=RNG, known_prize_ids=[2])
+    assert 2 in cfg["myPrize"]
+    assert len(cfg["myPrize"]) == 2
+    assert Counter(cfg["myPrize"] + cfg["myDeck"]) == Counter([1, 1, 2, 3])
+
+
+def test_own_split_ignores_known_prize_ids_the_unseen_pool_cant_back_up():
+    """A stale/wrong deduction (a card id not actually unseen, e.g. already
+    visible or not even in the deck) must degrade to a random guess for
+    that slot rather than overcounting or crashing."""
+    deck = [1, 1, 2, 3]
+    me = {"hand": [], "discard": [], "active": [], "bench": []}
+    opp = {
+        "deckCount": 0,
+        "prize": [],
+        "handCount": 0,
+        "hand": None,
+        "discard": [],
+        "active": [],
+        "bench": [],
+    }
+    obs = _obs(me, opp, deck_count=3, prize_len=1)
+    cfg = sample_determinization(obs, deck, rng=RNG, known_prize_ids=[99])
+    assert 99 not in cfg["myPrize"]
+    assert len(cfg["myPrize"]) == 1
+    assert Counter(cfg["myPrize"] + cfg["myDeck"]) == Counter([1, 1, 2, 3])
+
+
 def test_opponent_falls_back_to_filler_before_anything_revealed():
     deck = DRAGAPULT_DECK
     me = {"hand": [], "discard": [], "active": [], "bench": []}

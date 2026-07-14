@@ -4,8 +4,13 @@ Owns the full turn-search stack used by the agent:
 
 - ``expand_end_of_turn`` — engine-backed BFS under node/depth/beam caps
 - ``score_line`` / ``first_action_of_best_line`` — rank leaves
-- ``turn_bfs_search`` — DecisionRule that runs BFS on Main and returns the
-  first action of the best line (``play -v`` dumps ranked end states)
+- ``search`` — the generic entry point: given a decision (``ctx``) and a
+  scorer (``score_fn``), runs the budgeted BFS and returns the chosen
+  action. Callable directly by any decisionmaking engine, not just as a
+  registered rule.
+- ``make_turn_bfs_search`` — wraps ``search`` as a plain ``Heuristic``
+  (``Callable[[Ctx], list[int] | None]``) for registering in a
+  ``Ruleset``'s rule list (``play -v`` dumps ranked end states either way)
 
 Given a live ``obs`` (must include ``search_begin_input``), fork the state via
 ``SearchBegin``, walk legal option sequences, and collect terminal nodes where
@@ -22,17 +27,14 @@ import random
 from collections import deque
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
+from pokemon.board import Ctx, _log
 from pokemon.cabt_enums import OptionType, SelectType
 from pokemon.catalog import format_option
 from pokemon.determinize import sample_determinization
 from pokemon.native_search import SearchResult, SearchSession
 from pokemon.types import CardId, Observation, Option, SearchStartConfig
-
-if TYPE_CHECKING:
-    from pokemon.heuristics import Ctx
-
 
 TerminalKind = Literal["eot", "win", "loss", "draw", "budget", "opp_choice", "error", "depth"]
 
@@ -61,6 +63,15 @@ class TurnLine:
     terminal: TerminalKind
     search_id: int | None = None
     nodes: int = 0
+
+
+# A custom objective: given a leaf and which player is "us", return
+# anything comparable (a tuple for lexicographic tie-breaking like
+# ``score_line``, or just a float) -- higher is always better. Passed to
+# ``first_action_of_best_line``/``format_turn_lines``/``search``/
+# ``make_turn_bfs_search`` to rank BFS leaves by something other than the
+# built-in ``score_line``.
+ScoreFn = Callable[["TurnLine", int], Any]
 
 
 @dataclass
@@ -435,12 +446,16 @@ def score_line(line: TurnLine, root_player: int) -> tuple:
 def first_action_of_best_line(
     lines: list[TurnLine],
     root_player: int,
+    score_fn: ScoreFn = score_line,
 ) -> list[int] | None:
-    """Pick the first action of the best-scoring terminal line."""
+    """Pick the first action of the best-scoring terminal line, per
+    ``score_fn`` (defaults to the built-in ``score_line``; pass your own
+    ``(TurnLine, root_player) -> comparable`` to rank leaves by a different
+    objective -- see ``search``)."""
     usable = [line for line in lines if line.actions and line.terminal != "error"]
     if not usable:
         return None
-    ranked = sorted(usable, key=lambda line: score_line(line, root_player), reverse=True)
+    ranked = sorted(usable, key=lambda line: score_fn(line, root_player), reverse=True)
     return ranked[0].actions[0]
 
 
@@ -480,16 +495,17 @@ def format_turn_lines(
     root_player: int,
     *,
     max_lines: int = 40,
+    score_fn: ScoreFn = score_line,
 ) -> list[str]:
-    """Human-readable dump of BFS end states, best-first."""
+    """Human-readable dump of BFS end states, best-first per ``score_fn``."""
     if not lines:
         return ["  (no end states)"]
-    ranked = sorted(lines, key=lambda line: score_line(line, root_player), reverse=True)
+    ranked = sorted(lines, key=lambda line: score_fn(line, root_player), reverse=True)
     out: list[str] = [
         f"  turn_bfs: {len(lines)} end state(s) (showing top {min(len(ranked), max_lines)})"
     ]
     for i, line in enumerate(ranked[:max_lines]):
-        score = score_line(line, root_player)
+        score = score_fn(line, root_player)
         acts = " > ".join(str(a) for a in line.actions) if line.actions else "(no actions)"
         out.append(
             f"  [{i}] {line.terminal:8s} score={score} actions={acts} | "
@@ -500,20 +516,13 @@ def format_turn_lines(
     return out
 
 
-# --- Agent-facing DecisionRule -----------------------------------------------
+# --- Generic search entry point ------------------------------------------------
 
-# Hard caps for ``turn_bfs_search`` (not lethal-gated).
+# Hard caps for ``search`` (not lethal-gated).
 TURN_BFS_MAX_NODES = 800
 TURN_BFS_MAX_DEPTH = 20
 TURN_BFS_BEAM = 48
 TURN_BFS_MIN_OVERAGE_TIME = 30.0
-
-
-def _heuristic_log(msg: str) -> None:
-    """Deferred import avoids a circular import with ``heuristics`` at load time."""
-    from pokemon.heuristics import _log
-
-    _log(msg)
 
 
 def search_time_ok(obs: Observation, min_overage: float = TURN_BFS_MIN_OVERAGE_TIME) -> bool:
@@ -527,20 +536,75 @@ def search_time_ok(obs: Observation, min_overage: float = TURN_BFS_MIN_OVERAGE_T
         return True
 
 
-def turn_bfs_search(ctx: Ctx) -> list[int] | None:
-    """Budgeted BFS over end-of-turn states via native search.
+def _known_prize_ids(state: object) -> list[CardId] | None:
+    """Best-effort extraction of deduced-prized card ids from a ruleset's
+    state, if it happens to expose a ``deck_memory``-shaped attribute --
+    entries with ``.id``/``.prized`` -- e.g. ``DragapultState.deck_memory``.
+    Returns ``None`` (falls back to a fully random prize guess) if the state
+    has no such attribute, or its shape doesn't match what's expected;
+    duck-typed rather than importing ``DragapultState`` so this module
+    stays usable by any ruleset's state, not just Dragapult's."""
+    deck_memory = getattr(state, "deck_memory", None)
+    if not deck_memory:
+        return None
+    try:
+        return [entry.id for entry in deck_memory if getattr(entry, "prized", False)]
+    except (AttributeError, TypeError):
+        return None
 
-    Runs on Main when ``search_begin_input`` is present and overage time allows.
-    Explores under node/depth/beam caps with the tactical candidate policy,
-    scores every leaf, and returns the first action of the best line.
-    Soft-fails (``None``) if the engine binding is unavailable or every line
-    is empty/error, so lower heuristics still apply.
+
+def search(
+    ctx: Ctx,
+    score_fn: ScoreFn = score_line,
+    *,
+    max_nodes: int = TURN_BFS_MAX_NODES,
+    max_depth: int = TURN_BFS_MAX_DEPTH,
+    beam: int = TURN_BFS_BEAM,
+) -> list[int] | None:
+    """Generic search entry point: given one decision (``ctx``) and a scorer
+    (``score_fn``), run the budgeted end-of-turn BFS and return the chosen
+    action -- ``list[int]`` option indices for *this* decision, or ``None``
+    if search doesn't apply or couldn't decide (wrong phase, no engine, no
+    time budget left, no usable deck, or every line came back empty/error).
+
+    This is the one thing any decisionmaking engine needs to call to use
+    search: hand it a plain ``ctx`` and a scorer, get back the same shape of
+    answer every hand-written ``Heuristic`` gives -- so it can be called
+    directly from inline logic (e.g. "if close to lethal, try search with a
+    win-focused scorer, otherwise defer to normal heuristics") without
+    registering a whole ``Ruleset`` entry. ``make_turn_bfs_search`` below is
+    a thin convenience wrapper for the one case that *does* need a plain
+    ``Heuristic``-shaped (single-argument) callable -- a ``Ruleset``'s
+    ``rules`` list.
+
+    Runs on Main when ``search_begin_input`` is present and overage time
+    allows. Explores under node/depth/beam caps with the tactical candidate
+    policy, scores every leaf with ``score_fn``, and returns the first
+    action of the best line.
 
     With ``play -v``, dumps the ranked list of end states after each search.
 
-    Deck composition is taken from ``ctx.state["my_deck"]`` (set by
-    ``make_heuristic_agent`` on deck submission). If missing, search is
-    skipped rather than guessing a list.
+    Deck composition is taken from ``ctx.state.my_deck`` (populated by
+    ``admin.build_agent`` when it constructs each game's state -- see
+    ``admin._init_state``). Read via ``getattr`` rather than a typed
+    ``ctx.state`` access -- this module deliberately doesn't import
+    anything from ``pokemon.heuristics`` (e.g. ``DragapultState``), so it
+    stays usable by any future ruleset's state, not just Dragapult's, and
+    to avoid a circular import (``pokemon.heuristics`` registers
+    ``turn_bfs_search``, so it can't also be a dependency of this module).
+    If the active state has no ``my_deck`` attribute, search is skipped
+    rather than guessing a list.
+
+    If the active state also exposes a ``deck_memory``-shaped attribute
+    (entries with ``.id``/``.prized``, e.g. ``DragapultState.deck_memory``,
+    populated by ``prize_check`` -- see ``pokemon.heuristics.dragapult``),
+    the deduced prized card ids feed into the hidden-zone determinization
+    (``sample_determinization``'s ``known_prize_ids``) instead of a fully
+    random guess at which unseen cards are prized. That in turn makes the
+    *rest* of our own deck's composition -- what Poke Pad/Buddy-Buddy
+    Poffin/etc. could actually find -- correspondingly more accurate, once
+    a search card has revealed enough to resolve some prizes. Same
+    duck-typed, no-``pokemon.heuristics``-import approach as ``my_deck``.
     """
     if ctx.sel_type not in (SelectType.MAIN, 0):
         return None
@@ -548,41 +612,86 @@ def turn_bfs_search(ctx: Ctx) -> list[int] | None:
         return None
     if not search_time_ok(ctx.obs):
         return None
-    deck = ctx.state.get("my_deck")
-    if not isinstance(deck, list) or len(deck) != 60:
-        _heuristic_log(f"\n--- Turn {ctx.turn} BFS: no my_deck on state, skip ---")
+    deck = getattr(ctx.state, "my_deck", None)
+    if deck is None or len(deck) != 60:
+        _log(f"\n--- Turn {ctx.turn} BFS: no my_deck on state, skip ---")
         return None
 
+    config = sample_determinization(
+        ctx.obs, deck, known_prize_ids=_known_prize_ids(ctx.state)
+    )
     lines = expand_end_of_turn(
         ctx.obs,
-        deck,  # type: ignore[arg-type]
+        deck,
         policy="tactical",
-        max_nodes=TURN_BFS_MAX_NODES,
-        max_depth=TURN_BFS_MAX_DEPTH,
-        beam=TURN_BFS_BEAM,
+        max_nodes=max_nodes,
+        max_depth=max_depth,
+        beam=beam,
+        config=config,
     )
     root = root_player_index(ctx.obs)
     if not lines:
-        _heuristic_log(f"\n--- Turn {ctx.turn} BFS: no end states ---")
+        _log(f"\n--- Turn {ctx.turn} BFS: no end states ---")
         return None
 
-    for msg in format_turn_lines(lines, root):
-        _heuristic_log(msg)
+    for msg in format_turn_lines(lines, root, score_fn=score_fn):
+        _log(msg)
 
-    best = first_action_of_best_line(lines, root)
+    best = first_action_of_best_line(lines, root, score_fn=score_fn)
     usable = [line for line in lines if line.actions and line.terminal != "error"]
     if usable and best is not None:
-        top = max(usable, key=lambda line: score_line(line, root))
+        top = max(usable, key=lambda line: score_fn(line, root))
         first_labels = []
         for idx in best:
             if 0 <= idx < len(ctx.options):
                 first_labels.append(format_option(ctx.options[idx], ctx.hand))
             else:
                 first_labels.append(f"opt[{idx}]")
-        _heuristic_log(
+        _log(
             f"  pick first action of best line "
-            f"({top.terminal}, score={score_line(top, root)}): "
+            f"({top.terminal}, score={score_fn(top, root)}): "
             f"{', '.join(first_labels) or best}"
         )
     return best
 
+
+def make_turn_bfs_search(
+    score_fn: ScoreFn = score_line,
+    *,
+    max_nodes: int = TURN_BFS_MAX_NODES,
+    max_depth: int = TURN_BFS_MAX_DEPTH,
+    beam: int = TURN_BFS_BEAM,
+) -> Callable[[Ctx], list[int] | None]:
+    """Wrap ``search`` as a plain ``Heuristic`` (``Callable[[Ctx], list[int] | None]``)
+    for registering as a ``Ruleset``'s rule -- all this adds over calling
+    ``search`` directly is currying ``score_fn``/the budget knobs so the
+    result matches the one-argument shape a ``Ruleset.rules`` list needs.
+
+    ..  code-block:: python
+
+        def my_score(line: TurnLine, root_player: int) -> tuple:
+            # e.g. maximize damage dealt, ignore prizes entirely
+            if line.end_obs is None:
+                return (0,)
+            players = (line.end_obs.get("current") or {}).get("players") or []
+            opp = players[1 - root_player] if len(players) > 1 - root_player else {}
+            active = (opp.get("active") or [None])[0] or {}
+            hp, max_hp = active.get("hp"), active.get("maxHp")
+            dmg = int(max_hp) - int(hp) if hp is not None and max_hp is not None else 0
+            return (dmg,)
+
+        my_rule = make_turn_bfs_search(score_fn=my_score)
+        RULESETS["my_ruleset"] = Ruleset(rules=[my_rule, *DRAGAPULT_HEURISTICS], init_state=_dragapult_init_state)
+    """
+
+    def _rule(ctx: Ctx) -> list[int] | None:
+        return search(ctx, score_fn, max_nodes=max_nodes, max_depth=max_depth, beam=beam)
+
+    return _rule
+
+
+# The default-configured instance -- what ``RULESETS["dragapult_search"]``
+# actually registers. Build your own via ``make_turn_bfs_search(score_fn=...)``
+# for a custom objective, or call ``search(ctx, score_fn)`` directly for
+# inline use; see their docstrings.
+turn_bfs_search = make_turn_bfs_search()

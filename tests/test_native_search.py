@@ -11,7 +11,7 @@ import pytest
 
 from pokemon.decks import DRAGAPULT_DECK
 from pokemon.determinize import sample_determinization
-from pokemon.turn_search import (
+from pokemon.search_function.turn_search import (
     TurnLine,
     candidate_actions,
     classify_terminal,

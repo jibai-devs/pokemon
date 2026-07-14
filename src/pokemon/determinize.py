@@ -19,7 +19,12 @@ hidden zone `SearchStartConfig` needs:
   60-card list) — just need a random split of the *unseen* cards (full deck
   minus everything currently visible in our hand/board/discard) into "prize"
   (fixed size = current prize-array length) and "deck" (the rest, in random
-  draw order).
+  draw order). If a ruleset has already deduced *which specific* unseen
+  cards are prized (e.g. `pokemon.heuristics.dragapult.prize_check`'s
+  `deck_memory`), pass those ids as `known_prize_ids` to use them directly
+  instead of an arbitrary split — turns "guess all 6 prizes" into "we know
+  some of them, guess the rest," which also makes the `myDeck` guess more
+  accurate (whatever's left over is unseen cards known to *not* be prized).
 - **Opponent's deck/hand/prize/active**: composition is genuinely unknown.
   Absent archetype/meta modeling (see `tickets/PKM-015.md`, a separate,
   heavier ISMCTS-belief-modeling project this does *not* attempt to
@@ -90,12 +95,25 @@ def _split_unseen(
 
 
 def _own_determinization(
-    player: PlayerState, full_deck: Sequence[CardId], rng: random.Random
+    player: PlayerState,
+    full_deck: Sequence[CardId],
+    rng: random.Random,
+    known_prize_ids: Sequence[CardId] | None = None,
 ) -> tuple[list[CardId], list[CardId]]:
     """(prize, deck) guess for a player whose full 60-card composition we
     know (ourselves). Clips at zero per-id so transient off-by-one noise in
     a mid-step `obs` snapshot (a card counted in two zones for one frame)
-    degrades gracefully rather than raising."""
+    degrades gracefully rather than raising.
+
+    If `known_prize_ids` is given (a ruleset's own prize deduction), use
+    those specific card identities as (part of) the prize guess instead of
+    an arbitrary random split of the unseen pool. Never trusts more of it
+    than the unseen pool can actually back up, and never returns more
+    entries than `prize_count` -- a stale or partial deduction (fewer
+    prizes deduced than remain, or a card no longer actually unseen)
+    degrades to filling the rest randomly rather than raising or
+    overcounting.
+    """
     seen = Counter(_zone_ids(player))
     unseen = Counter(full_deck)
     unseen.subtract(seen)
@@ -103,6 +121,21 @@ def _own_determinization(
         if unseen[cid] < 0:
             unseen[cid] = 0
     prize_count = len(player.get("prize") or [])
+
+    if known_prize_ids:
+        known = Counter(known_prize_ids)
+        for cid in list(known):
+            known[cid] = min(known[cid], unseen.get(cid, 0))
+        confirmed_prize = list(known.elements())[:prize_count]
+        remaining = Counter(unseen)
+        remaining.subtract(Counter(confirmed_prize))
+        for cid in list(remaining):
+            if remaining[cid] < 0:
+                remaining[cid] = 0
+        extra_needed = max(0, prize_count - len(confirmed_prize))
+        extra_prize, deck_order = _split_unseen(remaining, extra_needed, rng)
+        return confirmed_prize + extra_prize, deck_order
+
     return _split_unseen(unseen, prize_count, rng)
 
 
@@ -144,7 +177,10 @@ def _opponent_determinization(
 
 
 def sample_determinization(
-    obs: GameplayObservation, my_deck: Sequence[CardId], rng: random.Random | None = None
+    obs: GameplayObservation,
+    my_deck: Sequence[CardId],
+    rng: random.Random | None = None,
+    known_prize_ids: Sequence[CardId] | None = None,
 ) -> SearchStartConfig:
     """Build one `SearchStartConfig`-shaped dict (see `Search.h:19`) from a
     live `obs`, guessing every zone the native search API doesn't already
@@ -155,6 +191,12 @@ def sample_determinization(
     can't read off `obs` itself (our own prize/deck contents are hidden from
     us same as anyone else's, so composition has to come from the
     submission, not the observation).
+
+    `known_prize_ids`, if given, are specific card ids a ruleset has already
+    deduced are prized (see `_own_determinization`) -- passed straight
+    through to make the *our own side* half of the guess more accurate than
+    a fully random split; has no effect on the opponent-side guess, which
+    remains a genuine unknown handled by `_opponent_determinization`.
 
     Returns keys matching `SearchStartConfig`'s fields:
     `manualCoin, myDeck, myPrize, enemyDeck, enemyPrize, enemyHand,
@@ -170,7 +212,7 @@ def sample_determinization(
     me = players[my_idx]
     opp = players[1 - my_idx]
 
-    my_prize, my_deck_order = _own_determinization(me, my_deck, rng)
+    my_prize, my_deck_order = _own_determinization(me, my_deck, rng, known_prize_ids=known_prize_ids)
     enemy_prize, enemy_deck, enemy_hand, enemy_active = _opponent_determinization(opp, rng)
 
     return {

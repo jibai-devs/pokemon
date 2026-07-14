@@ -1,14 +1,12 @@
-"""Modular decision-rule agent framework.
+"""Deck-agnostic board-reading helpers and the per-decision ``Ctx`` builder.
 
-Each ``DecisionRule`` is a small, independent function: given the current
-decision context, return an ``Action`` (option indices), or ``None`` if it
-doesn't apply. ``make_heuristic_agent`` tries each rule in priority order and
-falls back to a random legal choice if none fire — so a bug or gap in one
-rule can never crash a game, only under-perform.
-
-This module is deck-agnostic scaffolding. Deck-specific rules should be
-added as functions below (or in a separate module) and registered in
-``HEURISTIC_SETS`` keyed by deck name (see ``pokemon.decks.DECKS``).
+``Ctx`` is the read-only view of one decision handed to every heuristic. It's
+generic over its ``state`` field's type so each ruleset module can declare
+its own alias (e.g. ``DragapultCtx = Ctx[DragapultState]``, see
+``dragapult_state.py``) and get real attribute-level typing on ``ctx.state``
+instead of a stringly-keyed dict. Building/owning that state's lifecycle
+across a whole game is ``admin.py``'s job, not this module's -- this module
+only knows how to build one decision's ``Ctx`` from ``obs``.
 
 Some rules may depend on ``select.deck`` / ``select.contextCard`` field
 shapes that `docs/plans/000_plan_engine_enum_extraction.md` hasn't empirically
@@ -16,19 +14,14 @@ verified yet (its Phase 2) — best-effort, and should degrade to "doesn't
 apply" (returning ``None``) rather than guessing wrong.
 """
 
-import random
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Generic, TypeAlias, TypeVar
 
 from pokemon.cabt_enums import AreaType, OptionType
 from pokemon.types import (
-    Action,
-    Agent,
     CardState,
     CurrentState,
-    DecisionRule,
-    Deck,
-    HeuristicState,
     Observation,
     Option,
     PlayerState,
@@ -232,7 +225,7 @@ def _option_card_id(ctx: "Ctx[Any]", opt: Option) -> int | None:
     return None
 
 
-def _rank_and_pick(ctx: Ctx, targets: list[int]) -> Action | None:
+def _rank_and_pick(ctx: "Ctx[Any]", targets: list[int]) -> list[int] | None:
     """Rank options whose resolved card is in ``targets`` (best-first, by
     position in ``targets``) and return the top ``maxCount`` of them, or
     ``None`` if there aren't enough confident picks to fill the required
@@ -255,75 +248,3 @@ def _rank_and_pick(ctx: Ctx, targets: list[int]) -> Action | None:
         return None
     ranked.sort()
     return [i for _, i in ranked[:need]]
-
-
-# --- Deck-specific heuristic sets -------------------------------------------
-#
-# Add heuristic functions above (or in their own module) and register a
-# priority-ordered list per deck name here, mirroring pokemon.decks.DECKS.
-# An empty list is a valid, safe default — the agent just falls back to
-# random legal moves for every decision.
-
-DEFAULT_HEURISTICS: list[DecisionRule] = []
-HEURISTIC_SETS: dict[str, list[DecisionRule]] = {}
-
-# Registered here (rather than at import time in each deck module) to avoid a
-# circular import — heuristics_dragapult imports Ctx/helpers from this module.
-from pokemon.heuristics_dragapult import DRAGAPULT_HEURISTICS  # noqa: E402
-
-HEURISTIC_SETS["dragapult"] = DRAGAPULT_HEURISTICS
-
-
-def make_heuristic_agent(
-    deck: Deck, heuristics: list[DecisionRule] | None = None
-) -> Agent:
-    """Build an agent that applies ``heuristics`` in order, falling back to a
-    random legal choice when none of them apply to the current decision."""
-    rules = heuristics if heuristics is not None else DEFAULT_HEURISTICS
-    state: HeuristicState = {}
-
-    def play(obs: Observation) -> list[int]:
-        if obs["select"] is None:
-            state.clear()  # new game starting — cross-turn memory doesn't carry over
-            state["my_deck"] = list(deck)
-            lines, checksum = deck_summary(deck)
-            _log(f"\n{'=' * 60}")
-            _log(f"GAME {_game_num}: Submitting deck ({len(deck)} cards, sha256:{checksum}) [heuristic]")
-            _log(f"{'=' * 60}")
-            if _game_num <= 1:
-                for line in lines:
-                    _log(line)
-            return deck
-
-        ctx = _build_ctx(obs, state)
-        options = ctx.options
-        max_count = ctx.select["maxCount"]
-        min_count = ctx.select.get("minCount") or 0
-
-        for rule in rules:
-            try:
-                chosen = rule(ctx)
-            except Exception as exc:  # a bad heuristic must never crash a game
-                _log(f"  [heuristic {rule.__name__} raised {exc!r}, skipping]")
-                continue
-            if not chosen:
-                continue
-            chosen = [i for i in chosen if 0 <= i < len(options)][:max_count]
-            # A selection with fewer than minCount indices is invalid — a real
-            # playtest showed the engine silently ending the episode as a draw
-            # (no exception) the first time a heuristic under-counted a
-            # multi-select. Treat that as "this heuristic doesn't apply"
-            # rather than submit it.
-            if len(chosen) >= min_count and chosen:
-                if _verbose:
-                    picked = [format_option(options[i], ctx.hand) for i in chosen]
-                    _log(f"  -> {rule.__name__}: {', '.join(picked)}")
-                return chosen
-
-        chosen = random.sample(range(len(options)), min(max_count, len(options)))
-        if _verbose:
-            picked = [format_option(options[i], ctx.hand) for i in chosen]
-            _log(f"  -> fallback random: {', '.join(picked)}")
-        return chosen
-
-    return play

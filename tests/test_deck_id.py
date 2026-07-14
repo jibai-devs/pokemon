@@ -182,7 +182,8 @@ def test_p_in_hand_is_positive_when_copies_remain_in_a_nonempty_pool():
 
 
 def test_deck_belief_update_hook_is_wired_into_dragapult_heuristics():
-    from pokemon.heuristics_dragapult import DRAGAPULT_HEURISTICS, deck_belief_update
+    from pokemon.heuristics.dragapult import DRAGAPULT_HEURISTICS
+    from pokemon.heuristics.dragapult_matchups import deck_belief_update
 
     assert deck_belief_update in DRAGAPULT_HEURISTICS
 

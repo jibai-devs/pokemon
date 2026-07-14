@@ -126,8 +126,9 @@ class DeckIdentifier:
     """Bayesian-elimination belief over a meta library, updated from one
     opponent's cumulative revealed cards across a single game.
 
-    Instantiate once per game (stored in ``ctx.state``, which is itself reset
-    per game by ``make_heuristic_agent``) and call ``update`` every decision.
+    Instantiate once per game (stored on the ruleset's persistent-state
+    object, e.g. ``DragapultState.deck_id`` -- itself replaced each game by
+    ``admin.build_agent``) and call ``update`` every decision.
     """
 
     def __init__(self, library: MetaDeckLibrary | None = None):
